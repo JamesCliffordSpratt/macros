@@ -35,7 +35,6 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 2. Copy the following files into your Obsidian plugin directory:
    - `main.js`
    - `manifest.json`
-   - `styles.css` (optional)
 3. Enable the plugin in Obsidian settings under **Community Plugins**.
 
 ### From Obsidian Marketplace (coming soon)
