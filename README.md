@@ -4,6 +4,18 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ---
 
+## 🎬 Demo
+
+### 🔍 Searching for Food
+
+![Search GIF](images/search.gif)
+
+### 🍎 Creating and Visualizing Macros
+
+![Macros GIF](images/macros.gif)
+
+---
+
 ## Features
 
 - 🥑 **Food Search** using FatSecret API
