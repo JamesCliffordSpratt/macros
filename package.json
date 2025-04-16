@@ -1,0 +1,23 @@
+{
+  "type": "module",
+  "name": "obsidian-macros-plugin",
+  "version": "1.0.0",
+  "description": "Advanced nutrition tracker for Obsidian.",
+  "main": "main.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^22.14.1",
+    "obsidian": "^1.8.7",
+    "rollup": "^3.29.5",
+    "rollup-plugin-typescript2": "^0.31.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "macros-plugin",
+  "name": "Macros Plugin",
+  "version": "1.0.0",
+  "author": "James Clifford Spratt",
+  "description": "Advanced nutrition tracking plugin using FatSecret API.",
+  "main": "main.js",
+  "minAppVersion": "0.15.0"
+}
