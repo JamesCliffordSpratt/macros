@@ -13,5 +13,5 @@
       "obsidian": ["types/obsidian"]
     }
   },
-  "include": ["*.ts", "types"]
+  "include": ["src", "types"]
 }
