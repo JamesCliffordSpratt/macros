@@ -43,6 +43,14 @@ Once submitted and approved, this plugin will be available in the Community Plug
 
 ---
 
+## 🎥 Full Video Demo
+
+Watch the full walkthrough on YouTube:
+
+[![Watch the video](https://img.youtube.com/vi/dksAL13AvR4/hqdefault.jpg)](https://www.youtube.com/watch?v=dksAL13AvR4)
+
+---
+
 ## Usage
 
 ### 📦 Searching for Food
