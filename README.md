@@ -117,6 +117,7 @@ For long-term use, it’s recommended to [register your own](https://platform.fa
 
 - [ ] More options to fetch imperial units for serving size (cups, tablesoons, teaspoons etc.)
 - [ ] Daily calorie goals tracking
+- [ ] Add support for fetching micronutrient data (e.g. vitamins and minerals) and compare against user-defined or recommended daily allowances (RDA).
 
 ---
 
