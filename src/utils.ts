@@ -36,7 +36,6 @@ export function getVaultFolders(app: App): string[] {
  * @returns An array of merged macro line strings.
  */
 export function mergeMacroLines(lines: string[]): string[] {
-	console.log("mergeMacroLines input:", lines);
 	
 	const mergedFood: Record<string, { foodName: string, totalServing: number, firstIndex: number }> = {};
 	const mergedMeals: Record<string, { mealName: string, count: number, firstIndex: number }> = {};
@@ -53,7 +52,6 @@ export function mergeMacroLines(lines: string[]): string[] {
 			if (countMatch) {
 				mealName = countMatch[1];
 				existingCount = parseInt(countMatch[2]);
-				console.log(`Found existing count for ${mealName}: ${existingCount}`);
 			}
 			
 			const key = mealName.toLowerCase();
@@ -61,10 +59,8 @@ export function mergeMacroLines(lines: string[]): string[] {
 			// Check if we've seen this meal before
 			if (!mergedMeals[key]) {
 				mergedMeals[key] = { mealName, count: existingCount, firstIndex: index };
-				console.log(`First instance of ${mealName}, count: ${existingCount}`);
 			} else {
 				mergedMeals[key].count += existingCount;
-				console.log(`Added ${existingCount} to ${mealName}, new count: ${mergedMeals[key].count}`);
 			}
 		} else if (!line.toLowerCase().startsWith("-") && line.includes(':')) {
 			const match = line.match(/^([^:]+):\s*([\d\.]+)g$/i);
@@ -100,7 +96,6 @@ export function mergeMacroLines(lines: string[]): string[] {
 				// Add the meal with a count indicator if count > 1
 				if (mergedMeals[key].count > 1) {
 					output.push(`meal:${mealName} × ${mergedMeals[key].count}`);
-					console.log(`Output: meal:${mealName} × ${mergedMeals[key].count}`);
 				} else {
 					output.push(`meal:${mealName}`);
 				}
@@ -121,7 +116,6 @@ export function mergeMacroLines(lines: string[]): string[] {
 		}
 	});
 	
-	console.log("mergeMacroLines output:", output);
 	return output;
 }
 
