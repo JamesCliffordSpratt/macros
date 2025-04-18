@@ -473,7 +473,6 @@ serving_size: ${servingSize}
 						.map(line => line.trim())
 						.filter(line => line !== '' && !line.startsWith('-'));
 						
-					console.log(`Loading macroTable for id ${id}:`, tableLines);
 					return tableLines;
 				}
 			} catch (error) {
@@ -489,7 +488,6 @@ serving_size: ${servingSize}
 	 * @param content The full file content to search for macros blocks.
 	 */
 	updateGlobalMacroTableFromContent(content: string) {
-		console.log("updateGlobalMacroTableFromContent called");
 		try {
 			const regex = /```[\t ]*macros[\t ]+id:[\t ]*(\S+)[\t ]*\n([\s\S]*?)```/g;
 			let match;
@@ -501,7 +499,6 @@ serving_size: ${servingSize}
 					.map(l => l.trim())
 					.filter(l => l !== '' && !l.startsWith('-'));
 					
-				console.log(`Updating macroTables for id ${id} with ${blockContent.length} lines:`, blockContent);
 				
 				this.macroTables.set(id, blockContent);
 				updated = true;
@@ -509,11 +506,9 @@ serving_size: ${servingSize}
 			
 			// If we updated any tables, log that for debugging
 			if (updated) {
-				console.log("macroTables updated successfully");
 				
 				// Debug: log the content of all tables
 				for (const [id, lines] of this.macroTables.entries()) {
-					console.log(`Current macroTable[${id}]:`, lines);
 				}
 			}
 		} catch (error) {
@@ -526,7 +521,6 @@ serving_size: ${servingSize}
 	 * Also refreshes global macro tables and triggers re-rendering of markdown views.
 	 */
 	async updateMacrosCodeBlock() {
-		console.log("updateMacrosCodeBlock called");
 		await this.queueUpdate(async () => {
 			const activeFile = this.app.workspace.getActiveFile();
 			if (!activeFile) return;
@@ -534,7 +528,6 @@ serving_size: ${servingSize}
 				let content = await this.app.vault.read(activeFile);
 				const regex = /```macros\s+id:\s*(\S+)\s*([\s\S]*?)```/g;
 				let newContent = content.replace(regex, (match, id, blockContent) => {
-					console.log(`Processing block with id ${id}`);
 					
 					// First, collect all lines including removing interactive prefix
 					let allLines: string[] = [];
@@ -544,7 +537,6 @@ serving_size: ${servingSize}
 						.map((l: string) => l.trim())
 						.filter((l: string) => l !== "" && !l.startsWith(INTERACTIVE_PREFIX) && !l.startsWith("-"));
 					
-					console.log(`Static lines from block (${staticLines.length}):`, staticLines);
 					allLines = [...staticLines];
 
 					// Get interactive lines from the map
@@ -552,15 +544,12 @@ serving_size: ${servingSize}
 						line.startsWith(INTERACTIVE_PREFIX) ? line.substring(INTERACTIVE_PREFIX.length) : line
 					);
 					
-					console.log(`Interactive lines (${interactiveLines.length}):`, interactiveLines);
 					
 					// Add them to the collection
 					allLines = [...allLines, ...interactiveLines];
-					console.log(`Combined lines for merging (${allLines.length}):`, allLines);
 					
 					// Merge duplicate meal entries and food items
 					const mergedLines = mergeMacroLines(allLines);
-					console.log(`Merged lines (${mergedLines.length}):`, mergedLines);
 					
 					// Now expand the meal templates after the merging is complete
 					let expandedContent = "";
@@ -576,7 +565,6 @@ serving_size: ${servingSize}
 							if (countMatch) {
 								mealName = countMatch[1];
 								count = parseInt(countMatch[2]);
-								console.log(`Expanding meal ${mealName} with count ${count}`);
 							}
 							
 							const meal = this.settings.mealTemplates.find(m =>
@@ -596,7 +584,6 @@ serving_size: ${servingSize}
 											const serving = parseFloat(servingMatch[1]);
 											const multipliedServing = serving * count;
 											expandedContent += `- ${parts[0]}:${multipliedServing}g\n`;
-											console.log(`Added: - ${parts[0]}:${multipliedServing}g`);
 										} else {
 											expandedContent += `- ${item}\n`;
 										}
