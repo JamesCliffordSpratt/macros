@@ -1,0 +1,146 @@
+/*
+ * Macros Plugin for Obsidian
+ * -------------------------
+ * Styles for the Macros plugin interface elements
+ */
+
+/* Layout and container styles */
+.macros-container {
+  width: 100%;
+}
+
+.macros-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.macros-summary {
+  margin-bottom: 1rem;
+}
+
+/* Table styles */
+.macros-table {
+  width: 100%;
+}
+
+.macros-table-header {
+  font-weight: bold;
+}
+
+.macros-table-cell-right {
+  text-align: right;
+}
+
+/* Button styles */
+.macros-btn {
+  cursor: pointer;
+}
+
+.macros-btn-plus {
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.macros-btn-remove {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.macros-btn-small-remove {
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.macros-btn-action {
+  margin-top: 0.5rem;
+}
+
+/* List styles */
+.macros-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.macros-list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.macros-list-item-label {
+  margin-right: 0.5rem;
+}
+
+/* Food navigation */
+.food-nav {
+  margin-top: 1rem;
+}
+
+/* Pie chart styles */
+.macrospc-container {
+  margin-top: 16px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.macrospc-legend {
+  margin-top: 1em;
+}
+
+.macrospc-legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.macrospc-legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+}
+
+/* Settings styles */
+.macros-settings-section {
+  margin-bottom: 2rem;
+}
+
+.macros-color-picker {
+  margin-left: 10px;
+}
+
+.advanced-notice {
+  background-color: #ff3333;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #ffffff;
+}
+
+.macros-legend-color-box {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin-right: 0.5rem;
+  border-radius: 2px;
+}
+
+.macros-table-plus-cell {
+  text-align: right;
+  padding: 0.5rem;
+}
+
+.macros-table-plus-row {
+  margin-top: 0.5rem;
+}
+
+.macros-plus-button {
+  font-size: 1.2em;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0.2em 0.5em;
+}
