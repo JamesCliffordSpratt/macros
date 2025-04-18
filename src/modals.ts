@@ -66,8 +66,6 @@ export class AddToMacrosModal extends Modal {
 				this.selectedItems.push(mealValue);
 				refreshSummary();
 				mealSelect.value = '';
-				console.log(`Added meal to selectedItems: ${mealValue}`);
-				console.log(`Current selectedItems:`, this.selectedItems);
 			}
 		};
 		// Food row.
@@ -147,8 +145,6 @@ export class AddToMacrosModal extends Modal {
 			const arr = this.plugin.additionalMacros.get(this.tableId)!;
 			this.selectedItems.forEach(item => arr.push(item));
 			
-			console.log(`Confirming changes for table ${this.tableId}`);
-			console.log(`additionalMacros for table:`, arr);
 			
 			await this.onDone();
 			this.close();
