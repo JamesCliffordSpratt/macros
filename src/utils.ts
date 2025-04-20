@@ -320,13 +320,19 @@ export function createPieChartLegend(
 ) {
     const legendDiv = el.createEl('div', { cls: 'macrospc-legend' });
     
-    slices.forEach(slice => {
+    slices.forEach((slice, index) => {
         const legendItem = legendDiv.createEl('div', { cls: 'macrospc-legend-item' });
         
-        const colorBox = legendItem.createEl('span', { cls: 'macrospc-legend-color' });
-        // This is the only place in utils.ts where we need to set style directly because 
-        // the color is dynamic and cannot be specified ahead of time in CSS
-        colorBox.style.backgroundColor = slice.color;
+        // Create a unique class name for this element based on its index
+        const colorClassName = `macros-legend-color-${index}`;
+        const colorBox = legendItem.createEl('span', { 
+            cls: `macrospc-legend-color ${colorClassName}`
+        });
+        
+        // Create and add a style element with a rule for this specific class
+        const colorStyle = el.ownerDocument.createElement('style');
+        colorStyle.textContent = `.${colorClassName} { background-color: ${slice.color}; }`;
+        el.appendChild(colorStyle);
         
         legendItem.createEl('span', { text: `${slice.label}: ${slice.value.toFixed(2)} g` });
     });

@@ -242,3 +242,12 @@
   margin-bottom: 1rem;
   width: 100px;
 }
+
+/* Dynamic color variables for pie chart legends */
+.macrospc-legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  background-color: var(--legend-color, transparent);
+}
