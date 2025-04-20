@@ -45,12 +45,10 @@ export class AddToMacrosModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl('h2', { text: 'Add to Macros' });
+		contentEl.createEl('h2', { text: 'Add to Macros', cls: 'macros-modal-title' });
+		
 		// Meal row.
-		const mealRow = contentEl.createDiv({
-			cls: 'add-to-macros-row',
-			attr: { style: 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;' }
-		});
+		const mealRow = contentEl.createDiv({ cls: 'macros-modal-row' });
 		mealRow.createEl('label', { text: 'Select Meal:' });
 		const mealSelect = mealRow.createEl('select');
 		mealSelect.createEl('option', { text: '-- None --', value: '' });
@@ -68,11 +66,9 @@ export class AddToMacrosModal extends Modal {
 				mealSelect.value = '';
 			}
 		};
+		
 		// Food row.
-		const foodRow = contentEl.createDiv({
-			cls: 'add-to-macros-row',
-			attr: { style: 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;' }
-		});
+		const foodRow = contentEl.createDiv({ cls: 'macros-modal-row' });
 		foodRow.createEl('label', { text: 'Select Food:' });
 		const foodSelect = foodRow.createEl('select');
 		foodSelect.createEl('option', { text: '-- None --', value: '' });
@@ -109,42 +105,43 @@ export class AddToMacrosModal extends Modal {
 				foodSelect.value = '';
 			}
 		};
+		
 		// Summary.
-		const summaryDiv = contentEl.createDiv({
-			cls: 'macro-summary-div',
-			attr: { style: 'margin-bottom: 1rem;' }
-		});
+		const summaryDiv = contentEl.createDiv({ cls: 'macros-summary' });
 		summaryDiv.createEl('h3', { text: 'Items to add:' });
-		const summaryList = summaryDiv.createEl('ul');
+		const summaryList = summaryDiv.createEl('ul', { cls: 'macros-modal-list' });
+		
 		const refreshSummary = () => {
 			summaryList.empty();
 			this.selectedItems.forEach((item, index) => {
 				const displayText = item.startsWith('interactive:') ? item.substring('interactive:'.length) : item;
-				const listItem = summaryList.createEl('li');
-				listItem.createEl('span', { text: displayText });
+				const listItem = summaryList.createEl('li', { cls: 'macros-modal-list-item' });
+				listItem.createEl('span', { text: displayText, cls: 'macros-modal-item-text' });
 				
 				// Add a remove button for each item
 				const removeBtn = listItem.createEl('button', { 
 					text: ' ×',
-					attr: { style: 'margin-left: 8px; cursor: pointer;' }
+					cls: 'macros-modal-remove-btn'
 				});
+				
 				removeBtn.onclick = () => {
 					this.selectedItems.splice(index, 1);
 					refreshSummary();
 				};
 			});
 		};
+		
 		const confirmBtn = contentEl.createEl('button', {
 			text: 'Confirm Changes',
-			attr: { style: 'margin-top: 0.5rem;' }
+			cls: 'macros-modal-button'
 		});
+		
 		confirmBtn.onclick = async () => {
 			if (!this.plugin.additionalMacros.has(this.tableId)) {
 				this.plugin.additionalMacros.set(this.tableId, []);
 			}
 			const arr = this.plugin.additionalMacros.get(this.tableId)!;
 			this.selectedItems.forEach(item => arr.push(item));
-			
 			
 			await this.onDone();
 			this.close();
@@ -172,8 +169,12 @@ export class FoodSearchModal extends Modal {
 	}
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'Enter Food Search Term' });
-		const inputEl = contentEl.createEl('input', { type: 'text' });
+		contentEl.createEl('h2', { text: 'Enter Food Search Term', cls: 'macros-modal-title' });
+		const inputEl = contentEl.createEl('input', { 
+			type: 'text',
+			cls: 'macros-modal-input'
+		});
+		
 		inputEl.placeholder = 'e.g. Apple';
 		inputEl.addEventListener('keydown', (event) => {
 			if (event.key === 'Enter') {
@@ -244,19 +245,28 @@ export class FoodResultsModal extends Modal {
 	renderContent() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl('h2', { text: `Results for "${this.searchTerm}" (Page ${this.currentPage + 1})` });
+		contentEl.createEl('h2', { 
+			text: `Results for "${this.searchTerm}" (Page ${this.currentPage + 1})`,
+			cls: 'macros-modal-title'
+		});
+		
 		if (this.results.length === 0) {
 			contentEl.createEl('p', { text: 'No results found on this page.' });
 		} else {
 			this.results.forEach((food) => {
 				const servingSize = extractServingSize(food.food_description);
-				const btn = contentEl.createEl('button', { text: `${food.food_name} - ${servingSize}` });
+				const btn = contentEl.createEl('button', { 
+					text: `${food.food_name} - ${servingSize}`,
+					cls: 'macros-modal-button'
+				});
+				
 				btn.onclick = () => {
 					this.onSelect(food);
 					this.close();
 				};
 			});
 		}
+		
 		const navDiv = contentEl.createDiv({ cls: 'food-nav' });
 		if (this.currentPage > 0) {
 			const prevBtn = navDiv.createEl('button', { text: '< Prev' });
@@ -292,8 +302,16 @@ export class AddMealTemplateModal extends Modal {
 	}
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'New Meal Template' });
-		const nameInput = contentEl.createEl('input', { type: 'text' });
+		contentEl.createEl('h2', { 
+			text: 'New Meal Template',
+			cls: 'macros-modal-title'
+		});
+		
+		const nameInput = contentEl.createEl('input', { 
+			type: 'text',
+			cls: 'macros-modal-input'
+		});
+		
 		nameInput.placeholder = 'Meal Name (e.g., Meal1)';
 		const createMeal = async () => {
 			const mealName = nameInput.value.trim();
@@ -321,7 +339,11 @@ export class AddMealTemplateModal extends Modal {
 				createMeal();
 			}
 		});
-		const createBtn = contentEl.createEl('button', { text: 'Create Meal Template' });
+		const createBtn = contentEl.createEl('button', { 
+			text: 'Create Meal Template',
+			cls: 'macros-modal-button'
+		});
+		
 		createBtn.onclick = createMeal;
 	}
 	onClose() {
@@ -348,13 +370,20 @@ export class EditMealTemplateModal extends Modal {
 	renderContent() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl('h2', { text: `Edit Meal: ${this.meal.name}` });
-		const itemList = contentEl.createEl('ul');
+		contentEl.createEl('h2', { 
+			text: `Edit Meal: ${this.meal.name}`,
+			cls: 'macros-modal-title'
+		});
+		
+		const itemList = contentEl.createEl('ul', { cls: 'macros-modal-list' });
 		this.meal.items.forEach((item, index) => {
-			const li = itemList.createEl('li');
-			li.createEl('span', { text: item });
-			const removeBtn = li.createEl('button', { text: 'Remove' });
-			removeBtn.style.marginLeft = '8px';
+			const li = itemList.createEl('li', { cls: 'macros-modal-list-item' });
+			li.createEl('span', { text: item, cls: 'macros-modal-item-text' });
+			const removeBtn = li.createEl('button', { 
+				text: 'Remove',
+				cls: 'macros-modal-remove-btn' 
+			});
+			
 			removeBtn.onclick = async () => {
 				if (this.meal.items.length <= 1) {
 					new Notice('You must have at least 1 food item');
@@ -366,7 +395,11 @@ export class EditMealTemplateModal extends Modal {
 				this.plugin.nutritionalSettingTab.display();
 			};
 		});
-		const addFoodBtn = contentEl.createEl('button', { text: '+ Add Food Item' });
+		const addFoodBtn = contentEl.createEl('button', { 
+			text: '+ Add Food Item',
+			cls: 'macros-modal-button'
+		});
+		
 		addFoodBtn.onclick = () => {
 			new AddFoodToMealModal(this.plugin, this.meal).open();
 			this.close();
@@ -403,9 +436,21 @@ export class CustomServingSizeModal extends Modal {
 	}
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: `Custom Serving Size for ${this.foodName}` });
-		contentEl.createEl('p', { text: `Default serving is ${this.defaultServing}g. Enter a custom serving size in grams:` });
-		const inputEl = contentEl.createEl('input', { type: 'number' });
+		contentEl.createEl('h2', { 
+			text: `Custom Serving Size for ${this.foodName}`,
+			cls: 'macros-modal-title'
+		});
+		
+		contentEl.createEl('p', { 
+			text: `Default serving is ${this.defaultServing}g. Enter a custom serving size in grams:`,
+			cls: 'macros-serving-description'
+		});
+		
+		const inputEl = contentEl.createEl('input', { 
+			type: 'number',
+			cls: 'macros-serving-input'
+		});
+		
 		inputEl.placeholder = `${this.defaultServing}`;
 		inputEl.value = `${this.defaultServing}`;
 		inputEl.addEventListener('keydown', (event) => {
@@ -420,7 +465,11 @@ export class CustomServingSizeModal extends Modal {
 				}
 			}
 		});
-		const submitBtn = contentEl.createEl('button', { text: 'Submit' });
+		const submitBtn = contentEl.createEl('button', { 
+			text: 'Submit',
+			cls: 'macros-modal-button'
+		});
+		
 		submitBtn.onclick = () => {
 			const value = parseFloat(inputEl.value);
 			if (isNaN(value) || value <= 0) {
@@ -457,11 +506,12 @@ class AddFoodToMealModal extends Modal {
 	}
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: `Add Food Items to "${this.meal.name}"` });
-		const row = contentEl.createDiv({
-			cls: 'add-food-row',
-			attr: { style: 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;' }
+		contentEl.createEl('h2', { 
+			text: `Add Food Items to "${this.meal.name}"`,
+			cls: 'macros-modal-title'
 		});
+		
+		const row = contentEl.createDiv({ cls: 'macros-modal-row' });
 		const folder = this.plugin.settings.storageFolder;
 		const fileList = this.app.vault.getFiles().filter(f => f.path.startsWith(folder));
 		this.files = fileList.map(f => f.name.replace(/\.md$/, ''));
@@ -505,12 +555,14 @@ class AddFoodToMealModal extends Modal {
 			}
 		};
 
-		this.itemListEl = contentEl.createEl('ul', {
-			attr: { style: 'list-style-type: none; padding-left: 0;' }
-		});
+		this.itemListEl = contentEl.createEl('ul', { cls: 'macros-modal-list' });
 		this.refreshItemList();
 
-		const finishBtn = contentEl.createEl('button', { text: 'Finish' });
+		const finishBtn = contentEl.createEl('button', { 
+			text: 'Finish',
+			cls: 'macros-modal-button'
+		});
+		
 		finishBtn.onclick = () => {
 			this.close();
 			this.plugin.nutritionalSettingTab.display();
@@ -520,11 +572,17 @@ class AddFoodToMealModal extends Modal {
 		if (!this.itemListEl) return;
 		this.itemListEl.empty();
 		this.meal.items.forEach((item, index) => {
-			const li = this.itemListEl!.createEl('li');
-			const span = li.createEl('span', { text: item });
-			span.style.marginRight = '0.5rem';
-			const removeBtn = li.createEl('button', { text: '×' });
-			removeBtn.style.marginLeft = '0.5rem';
+			const li = this.itemListEl!.createEl('li', { cls: 'macros-modal-list-item' });
+			const span = li.createEl('span', { 
+				text: item,
+				cls: 'macros-modal-item-text'
+			});
+			
+			const removeBtn = li.createEl('button', { 
+				text: '×',
+				cls: 'macros-modal-remove-btn'
+			});
+			
 			removeBtn.onclick = async () => {
 				this.meal.items.splice(index, 1);
 				await this.plugin.saveSettings();

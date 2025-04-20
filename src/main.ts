@@ -214,7 +214,11 @@ serving_size: ${servingSize}
 	 */
 	drawMacrospc(id: string, el: HTMLElement) {
 		el.empty();
-		const canvas = el.createEl('canvas', { attr: { width: '300', height: '300' } });
+		const canvas = el.createEl('canvas', { 
+			cls: 'macros-canvas',
+			attr: { width: '300', height: '300' } 
+		});
+		
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			el.createEl('div', { text: 'Error: Unable to get canvas context.' });
@@ -342,7 +346,11 @@ serving_size: ${servingSize}
 	 */
 	drawCombinedMacrospc(ids: string[], el: HTMLElement) {
 		el.empty();
-		const canvas = el.createEl('canvas', { attr: { width: '300', height: '300' } });
+		const canvas = el.createEl('canvas', { 
+			cls: 'macros-canvas',
+			attr: { width: '300', height: '300' }
+		});
+		
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			el.createEl('div', { text: 'Error: Unable to get canvas context.' });
@@ -499,17 +507,8 @@ serving_size: ${servingSize}
 					.map(l => l.trim())
 					.filter(l => l !== '' && !l.startsWith('-'));
 					
-				
 				this.macroTables.set(id, blockContent);
 				updated = true;
-			}
-			
-			// If we updated any tables, log that for debugging
-			if (updated) {
-				
-				// Debug: log the content of all tables
-				for (const [id, lines] of this.macroTables.entries()) {
-				}
 			}
 		} catch (error) {
 			console.error("Error updating global macro table from content:", error);
@@ -543,7 +542,6 @@ serving_size: ${servingSize}
 					const interactiveLines = (this.additionalMacros.get(id) || []).map((line: string) =>
 						line.startsWith(INTERACTIVE_PREFIX) ? line.substring(INTERACTIVE_PREFIX.length) : line
 					);
-					
 					
 					// Add them to the collection
 					allLines = [...allLines, ...interactiveLines];

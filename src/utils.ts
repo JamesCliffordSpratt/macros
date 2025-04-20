@@ -318,23 +318,13 @@ export function createPieChartLegend(
     el: HTMLElement, 
     slices: { label: string; value: number; color: string }[]
 ) {
-    const legendDiv = el.createEl('div', { 
-        cls: 'macrospc-legend', 
-        attr: { style: 'margin-top: 1em;' } 
-    });
+    const legendDiv = el.createEl('div', { cls: 'macrospc-legend' });
     
     slices.forEach(slice => {
-        const legendItem = legendDiv.createEl('div', {
-            cls: 'macrospc-legend-item',
-            attr: { style: 'display: flex; align-items: center; margin-bottom: 2px;' }
-        });
+        const legendItem = legendDiv.createEl('div', { cls: 'macrospc-legend-item' });
         
-        const colorBox = legendItem.createEl('span');
+        const colorBox = legendItem.createEl('span', { cls: 'macrospc-legend-color' });
         colorBox.style.backgroundColor = slice.color;
-        colorBox.style.display = 'inline-block';
-        colorBox.style.width = '12px';
-        colorBox.style.height = '12px';
-        colorBox.style.marginRight = '5px';
         
         legendItem.createEl('span', { text: `${slice.label}: ${slice.value.toFixed(2)} g` });
     });

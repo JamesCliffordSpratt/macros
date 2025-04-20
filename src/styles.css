@@ -26,11 +26,13 @@
 }
 
 .macros-table-header {
-  font-weight: bold; color: var(--text-title);
+  font-weight: bold;
+  color: var(--text-title);
 }
 
 .macros-table-cell-right {
-  text-align: right; color: var(--text-normal);
+  text-align: right;
+  color: var(--text-normal);
 }
 
 /* Button styles */
@@ -129,7 +131,8 @@
 }
 
 .macros-table-plus-cell {
-  text-align: right; color: var(--text-normal);
+  text-align: right;
+  color: var(--text-normal);
   padding: 0.5rem;
 }
 
@@ -141,6 +144,101 @@
   font-size: 1.2em;
   cursor: pointer;
   border: none;
-  background: transparent; color: var(--text-normal);
+  background: transparent;
+  color: var(--text-normal);
   padding: var(--size-2-1) var(--size-4-2);
+}
+
+/* New styles to replace inline styling */
+.macros-canvas {
+  width: 300px;
+  height: 300px;
+}
+
+.macros-preview-container {
+  margin-top: 16px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Modal styles */
+.macros-modal-title {
+  margin-bottom: 1rem;
+}
+
+.macros-modal-input {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.macros-modal-button {
+  margin-top: 0.5rem;
+}
+
+.macros-modal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.macros-modal-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 1rem;
+}
+
+.macros-modal-list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.macros-modal-item-text {
+  margin-right: 0.5rem;
+}
+
+.macros-modal-remove-btn {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+/* Table cell styles */
+.macros-cell-colspan-6 {
+  text-align: right;
+}
+
+.macros-cell-bold {
+  font-weight: bold;
+}
+
+/* Macros table styles */
+.macros-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.macros-table-header-cell {
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+}
+
+.macros-table-data-cell {
+  padding: 0.25rem 0.5rem;
+}
+
+.macros-table-total-row {
+  font-weight: bold;
+}
+
+/* Custom serving size modal */
+.macros-serving-description {
+  margin-bottom: 1rem;
+}
+
+.macros-serving-input {
+  margin-bottom: 1rem;
+  width: 100px;
 }

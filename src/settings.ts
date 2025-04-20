@@ -90,8 +90,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 						updatePreview();
 					});
-				const proteinColorPicker = containerEl.createEl('input', { type: 'color', value: this.plugin.settings.proteinColor });
-				proteinColorPicker.style.marginLeft = '10px';
+				const proteinColorPicker = containerEl.createEl('input', { 
+					type: 'color', 
+					value: this.plugin.settings.proteinColor,
+					cls: 'macros-color-picker'
+				});
+				
 				proteinColorPicker.addEventListener('change', async () => {
 					text.setValue(proteinColorPicker.value);
 					this.plugin.settings.proteinColor = proteinColorPicker.value;
@@ -114,8 +118,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 						updatePreview();
 					});
-				const fatColorPicker = containerEl.createEl('input', { type: 'color', value: this.plugin.settings.fatColor });
-				fatColorPicker.style.marginLeft = '10px';
+				const fatColorPicker = containerEl.createEl('input', { 
+					type: 'color', 
+					value: this.plugin.settings.fatColor,
+					cls: 'macros-color-picker'
+				});
+				
 				fatColorPicker.addEventListener('change', async () => {
 					text.setValue(fatColorPicker.value);
 					this.plugin.settings.fatColor = fatColorPicker.value;
@@ -138,8 +146,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 						updatePreview();
 					});
-				const carbsColorPicker = containerEl.createEl('input', { type: 'color', value: this.plugin.settings.carbsColor });
-				carbsColorPicker.style.marginLeft = '10px';
+				const carbsColorPicker = containerEl.createEl('input', { 
+					type: 'color', 
+					value: this.plugin.settings.carbsColor,
+					cls: 'macros-color-picker'
+				});
+				
 				carbsColorPicker.addEventListener('change', async () => {
 					text.setValue(carbsColorPicker.value);
 					this.plugin.settings.carbsColor = carbsColorPicker.value;
@@ -150,9 +162,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
 			});
 
 		// Render a preview of the nutritional pie chart.
-		const previewContainer = containerEl.createDiv({ cls: 'macrospc-preview-container', attr: { style: 'margin-top: 16px; margin-bottom: 32px; display: flex; flex-direction: column; align-items: center;' } });
+		const previewContainer = containerEl.createDiv({ cls: 'macros-preview-container' });
 		previewContainer.createEl('h3', { text: 'Pie Chart Preview' });
-		const previewCanvas = previewContainer.createEl('canvas', { attr: { width: '300', height: '300' } });
+		const previewCanvas = previewContainer.createEl('canvas', { 
+			cls: 'macros-canvas',
+			attr: { width: '300', height: '300' } 
+		});
 
 		function updatePreview() {
 			const proteinInput = containerEl.querySelector('input[placeholder="#4caf50"]') as HTMLInputElement;
@@ -212,7 +227,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
 		containerEl.createEl('h3', { text: 'Advanced' });
 
 		// Notice about API credentials.
-		const advancedNotice = containerEl.createDiv({ cls: 'advanced-notice', attr: { style: 'background-color: #ff3333; padding: 8px; margin-bottom: 8px; border: 1px solid #ffffff;' } });
+		const advancedNotice = containerEl.createDiv({ cls: 'advanced-notice' });
 		advancedNotice.createEl('p', {
 			text: "The default FatSecret API credentials are provided by the Macros Plugin for convenience. You are welcome to sign up for your own API credentials to ensure longevity if the default key becomes obsolete. To sign up, please visit "
 		});
@@ -289,7 +304,5 @@ export class NutritionalSettingTab extends PluginSettingTab {
 		        }
 		      });
 		  });
-
-
 	}
 }
