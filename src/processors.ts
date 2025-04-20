@@ -77,16 +77,19 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 
 		const renderTableFromLines = (lines: string[]) => {
 			el.empty();
-			const table = el.createEl('table');
-			table.style.width = '100%';
+			const table = el.createEl('table', { cls: 'macros-table' });
+			
 			// Add a row with a "+" button.
 			const plusRow = table.insertRow();
 			const plusCell = plusRow.insertCell();
 			plusCell.colSpan = 6;
-			plusCell.style.textAlign = 'right';
-			const plusBtn = plusCell.createEl('button', { text: '+' });
-			plusBtn.style.fontSize = '1.2em';
-			plusBtn.style.cursor = 'pointer';
+			plusCell.addClass('macros-table-plus-cell');
+			
+			const plusBtn = plusCell.createEl('button', { 
+				text: '+',
+				cls: 'macros-plus-button'
+			});
+			
 			plusBtn.onclick = () => {
 				new AddToMacrosModal(plugin.app, plugin, id!, async () => {
 					await plugin.updateMacrosCodeBlock();
@@ -217,7 +220,7 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 				const headerRow = table.insertRow();
 				const headerCell = headerRow.insertCell();
 				headerCell.colSpan = 6;
-				headerCell.style.fontWeight = 'bold';
+				headerCell.addClass('macros-cell-bold');
 				
 				// Add quantity indicator in the header if count > 1
 				if (group.count > 1) {
@@ -227,8 +230,11 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 				}
 				
 				if (group.macroLine) {
-					const removeBtn = headerCell.createEl('button', { text: ' –' });
-					removeBtn.style.marginLeft = '8px';
+					const removeBtn = headerCell.createEl('button', { 
+						text: ' –',
+						cls: 'macros-btn-remove'
+					});
+					
 					removeBtn.onclick = async () => {
 						await removeMacroLine(group.macroLine!);
 					};
@@ -237,15 +243,18 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 				['Food', 'Quantity', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach((text: string) => {
 					const cell = colHeaderRow.insertCell();
 					cell.innerText = text;
-					cell.style.fontWeight = 'bold';
+					cell.addClass('macros-table-header-cell');
 				});
 				group.rows.forEach((row: MacroRow) => {
 					const r = table.insertRow();
 					const nameCell = r.insertCell();
 					nameCell.innerText = row.name;
 					if (!group.macroLine) {
-						const removeBtn = nameCell.createEl('button', { text: ' –' });
-						removeBtn.style.marginLeft = '5px';
+						const removeBtn = nameCell.createEl('button', { 
+							text: ' –',
+							cls: 'macros-btn-small-remove'
+						});
+						
 						removeBtn.onclick = async () => {
 							await removeMacroLine(row.macroLine);
 						};
@@ -258,6 +267,7 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 				});
 				if (!multipleGroups) {
 					const totalRow = table.insertRow();
+					totalRow.addClass('macros-table-total-row');
 					totalRow.insertCell().innerText = 'Totals';
 					totalRow.insertCell().innerText = '';
 					totalRow.insertCell().innerText = group.total.calories.toFixed(2);
@@ -278,8 +288,10 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 				const combinedHeaderCell = combinedHeaderRow.insertCell();
 				combinedHeaderCell.colSpan = 6;
 				combinedHeaderCell.innerText = 'Combined Totals';
-				combinedHeaderCell.style.fontWeight = 'bold';
+				combinedHeaderCell.addClass('macros-cell-bold');
+				
 				const combinedTotalsRow = table.insertRow();
+				combinedTotalsRow.addClass('macros-table-total-row');
 				combinedTotalsRow.insertCell().innerText = 'Totals';
 				combinedTotalsRow.insertCell().innerText = '';
 				combinedTotalsRow.insertCell().innerText = combinedTotals.calories.toFixed(2);
@@ -501,14 +513,15 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 			aggregate.carbs += total.carbs;
 		}
 		
-		const table = el.createEl('table');
-		table.style.width = '100%';
+		const table = el.createEl('table', { cls: 'macros-table' });
+		
 		const headerRow = table.insertRow();
 		['Table ID', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach(text => {
 			const cell = headerRow.insertCell();
 			cell.innerText = text;
-			cell.style.fontWeight = 'bold';
+			cell.addClass('macros-table-header-cell');
 		});
+		
 		breakdown.forEach(item => {
 			const row = table.insertRow();
 			row.insertCell().innerText = item.id;
@@ -517,12 +530,15 @@ export function registerProcessors(plugin: MacrosPlugin): void {
 			row.insertCell().innerText = item.totals.fat.toFixed(2);
 			row.insertCell().innerText = item.totals.carbs.toFixed(2);
 		});
+		
 		const aggregateRow = table.insertRow();
+		aggregateRow.addClass('macros-table-total-row');
 		aggregateRow.insertCell().innerText = 'Aggregate Totals';
 		aggregateRow.insertCell().innerText = aggregate.calories.toFixed(2);
 		aggregateRow.insertCell().innerText = aggregate.protein.toFixed(2);
 		aggregateRow.insertCell().innerText = aggregate.fat.toFixed(2);
 		aggregateRow.insertCell().innerText = aggregate.carbs.toFixed(2);
+		
 		el.appendChild(table);
 	});
 }
