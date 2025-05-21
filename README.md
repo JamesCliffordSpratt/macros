@@ -49,7 +49,7 @@ Once submitted and approved, this plugin will be available in the Community Plug
 
 Watch the full walkthrough on YouTube:
 
-[![Watch the video](https://img.youtube.com/vi/dksAL13AvR4/hqdefault.jpg)](https://www.youtube.com/watch?v=dksAL13AvR4)
+[![Watch the video](https://img.youtube.com/vi/0cOk846lRuc/hqdefault.jpg)](https://youtu.be/0cOk846lRuc)
 
 ---
 
