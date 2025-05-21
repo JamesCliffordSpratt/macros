@@ -1,23 +1,43 @@
 {
-  "type": "module",
-  "name": "obsidian-macros-plugin",
-  "version": "1.0.0",
-  "description": "Advanced nutrition tracker for Obsidian.",
-  "main": "main.js",
-  "scripts": {
-    "build": "rollup -c"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.14.1",
-    "obsidian": "^1.8.7",
-    "rollup": "^3.29.5",
-    "rollup-plugin-typescript2": "^0.31.2",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "crypto-js": "^4.2.0"
-  }
+	"name": "obsidian-macros-plugin",
+	"version": "1.0.0",
+	"description": "Track nutrition, plan meals, and visualize macros right inside your notes. The Macros Plugin integrates food logging and nutritional analysis into Obsidian. With FatSecret API support, reusable meal templates, interactive macros tables, and automatic pie chart generation, this plugin turns your vault into a lightweight food journal.",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"typecheck": "tsc --project tsconfig.check.json",
+		"build": "npm run typecheck && node esbuild.config.mjs production",
+		"lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --fix",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"devDependencies": {
+		"@testing-library/dom": "^10.4.0",
+		"@types/jest": "^29.5.14",
+		"@types/node": "^16.11.6",
+		"@typescript-eslint/eslint-plugin": "^5.29.0",
+		"@typescript-eslint/parser": "^5.29.0",
+		"builtin-modules": "3.3.0",
+		"esbuild": "^0.25.2",
+		"eslint": "^8.57.1",
+		"eslint-config-prettier": "^10.1.2",
+		"eslint-plugin-prettier": "^5.2.6",
+		"eslint-plugin-unused-imports": "^4.1.4",
+		"jest": "^29.7.0",
+		"jest-environment-jsdom": "^29.7.0",
+		"obsidian": "latest",
+		"prettier": "^3.5.3",
+		"ts-jest": "^29.3.2",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	},
+	"dependencies": {
+		"chart.js": "^4.4.9",
+		"crypto-js": "^4.2.0"
+	}
 }
