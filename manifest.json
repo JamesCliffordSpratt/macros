@@ -1,10 +1,10 @@
 {
-  "id": "macros",
+  "id": "macros-plugin",
   "name": "Macros",
-  "version": "1.0.0",
-  "author": "JamesCliffordSpratt",
-  "description": "Advanced nutrition tracking with dynamic macros blocks and pie charts.",
-  "main": "main.js",
-  "minAppVersion": "0.15.0",
-  "isDesktopOnly": true
+  "version": "2.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Track and visualize your daily macros, meals and nutrition inside Obsidian.",
+  "author": "James Spratt",
+  "authorUrl": "https://github.com/jmspratt",
+  "isDesktopOnly": false
 }
