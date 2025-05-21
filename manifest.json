@@ -3,7 +3,7 @@
   "name": "Macros",
   "version": "2.0.0",
   "minAppVersion": "1.0.0",
-  "description": "Track and visualize your daily macros, meals and nutrition inside Obsidian.",
+  "description": "Track and visualize your daily macros, meals and nutrition inside your notes.",
   "author": "James Spratt",
   "authorUrl": "https://github.com/jmspratt",
   "isDesktopOnly": false
