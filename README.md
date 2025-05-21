@@ -8,11 +8,11 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ### 🔍 Searching for Food
 
-![Search GIF](images/search.gif)
+![Search GIF](images/V2/Live-Search.gif)
 
 ### 🍎 Creating and Visualizing Macros
 
-![Macros GIF](images/macros.gif)
+![Macros GIF](images/V2/Macros-Table.gif)
 
 ---
 
@@ -24,6 +24,7 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 - 🥗 **Meal templates** for quick reusable meal groups
 - 🍽️ **Pie charts** (`macrospc`) to visualize macros
 - 📐 **Custom serving sizes** and interactive add/remove
+- 📈 **Aggregate mutiple IDs** (`macroscalc`) to combine multiple macro blocks together
 
 ---
 
@@ -35,6 +36,7 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 2. Copy the following files into your Obsidian plugin directory:
    - `main.js`
    - `manifest.json`
+   - `styles.css`
 3. Enable the plugin in Obsidian settings under **Community Plugins**.
 
 ### From Obsidian Marketplace (coming soon)
@@ -64,8 +66,10 @@ Add a code block like this to your notes:
 ````markdown
 ```macros
 id: today
-Apple:100g
-meal:Lunch
+meal:Dinner
+- Chicken Breast:30g
+- Cooked Rice:150g
+- Broccoli:100g
 ```
 ````
 
@@ -102,6 +106,7 @@ ids: today, yesterday
 - **Storage Folder** – Where food files are saved
 - **Colors** – Customize pie chart colors
 - **Meal Templates** – Define reusable meal groups
+- **Display** - Toggle on/off additional information
 - **FatSecret Credentials** – Add your own API key/secret (optional)
 
 ---
