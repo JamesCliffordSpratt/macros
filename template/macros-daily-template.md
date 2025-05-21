@@ -4,16 +4,14 @@
 id: <% tp.date.now("YYYY-MM-DD") %>
 ```
 
-## 📊 Pie Chart
-
-### Todays Macros:
+### 📊 Pie Chart
 
 ```macrospc
 id: <% tp.date.now("YYYY-MM-DD") %>
 ```
 
-### 📅 Weekly Overview:
-
+## 📅 Weekly Overview
+### Summary Table
 ```macroscalc
 ids: <%* 
 let days = [];
@@ -23,7 +21,7 @@ for (let x = 6; x >= 0; x--) {
 tR += days.join(", ");
 %>
 ```
-
+### 📊 Pie Chart
 ```macrospc
 ids: <%* 
 let dayspc = [];
