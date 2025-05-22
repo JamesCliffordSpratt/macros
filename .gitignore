@@ -5,8 +5,6 @@ node_modules/
 dist/
 main.js
 main.js.map
-styles.css
-styles.css.map
 
 # Logs
 npm-debug.log*
