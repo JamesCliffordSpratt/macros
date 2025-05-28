@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-macros-plugin",
-	"version": "1.0.0",
-	"description": "Track nutrition, plan meals, and visualize macros right inside your notes. The Macros Plugin integrates food logging and nutritional analysis into Obsidian. With FatSecret API support, reusable meal templates, interactive macros tables, and automatic pie chart generation, this plugin turns your vault into a lightweight food journal.",
+	"name": "macros",
+	"version": "2.0.0",
+	"description": "Track and visualize your daily macros, meals and nutrition inside your notes.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
