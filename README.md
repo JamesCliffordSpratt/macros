@@ -113,7 +113,7 @@ ids: today, yesterday
 
 ## API Credentials (FatSecret)
 
-Default credentials are provided for convenience and are obfuscated in code.
+Default credentials are provided for convenience.
 For long-term use, it’s recommended to [register your own](https://platform.fatsecret.com/platform-api) and paste them into plugin settings.
 
 ---
