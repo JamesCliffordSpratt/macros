@@ -8,7 +8,7 @@ export class LiveFoodSearchModal extends Modal {
 	private resultsContainer: HTMLElement;
 	private loadingIndicator: HTMLElement;
 	private noResultsMessage: HTMLElement;
-	private searchTimeout: number | null = null;
+	private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 	private maxResults = 50;
 	private results: FoodItem[] = [];
 	private selectedIndex = -1;
