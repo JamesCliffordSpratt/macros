@@ -13,27 +13,21 @@ import {
 	formatCalories,
 	formatGrams,
 } from '../../utils/formatters';
-import { EventManager } from '../../utils/EventManager';
 
 export class MacrosDashboard {
-	// Explicitly declare class properties
 	private container: HTMLElement;
 	private id: string;
 	private plugin: MacrosPlugin;
-	private eventManager: EventManager;
 	private dashboardHeader: HTMLElement | null = null;
 	private dashboardContent: HTMLElement | null = null;
 	private toggleIcon: HTMLElement | null = null;
 	private state: MacrosState | null = null;
 
-	// Constructor with proper initialization
 	constructor(container: HTMLElement, id: string, plugin: MacrosPlugin) {
 		this.container = container;
 		this.id = id;
 		this.plugin = plugin;
-		this.eventManager = new EventManager(this.plugin);
 
-		// Initialize the state for persistence
 		if (this.id) {
 			this.state = new MacrosState(plugin, id, 'dashboard');
 		}
@@ -43,36 +37,29 @@ export class MacrosDashboard {
 		try {
 			const dashboardContainer = this.container.createDiv({ cls: CLASS_NAMES.DASHBOARD.CONTAINER });
 
-			// Use the new collapsible-header class
 			this.dashboardHeader = dashboardContainer.createDiv({
 				cls: `${CLASS_NAMES.DASHBOARD.HEADER} collapsible-header`,
 			});
 
-			// Add a data attribute for better selection
 			this.dashboardHeader.dataset.dashboardId = this.id;
 
-			// Use header-content and header-label
 			const headerContent = dashboardContainer.createDiv({ cls: 'header-content' });
 			const headerText = getSummaryHeader(this.id);
 
-			// Use the new class for the header label
 			headerContent.createSpan({
 				cls: 'header-label',
 				text: headerText,
 			});
 
-			// Add the toggle icon
 			this.toggleIcon = headerContent.createSpan({ cls: 'toggle-icon' });
 			this.toggleIcon.dataset.dashboardId = this.id;
 
-			// Add the header content to the header
 			this.dashboardHeader.appendChild(headerContent);
 
 			this.dashboardContent = dashboardContainer.createDiv({
 				cls: `${CLASS_NAMES.DASHBOARD.CONTENT} collapsible-content`,
 			});
 
-			// Add data attribute for better selection
 			this.dashboardContent.dataset.dashboardId = this.id;
 
 			const caloriePercentage = (combinedTotals.calories / dailyTargets.calories) * 100;
@@ -113,7 +100,6 @@ export class MacrosDashboard {
 				MACRO_TYPES.CARBS
 			);
 
-			// Restore saved collapsed state
 			const isCollapsed = this.loadCollapsedState();
 			if (isCollapsed && this.dashboardHeader && this.dashboardContent && this.toggleIcon) {
 				this.dashboardHeader.classList.add('collapsed');
@@ -121,13 +107,11 @@ export class MacrosDashboard {
 				this.toggleIcon.classList.add('collapsed');
 			}
 
-			// Add click handler for collapsing/expanding
 			const clickHandler = () => {
 				if (this.dashboardHeader && this.dashboardContent && this.toggleIcon) {
 					const isCurrentlyCollapsed = this.dashboardHeader.classList.contains('collapsed');
 					const newCollapsedState = !isCurrentlyCollapsed;
 
-					// Toggle visual state
 					if (newCollapsedState) {
 						this.dashboardHeader.classList.add('collapsed');
 						this.dashboardContent.classList.add('collapsed');
@@ -138,21 +122,18 @@ export class MacrosDashboard {
 						this.toggleIcon.classList.remove('collapsed');
 					}
 
-					// Save the new state
 					this.saveCollapsedState(newCollapsedState);
 				}
 			};
 
-			// Use EventManager for proper cleanup
 			if (this.dashboardHeader) {
-				this.eventManager.registerDomEvent(this.dashboardHeader, 'click', clickHandler);
+				this.plugin.registerDomListener(this.dashboardHeader, 'click', clickHandler);
 			}
 		} catch (error) {
 			this.plugin.logger.error('Error creating dashboard:', error);
 		}
 	}
 
-	// Save collapsed state using MacrosState
 	private saveCollapsedState(isCollapsed: boolean): void {
 		if (this.state) {
 			this.state.saveCollapsedState('dashboard', isCollapsed);
@@ -160,7 +141,6 @@ export class MacrosDashboard {
 		}
 	}
 
-	// Load collapsed state from MacrosState
 	private loadCollapsedState(): boolean {
 		if (this.state) {
 			const isCollapsed = this.state.getCollapsedState('dashboard');
@@ -179,7 +159,6 @@ export class MacrosDashboard {
 		macroType: string
 	): void {
 		try {
-			// Use the same class pattern as in MacrosCalcRenderer
 			const card = container.createDiv({
 				cls: `${CLASS_NAMES.DASHBOARD.METRIC_CARD} macroscalc-metric-card ${macroType}-card`,
 			});
@@ -196,7 +175,6 @@ export class MacrosDashboard {
 				text: value,
 			});
 
-			// Add tooltip
 			const numericValue = parseFloat(value.replace('g', ''));
 			const tooltipMessage = formatDashboardTooltip(numericValue, target, label);
 			safeAttachTooltip(card, tooltipMessage, this.plugin);
@@ -206,7 +184,6 @@ export class MacrosDashboard {
 				text: `${Math.round(percentage)}%`,
 			});
 
-			// Add progress bar with the same styling as macroscalc
 			const progressContainer = card.createDiv({
 				cls: CLASS_NAMES.DASHBOARD.METRIC_PROGRESS_CONTAINER,
 			});
@@ -247,12 +224,8 @@ export class MacrosDashboard {
 		}
 	}
 
-	/**
-	 * Expose method to toggle dashboard from external components
-	 */
 	public toggleCollapsed(isCollapsed: boolean): void {
 		if (this.dashboardHeader && this.dashboardContent && this.toggleIcon) {
-			// Update the UI
 			if (isCollapsed) {
 				this.dashboardHeader.classList.add('collapsed');
 				this.dashboardContent.classList.add('collapsed');
@@ -263,15 +236,7 @@ export class MacrosDashboard {
 				this.toggleIcon.classList.remove('collapsed');
 			}
 
-			// Save the new state
 			this.saveCollapsedState(isCollapsed);
 		}
-	}
-
-	/**
-	 * Clean up resources when no longer needed
-	 */
-	public cleanup(): void {
-		this.eventManager.cleanup();
 	}
 }

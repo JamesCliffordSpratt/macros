@@ -8,19 +8,16 @@ import {
 	Group,
 } from '../../../utils';
 import { RowRenderer } from './RowRenderer';
-import { EventManager } from '../../../utils/EventManager';
 
 export class GroupRenderer {
 	private plugin: MacrosPlugin;
 	private state: MacrosState | null;
 	private rowRenderer: RowRenderer;
-	private eventManager: EventManager;
 
 	constructor(plugin: MacrosPlugin, state: MacrosState | null) {
 		this.plugin = plugin;
 		this.state = state;
 		this.rowRenderer = new RowRenderer(this.plugin);
-		this.eventManager = new EventManager(this.plugin);
 	}
 
 	renderGroups(
@@ -84,27 +81,22 @@ export class GroupRenderer {
 	}
 
 	private createGroupHeader(headerCell: HTMLTableCellElement, group: Group): void {
-		// Apply the new common header content class
 		const headerContent = createEl('div', { cls: 'header-content' });
 
-		// Left side content with name and calories
 		const leftContent = createEl('div', { cls: 'header-left' });
 
-		// Use consistent header-label class
 		const nameSpan = createEl('span', {
 			cls: 'header-label',
 			text: group.count > 1 ? `${group.name} × ${group.count}` : group.name,
 		});
 		leftContent.appendChild(nameSpan);
 
-		// Use consistent calorie summary class
 		const caloriesSpan = createEl('span', {
 			cls: 'header-calorie-summary',
 			text: `(${group.total.calories.toFixed(1)} cal)`,
 		});
 		leftContent.appendChild(caloriesSpan);
 
-		// Handle remove button for meals
 		if (group.macroLine) {
 			const removeBtn = createEl('span', {
 				cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE}`,
@@ -112,7 +104,6 @@ export class GroupRenderer {
 			});
 			attachTooltip(removeBtn, 'Remove this meal');
 
-			// Use unified EventManager for proper cleanup
 			const removeBtnHandler = async (e: MouseEvent) => {
 				e.stopPropagation();
 				const macroLine = group.macroLine;
@@ -121,16 +112,14 @@ export class GroupRenderer {
 				}
 			};
 
-			this.eventManager.registerDomEvent(removeBtn, 'click', removeBtnHandler);
+			this.plugin.registerDomListener(removeBtn, 'click', removeBtnHandler);
 			leftContent.appendChild(removeBtn);
 		}
 
-		// Use consistent toggle icon class
 		const toggleSpan = createEl('span', {
 			cls: 'toggle-icon',
 		});
 
-		// Append elements to the header
 		headerContent.appendChild(leftContent);
 		headerContent.appendChild(toggleSpan);
 		headerCell.appendChild(headerContent);
@@ -143,69 +132,47 @@ export class GroupRenderer {
 	): void {
 		const sectionName = headerRow.dataset.section as string;
 
-		// Check if we need to initialize as collapsed
 		let isCollapsed = false;
 
 		if (this.state) {
-			// Use the new MacrosState getCollapsedState method
 			isCollapsed = this.state.getCollapsedState(sectionName);
 
 			if (isCollapsed) {
-				// Update UI to collapsed state
 				headerCell.classList.add(CLASS_NAMES.TABLE.COLLAPSED);
 				headerCell.classList.add('collapsed');
-
-				// Hide rows
 				this.setRowsVisibility(table, sectionName, false);
 			}
 		}
 
-		// Store initial state directly on the element for reference
 		headerCell.dataset.macroState = isCollapsed ? 'collapsed' : 'expanded';
 
-		// Use direct click handler to ensure single operation
 		const headerCellClickHandler = (e: MouseEvent) => {
-			// Don't handle clicks on remove button
 			if ((e.target as HTMLElement).classList.contains(CLASS_NAMES.ICONS.REMOVE)) {
 				return;
 			}
 
-			// Get the current state from the dataset
 			const currentState = headerCell.dataset.macroState;
 
 			if (currentState === 'collapsed') {
-				// Update visual state
 				headerCell.classList.remove(CLASS_NAMES.TABLE.COLLAPSED);
 				headerCell.classList.remove('collapsed');
-
-				// Show rows
 				this.setRowsVisibility(table, sectionName, true);
-
-				// Update state
 				headerCell.dataset.macroState = 'expanded';
 				if (this.state) {
-					// Use the new MacrosState saveCollapsedState method
 					this.state.saveCollapsedState(sectionName, false);
 				}
 			} else {
-				// Update visual state
 				headerCell.classList.add(CLASS_NAMES.TABLE.COLLAPSED);
 				headerCell.classList.add('collapsed');
-
-				// Hide rows
 				this.setRowsVisibility(table, sectionName, false);
-
-				// Update state
 				headerCell.dataset.macroState = 'collapsed';
 				if (this.state) {
-					// Use the new MacrosState saveCollapsedState method
 					this.state.saveCollapsedState(sectionName, true);
 				}
 			}
 		};
 
-		// Use EventManager for proper cleanup
-		this.eventManager.registerDomEvent(headerCell, 'click', headerCellClickHandler);
+		this.plugin.registerDomListener(headerCell, 'click', headerCellClickHandler);
 	}
 
 	private setRowsVisibility(table: HTMLTableElement, sectionName: string, visible: boolean): void {
@@ -234,11 +201,7 @@ export class GroupRenderer {
 			cell.innerText = text;
 			cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
 
-			// Add classes based on column type
-			if (text === 'Protein') cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
-			if (text === 'Fat') cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
-			if (text === 'Carbs') cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
-			if (text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL); // Add this line
+			if (text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
 		});
 	}
 
@@ -291,18 +254,16 @@ export class GroupRenderer {
 		combinedHeaderCell.classList.add(
 			CLASS_NAMES.TABLE.MEAL_HEADER_CELL,
 			CLASS_NAMES.TABLE.COLLAPSIBLE,
-			'collapsible-header' // Add the new common header class
+			'collapsible-header'
 		);
 		combinedHeaderRow.dataset.section = 'combined-totals';
 
-		// Use consistent header content structure
 		const combinedHeaderContent = createEl('div', { cls: 'header-content' });
 		const combinedLabel = createEl('span', {
 			cls: 'header-label',
 			text: 'Macros Summary',
 		});
 
-		// Use consistent toggle icon
 		const combinedToggle = createEl('span', {
 			cls: 'toggle-icon',
 		});
@@ -311,63 +272,43 @@ export class GroupRenderer {
 		combinedHeaderContent.appendChild(combinedToggle);
 		combinedHeaderCell.appendChild(combinedHeaderContent);
 
-		// Check initial state
 		let isCollapsed = false;
 
 		if (this.state) {
-			// Use the new MacrosState getCollapsedState method
 			isCollapsed = this.state.getCollapsedState('combined-totals');
 
 			if (isCollapsed) {
-				// Update UI to collapsed state
 				combinedHeaderCell.classList.add(CLASS_NAMES.TABLE.COLLAPSED);
 				combinedHeaderCell.classList.add('collapsed');
-
-				// Hide rows
 				this.setRowsVisibility(table, 'combined-totals', false);
 			}
 		}
 
-		// Store initial state directly on the element
 		combinedHeaderCell.dataset.macroState = isCollapsed ? 'collapsed' : 'expanded';
 
-		// Use unified EventManager for proper cleanup
 		const combinedHeaderClickHandler = () => {
-			// Get current state from dataset
 			const currentState = combinedHeaderCell.dataset.macroState;
 
 			if (currentState === 'collapsed') {
-				// EXPANDING
 				combinedHeaderCell.classList.remove(CLASS_NAMES.TABLE.COLLAPSED);
 				combinedHeaderCell.classList.remove('collapsed');
-
-				// Show rows
 				this.setRowsVisibility(table, 'combined-totals', true);
-
-				// Update state
 				combinedHeaderCell.dataset.macroState = 'expanded';
 				if (this.state) {
-					// Use the new MacrosState saveCollapsedState method
 					this.state.saveCollapsedState('combined-totals', false);
 				}
 			} else {
-				// COLLAPSING
 				combinedHeaderCell.classList.add(CLASS_NAMES.TABLE.COLLAPSED);
 				combinedHeaderCell.classList.add('collapsed');
-
-				// Hide rows
 				this.setRowsVisibility(table, 'combined-totals', false);
-
-				// Update state
 				combinedHeaderCell.dataset.macroState = 'collapsed';
 				if (this.state) {
-					// Use the new MacrosState saveCollapsedState method
 					this.state.saveCollapsedState('combined-totals', true);
 				}
 			}
 		};
 
-		this.eventManager.registerDomEvent(combinedHeaderCell, 'click', combinedHeaderClickHandler);
+		this.plugin.registerDomListener(combinedHeaderCell, 'click', combinedHeaderClickHandler);
 
 		this.renderGroupTotals(
 			table,
@@ -382,9 +323,6 @@ export class GroupRenderer {
 		);
 	}
 
-	/**
-	 * Directly collapses all sections in the table
-	 */
 	public collapseAllSections(table: HTMLTableElement, id: string | null): void {
 		const allHeaders = table.querySelectorAll(
 			`.${CLASS_NAMES.TABLE.MEAL_HEADER_CELL}.${CLASS_NAMES.TABLE.COLLAPSIBLE}, ` +
@@ -409,15 +347,11 @@ export class GroupRenderer {
 			(header as HTMLElement).dataset.macroState = 'collapsed';
 
 			if (this.state && id) {
-				// Use the new MacrosState saveCollapsedState method
 				this.state.saveCollapsedState(sectionName, true);
 			}
 		});
 	}
 
-	/**
-	 * Directly expands all sections in the table
-	 */
 	public expandAllSections(table: HTMLTableElement, id: string | null): void {
 		const allHeaders = table.querySelectorAll(
 			`.${CLASS_NAMES.TABLE.MEAL_HEADER_CELL}.${CLASS_NAMES.TABLE.COLLAPSIBLE}, ` +
@@ -442,28 +376,16 @@ export class GroupRenderer {
 			(header as HTMLElement).dataset.macroState = 'expanded';
 
 			if (this.state && id) {
-				// Use the new MacrosState saveCollapsedState method
 				this.state.saveCollapsedState(sectionName, false);
 			}
 		});
 	}
 
-	/**
-	 * Legacy method - calls the appropriate direct method
-	 */
 	public toggleAllSections(table: HTMLTableElement, collapse: boolean, id: string | null): void {
 		if (collapse) {
 			this.collapseAllSections(table, id);
 		} else {
 			this.expandAllSections(table, id);
 		}
-	}
-
-	/**
-	 * Clean up resources when no longer needed
-	 */
-	public cleanup(): void {
-		this.eventManager.cleanup();
-		this.rowRenderer.cleanup();
 	}
 }

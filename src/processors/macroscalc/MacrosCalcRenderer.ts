@@ -15,6 +15,7 @@ import { CalcBreakdown } from './calculator';
 import { parseGrams } from '../../utils/parsingUtils';
 import { findMatchingFoodFile } from '../../utils/fileUtils';
 import { processNutritionalData } from '../../utils/nutritionUtils';
+import { processNutritionalDataFromLines } from './calculator';
 
 // Define the chart reference type for proper TypeScript support
 interface ChartReference {
@@ -71,7 +72,7 @@ export class MacrosCalcRenderer {
 		return this.state ? this.state.getCollapsedState('dashboard') : false;
 	}
 
-	async render(aggregate: MacroTotals, breakdown: CalcBreakdown[]): Promise<void> {
+async render(aggregate: MacroTotals, breakdown: CalcBreakdown[]): Promise<void> {
 		// Always force fresh data fetch if needed
 		if (this.needsDataRefresh) {
 			this.plugin.logger.debug('MacrosCalc refresh triggered - reloading all data');
@@ -101,6 +102,19 @@ export class MacrosCalcRenderer {
 			this.needsDataRefresh = false;
 		}
 
+		// CRITICAL FIX: Always recalculate the aggregate and breakdown using the fixed calculator
+		// Don't trust the passed-in values as they might be from the old calculation logic
+		const { aggregate: freshAggregate, breakdown: freshBreakdown } = await processNutritionalDataFromLines(this.plugin, this.ids);
+		
+		this.plugin.logger.debug('MacrosCalc using fresh calculations:', {
+			aggregate: freshAggregate,
+			breakdown: freshBreakdown
+		});
+
+		// Use the fresh calculations instead of the passed-in values
+		const finalAggregate = freshAggregate;
+		const finalBreakdown = freshBreakdown;
+
 		// Create a document fragment to batch DOM operations
 		const fragment = document.createDocumentFragment();
 		this.el.empty();
@@ -108,8 +122,8 @@ export class MacrosCalcRenderer {
 		// Load state from MacrosState
 		this.isDashboardCollapsed = this.loadDashboardCollapseState();
 
-		// Create dashboard summary at the top
-		this.renderDashboard(fragment as unknown as HTMLElement, aggregate);
+		// Create dashboard summary at the top - use the FRESH aggregate data
+		this.renderDashboard(fragment as unknown as HTMLElement, finalAggregate);
 
 		// Create the main table with styling that matches other components
 		const tableContainer = (fragment as unknown as HTMLElement).createDiv({
@@ -159,15 +173,15 @@ export class MacrosCalcRenderer {
 			if (text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
 		});
 
-		// Render each breakdown row
-		breakdown.forEach((item, index) => {
-			this.renderTableRow(table, item, aggregate, index % 2 === 1);
+		// Render each breakdown row - use the FRESH breakdown data
+		finalBreakdown.forEach((item, index) => {
+			this.renderTableRow(table, item, finalAggregate, index % 2 === 1);
 
 			// Render expandable detail row (initially hidden)
 			this.renderExpandableDetailRow(table, item);
 		});
 
-		// Render aggregate totals row with special styling
+		// Render aggregate totals row with special styling - use the FRESH aggregate data
 		const aggregateRow = table.insertRow();
 		aggregateRow.classList.add(CLASS_NAMES.TABLE.TOTALS_ROW);
 
@@ -176,19 +190,19 @@ export class MacrosCalcRenderer {
 		aggLabelCell.classList.add('macro-bold-cell');
 
 		// Calculate total macros for percentages
-		const totalMacros = aggregate.protein + aggregate.fat + aggregate.carbs;
+		const totalMacros = finalAggregate.protein + finalAggregate.fat + finalAggregate.carbs;
 
 		// Calories
 		const aggCaloriesCell = aggregateRow.insertCell();
 		aggCaloriesCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CALORIES_CELL);
-		aggCaloriesCell.innerText = formatCalories(aggregate.calories);
+		aggCaloriesCell.innerText = formatCalories(finalAggregate.calories);
 
 		// Protein
 		const aggProteinCell = aggregateRow.insertCell();
 		aggProteinCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.PROTEIN_CELL);
-		aggProteinCell.textContent = formatGrams(aggregate.protein);
+		aggProteinCell.textContent = formatGrams(finalAggregate.protein);
 		if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-			const proteinPercentage = formatPercentage((aggregate.protein / totalMacros) * 100);
+			const proteinPercentage = formatPercentage((finalAggregate.protein / totalMacros) * 100);
 			aggProteinCell.createSpan({
 				cls: CLASS_NAMES.MACRO.PERCENTAGE,
 				text: `(${proteinPercentage}%)`,
@@ -198,9 +212,9 @@ export class MacrosCalcRenderer {
 		// Fat
 		const aggFatCell = aggregateRow.insertCell();
 		aggFatCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.FAT_CELL);
-		aggFatCell.textContent = formatGrams(aggregate.fat);
+		aggFatCell.textContent = formatGrams(finalAggregate.fat);
 		if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-			const fatPercentage = formatPercentage((aggregate.fat / totalMacros) * 100);
+			const fatPercentage = formatPercentage((finalAggregate.fat / totalMacros) * 100);
 			aggFatCell.createSpan({
 				cls: CLASS_NAMES.MACRO.PERCENTAGE,
 				text: `(${fatPercentage}%)`,
@@ -210,16 +224,16 @@ export class MacrosCalcRenderer {
 		// Carbs
 		const aggCarbsCell = aggregateRow.insertCell();
 		aggCarbsCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CARBS_CELL);
-		aggCarbsCell.textContent = formatGrams(aggregate.carbs);
+		aggCarbsCell.textContent = formatGrams(finalAggregate.carbs);
 		if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-			const carbsPercentage = formatPercentage((aggregate.carbs / totalMacros) * 100);
+			const carbsPercentage = formatPercentage((finalAggregate.carbs / totalMacros) * 100);
 			aggCarbsCell.createSpan({
 				cls: CLASS_NAMES.MACRO.PERCENTAGE,
 				text: `(${carbsPercentage}%)`,
 			});
 		}
 
-		// Add comparison visualization - only if not collapsed
+		// Add comparison visualization - only if not collapsed - use the FRESH breakdown data
 		const chartSection = (fragment as unknown as HTMLElement).createDiv({
 			cls: 'macroscalc-chart-section',
 		});
@@ -228,7 +242,7 @@ export class MacrosCalcRenderer {
 			chartSection.classList.add('macroscalc-hidden');
 		}
 
-		await this.renderComparisonChart(chartSection, breakdown);
+		await this.renderComparisonChart(chartSection, finalBreakdown);
 
 		// Add to main element
 		this.el.appendChild(fragment);
@@ -938,116 +952,254 @@ export class MacrosCalcRenderer {
 		}
 	}
 
-	private async renderComparisonChart(
-		container: HTMLElement,
-		breakdown: CalcBreakdown[]
-	): Promise<void> {
-		if (breakdown.length < 2) return;
+private async renderComparisonChart(
+	container: HTMLElement,
+	breakdown: CalcBreakdown[]
+): Promise<void> {
+	this.plugin.logger.debug(`renderComparisonChart called with ${breakdown.length} items`);
+	
+	// Always show the header, even if we can't render the chart
+	const chartSection = container.createDiv({
+		cls: 'macroscalc-chart-section macro-dashboard',
+	});
 
-		try {
-			// Clean up any existing charts first to prevent memory leaks
-			this.destroyCharts();
+	const dashboardHeader = chartSection.createDiv({
+		cls: 'macroscalc-dashboard-header macro-dashboard-header',
+	});
 
-			// Use the ChartLoader instead of the old ensureChartJsLoaded function
-			await this.chartLoader.loadChart();
+	const headerContent = dashboardHeader.createDiv({
+		cls: 'macroscalc-header-content',
+	});
 
-			// Create a properly styled parent container with consistent class names
-			const chartSection = container.createDiv({
-				cls: 'macroscalc-chart-section macro-dashboard',
-			});
+	headerContent.createSpan({
+		cls: 'macroscalc-header-title',
+		text: 'Macro Trends Over Time',
+	});
 
-			// Create proper header with the same styling as other sections
-			const dashboardHeader = chartSection.createDiv({
-				cls: 'macroscalc-dashboard-header macro-dashboard-header',
-			});
+	const chartContent = chartSection.createDiv({
+		cls: 'macro-dashboard-flex-container',
+	});
 
-			// Create header content with proper spacing
-			const headerContent = dashboardHeader.createDiv({
-				cls: 'macroscalc-header-content',
-			});
-
-			// Add title with proper class
-			headerContent.createSpan({
-				cls: 'macroscalc-header-title',
-				text: 'Macro Trends Over Time',
-			});
-
-			// Create the content container with proper styling
-			const chartContent = chartSection.createDiv({
-				cls: 'macro-dashboard-flex-container',
-			});
-
-			// Create the chart wrapper with proper height constraint
-			const chartWrapper = chartContent.createDiv({
-				cls: 'macroscalc-chart-wrapper',
-				attr: { style: 'height: 300px; width: 100%;' },
-			});
-
-			const chartCanvas = chartWrapper.createEl('canvas', {
-				cls: 'macroscalc-line-chart',
-			});
-
-			// Make sure the canvas has an ID so we can reference it later
-			const chartId = `macroscalc-${this.ids.join('-')}-chart`;
-			chartCanvas.id = chartId;
-
-			const ctx = chartCanvas.getContext('2d');
-			if (!ctx || !window.Chart)
-				throw new Error('Chart.js not available or canvas context not available');
-
-			const labels = breakdown.map((item) => item.id); // assumed to be date strings
-
-			// Use the centralized chart creation method from ChartManager
-			const chart = this.plugin.chartManager.createLineChart(ctx, chartId, labels, [
-				{
-					label: 'Protein (g)',
-					data: breakdown.map((item) => item.totals.protein),
-					borderColor: this.plugin.settings.proteinColor,
-					backgroundColor: this.plugin.settings.proteinColor,
-				},
-				{
-					label: 'Fat (g)',
-					data: breakdown.map((item) => item.totals.fat),
-					borderColor: this.plugin.settings.fatColor,
-					backgroundColor: this.plugin.settings.fatColor,
-				},
-				{
-					label: 'Carbs (g)',
-					data: breakdown.map((item) => item.totals.carbs),
-					borderColor: this.plugin.settings.carbsColor,
-					backgroundColor: this.plugin.settings.carbsColor,
-				},
-				{
-					label: 'Calories',
-					data: breakdown.map((item) => item.totals.calories),
-					borderColor: '#ff9800',
-					backgroundColor: '#ff9800',
-				},
-			]);
-
-			// Save a reference to the resize handler
-			const resizeHandler = () => {
-				// Only resize if the element is still in the DOM
-				if (document.contains(chartCanvas)) {
-					chart.resize();
-				}
-			};
-
-			// Add the resize handler
-			window.addEventListener('resize', resizeHandler);
-
-			// Save the chart reference for cleanup
-			this.charts.push({ chart, caloriesChart: null, resizeHandler });
-
-			this.plugin.logger.debug(`Created chart with ID: ${chartId}`);
-		} catch (error) {
-			console.error('Error creating line chart:', error);
-			const errorDiv = container.createDiv({ cls: 'macroscalc-chart-error' });
-			errorDiv.createEl('p', { text: 'Could not create chart visualization.' });
-		}
+	// Check if we have enough data for a chart
+	if (breakdown.length < 2) {
+		chartContent.createEl('p', { 
+			text: `Need at least 2 data points to show trends (currently have ${breakdown.length})`,
+			cls: 'macroscalc-chart-info'
+		});
+		this.plugin.logger.debug('Not enough data points for chart');
+		return;
 	}
 
-	// Improved destroyCharts method to properly clean up
+	try {
+		// Clean up any existing charts first
+		this.destroyCharts();
+
+		// Debug Chart.js availability
+		this.plugin.logger.debug('Chart.js available on window:', !!window.Chart);
+		
+		// Load Chart.js through ChartLoader
+		await this.chartLoader.loadChart();
+		
+		// Check again after loading
+		this.plugin.logger.debug('Chart.js available after loading:', !!window.Chart);
+
+		if (!window.Chart) {
+			throw new Error('Chart.js failed to load');
+		}
+
+		// Create the chart wrapper
+		const chartWrapper = chartContent.createDiv({
+			cls: 'macroscalc-chart-wrapper',
+		});
+		
+		chartWrapper.setAttribute('data-height', '300');
+		chartWrapper.setAttribute('data-width', '100');
+
+		const chartCanvas = chartWrapper.createEl('canvas', {
+			cls: 'macroscalc-line-chart',
+			attr: {
+				'data-width': '800',
+				'data-height': '300'
+			}
+		});
+
+		chartCanvas.width = 800;
+		chartCanvas.height = 300;
+
+		const chartId = `macroscalc-${this.ids.join('-')}-chart`;
+		chartCanvas.id = chartId;
+
+		const ctx = chartCanvas.getContext('2d');
+		if (!ctx) {
+			throw new Error('Failed to get canvas context');
+		}
+
+		this.plugin.logger.debug('Creating chart with data:', {
+			labels: breakdown.map(item => item.id),
+			proteinData: breakdown.map(item => item.totals.protein),
+			fatData: breakdown.map(item => item.totals.fat),
+			carbsData: breakdown.map(item => item.totals.carbs),
+			caloriesData: breakdown.map(item => item.totals.calories),
+		});
+
+		// Properly typed chart configuration
+		const chartConfig: import('chart.js').ChartConfiguration<'line', number[], string> = {
+			type: 'line',
+			data: {
+				labels: breakdown.map((item) => item.id),
+				datasets: [
+					{
+						label: 'Protein (g)',
+						data: breakdown.map((item) => item.totals.protein),
+						borderColor: this.plugin.settings.proteinColor || '#4caf50',
+						backgroundColor: (this.plugin.settings.proteinColor || '#4caf50') + '20',
+						tension: 0.2,
+						fill: false,
+						pointRadius: 4,
+						pointHoverRadius: 6,
+					},
+					{
+						label: 'Fat (g)',
+						data: breakdown.map((item) => item.totals.fat),
+						borderColor: this.plugin.settings.fatColor || '#f44336',
+						backgroundColor: (this.plugin.settings.fatColor || '#f44336') + '20',
+						tension: 0.2,
+						fill: false,
+						pointRadius: 4,
+						pointHoverRadius: 6,
+					},
+					{
+						label: 'Carbs (g)',
+						data: breakdown.map((item) => item.totals.carbs),
+						borderColor: this.plugin.settings.carbsColor || '#2196f3',
+						backgroundColor: (this.plugin.settings.carbsColor || '#2196f3') + '20',
+						tension: 0.2,
+						fill: false,
+						pointRadius: 4,
+						pointHoverRadius: 6,
+					},
+					{
+						label: 'Calories',
+						data: breakdown.map((item) => item.totals.calories),
+						borderColor: '#ff9800',
+						backgroundColor: '#ff980020',
+						tension: 0.2,
+						fill: false,
+						pointRadius: 4,
+						pointHoverRadius: 6,
+						yAxisID: 'y1',
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				interaction: {
+					intersect: false,
+				},
+				plugins: {
+					legend: {
+						position: 'top',
+					},
+					tooltip: {
+						callbacks: {
+							label: function (context: any) {
+								return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
+							},
+						},
+					},
+				},
+				scales: {
+					x: {
+						title: {
+							display: true,
+							text: 'Date/ID',
+						},
+					},
+					y: {
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Grams',
+						},
+						position: 'left',
+					},
+					y1: {
+						type: 'linear',
+						display: true,
+						position: 'right',
+						title: {
+							display: true,
+							text: 'Calories',
+						},
+						grid: {
+							drawOnChartArea: false,
+						},
+						beginAtZero: true,
+					},
+				},
+			},
+		};
+
+		this.plugin.logger.debug('Creating Chart.js instance...');
+
+		// Create the chart with proper typing
+		const chart = new window.Chart(ctx, chartConfig);
+
+		this.plugin.logger.debug('Chart created successfully:', chart);
+
+		// Save reference for cleanup
+		const resizeHandler = () => {
+			if (document.contains(chartCanvas)) {
+				chart.resize();
+			}
+		};
+
+		window.addEventListener('resize', resizeHandler);
+		this.charts.push({ chart, caloriesChart: null, resizeHandler });
+		this.chartLoader.registerChart(chartId, chart);
+
+		this.plugin.logger.debug('Chart setup complete');
+
+	} catch (error) {
+		this.plugin.logger.error('Error creating chart:', error);
+		
+		// Show error message in UI
+		const errorDiv = chartContent.createDiv({ cls: 'macroscalc-chart-error' });
+		errorDiv.createEl('p', { 
+			text: `Chart Error: ${(error as Error).message}`,
+			cls: 'error-message'
+		});
+		
+		// Show fallback table
+		this.renderFallbackTable(chartContent, breakdown);
+	}
+}
+
+private renderFallbackTable(container: HTMLElement, breakdown: CalcBreakdown[]): void {
+	const fallbackDiv = container.createDiv({ cls: 'chart-fallback' });
+	
+	fallbackDiv.createEl('h4', { text: 'Data Summary:' });
+	
+	const table = fallbackDiv.createEl('table', { cls: 'fallback-data-table' });
+	const headerRow = table.insertRow();
+	
+	['Date/ID', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach(header => {
+		const th = document.createElement('th');
+		th.textContent = header;
+		headerRow.appendChild(th);
+	});
+	
+	breakdown.forEach(item => {
+		const row = table.insertRow();
+		row.insertCell().textContent = item.id;
+		row.insertCell().textContent = item.totals.calories.toFixed(1);
+		row.insertCell().textContent = item.totals.protein.toFixed(1) + 'g';
+		row.insertCell().textContent = item.totals.fat.toFixed(1) + 'g';
+		row.insertCell().textContent = item.totals.carbs.toFixed(1) + 'g';
+	});
+}
+
 	public destroyCharts(): void {
 		if (this.charts && this.charts.length > 0) {
 			this.plugin.logger.debug(`Cleaning up ${this.charts.length} charts`);

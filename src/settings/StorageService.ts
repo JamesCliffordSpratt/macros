@@ -256,7 +256,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
 			.setName('Create a new meal template')
 			.setDesc('Create a new set of food items that you often eat together')
 			.addButton((btn) => {
-				btn.setButtonText('+ Add Meal Template').onClick(() => {
+				btn.setButtonText('+ Add meal template').onClick(() => {
 					new AddMealTemplateModal(this.plugin).open();
 				});
 			});
@@ -296,73 +296,98 @@ export class NutritionalSettingTab extends PluginSettingTab {
 		}
 
 		// =======================================
-		// API (ADVANCED)
+		// API (REQUIRED)
 		// =======================================
-		new Setting(containerEl).setName('🔌 API (Advanced)').setHeading();
+		new Setting(containerEl).setName('🔌 API configuration (required)').setHeading();
 
-		const advancedNotice = containerEl.createDiv({ cls: 'macrospc-api-notice' });
-		advancedNotice.createEl('p', {
-			text: 'The default FatSecret API credentials are provided for convenience. You may sign up for your own API credentials to ensure continued functionality if the default key becomes unavailable. To sign up, visit:',
+		const apiNotice = containerEl.createDiv({ cls: 'macrospc-api-notice' });
+		apiNotice.createEl('p', {
+			text: 'To use the food search functionality, you must sign up for free FatSecret API credentials. This plugin does not include default API keys.',
 		});
 
-		advancedNotice.createEl('a', {
+		apiNotice.createEl('p', {
+			text: 'Sign up for free API credentials at:',
+		});
+
+		apiNotice.createEl('a', {
 			text: 'https://platform.fatsecret.com/platform-api',
 			attr: { href: 'https://platform.fatsecret.com/platform-api', target: '_blank' },
 		});
 
-		advancedNotice.createEl('p', {
-			text: 'Note: Your API credentials will be stored in your vault settings file.',
+		apiNotice.createEl('p', {
+			text: 'Your API credentials will be stored securely in your vault settings.',
 			cls: 'note-text',
 		});
 
+		// Check if credentials are configured
+		const hasCredentials = this.plugin.apiService.hasApiCredentials();
+		
+		if (!hasCredentials) {
+			const warningDiv = containerEl.createDiv({ 
+				cls: 'setting-item-description api-credentials-warning' 
+			});
+			warningDiv.createEl('p', {
+				text: '⚠️ API credentials not configured. Food search will not work until you add your credentials.',
+			});
+		} else {
+			const successDiv = containerEl.createDiv({ 
+				cls: 'setting-item-description api-credentials-success' 
+			});
+			successDiv.createEl('p', {
+				text: '✅ API credentials configured successfully.',
+			});
+		}
+
 		new Setting(containerEl)
 			.setName('FatSecret API key')
-			.setDesc(
-				'Enter your FatSecret API Key. Leave blank to use the default provided by the Macros Plugin.'
-			)
+			.setDesc('Your fatSecret API key (required for food search functionality)')
 			.addText((text) => {
 				text
-					.setPlaceholder(`Default API`)
+					.setPlaceholder('Enter your API key here')
 					.setValue(this.plugin.settings.fatSecretApiKey)
 					.onChange(async (value) => {
 						this.plugin.settings.fatSecretApiKey = value;
 						await this.plugin.saveSettings();
+						// Refresh the settings display to update the status
+						setTimeout(() => this.display(), 100);
 					});
 			});
 
 		new Setting(containerEl)
 			.setName('FatSecret API secret')
-			.setDesc(
-				'Enter your FatSecret API Secret. Leave blank to use the default provided by the Macros Plugin.'
-			)
+			.setDesc('Your fatsecret API secret (required for food search functionality)')
 			.addText((text) => {
 				text
-					.setPlaceholder(`Default API`)
+					.setPlaceholder('Enter your API secret here')
 					.setValue(this.plugin.settings.fatSecretApiSecret)
 					.onChange(async (value) => {
 						this.plugin.settings.fatSecretApiSecret = value;
 						await this.plugin.saveSettings();
+						// Refresh the settings display to update the status
+						setTimeout(() => this.display(), 100);
 					});
 			});
 
-		// And update the test connection section to use the active key/secret:
+		// And update the test connection section to handle missing credentials:
 		new Setting(containerEl)
 			.setName('Test API connection')
-			.setDesc('Click to test your current FatSecret API credentials.')
+			.setDesc('Click to test your FatSecret API credentials.')
 			.addButton((button) => {
 				button.setButtonText('Test Connection').onClick(async () => {
-					// Get the active key/secret from the service
-					const key = this.plugin.apiService.getActiveApiKey();
-					const secret = this.plugin.apiService.getActiveApiSecret();
-					new Notice('Testing connection…');
 					try {
-						const results = await fetchFoodData(this.plugin.app, 'apple', 0, 1, key, secret);
+						// Check if credentials are configured
+						const credentials = this.plugin.apiService.getCredentialsSafe();
+						if (!credentials) {
+							new Notice('Please configure your API credentials first.');
+							return;
+						}
+
+						new Notice('Testing connection…');
+						const results = await fetchFoodData(this.plugin.app, 'apple', 0, 1, credentials.key, credentials.secret);
 						if (results.length > 0) {
 							new Notice('Test connection successful!');
 						} else {
-							new Notice(
-								'Test connection failed. No data returned. Please check your API credentials.'
-							);
+							new Notice('Test connection failed. No data returned. Please check your API credentials.');
 						}
 					} catch (error) {
 						this.plugin.logger.error('Error during test connection:', error);
@@ -372,9 +397,9 @@ export class NutritionalSettingTab extends PluginSettingTab {
 			});
 
 		// =======================================
-		// DEVELOPER SETTINGS
+		// DEVELOPER MODE
 		// =======================================
-		new Setting(containerEl).setName('🔧 Developer settings').setHeading();
+		new Setting(containerEl).setName('🔧 Developer mode').setHeading();
 
 		new Setting(containerEl)
 			.setName('Enable developer mode')

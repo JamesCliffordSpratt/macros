@@ -1,39 +1,35 @@
-import { App, Modal, Notice } from 'obsidian';
+import { App, Modal, Notice, Component } from 'obsidian';
 import { extractServingSize } from '../../utils/nutritionUtils';
 import { fetchFoodData, FoodItem } from '../../core/api';
 import MacrosPlugin from '../../main';
-import { EventManager } from '../../utils/EventManager';
 
 export class LiveFoodSearchModal extends Modal {
 	private searchInput: HTMLInputElement;
 	private resultsContainer: HTMLElement;
 	private loadingIndicator: HTMLElement;
 	private noResultsMessage: HTMLElement;
-	private searchTimeout: NodeJS.Timeout | null = null;
+	private searchTimeout: number | null = null;
 	private maxResults = 50;
 	private results: FoodItem[] = [];
 	private selectedIndex = -1;
 	private isSearching = false;
-	private plugin: MacrosPlugin | null = null;
-	private eventManager: EventManager;
+	private component: Component;
 
 	constructor(
 		public app: App,
 		public apiKey: string,
 		public apiSecret: string,
 		public onSelect: (item: FoodItem) => void,
-		plugin?: MacrosPlugin
+		private plugin?: MacrosPlugin
 	) {
 		super(app);
-		// Store the plugin reference if provided
-		this.plugin = plugin || null;
-		this.eventManager = new EventManager(this.plugin);
+		this.component = new Component();
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.addClass('live-food-search-modal');
-		contentEl.createEl('h2', { text: 'Search for Food', cls: 'mod-header' });
+		contentEl.createEl('h2', { text: 'Search for food', cls: 'mod-header' });
 
 		const searchContainer = contentEl.createDiv({ cls: 'search-container' });
 		this.searchInput = searchContainer.createEl('input', {
@@ -56,21 +52,15 @@ export class LiveFoodSearchModal extends Modal {
 
 		this.searchInput.focus();
 
-		// Use EventManager for event handling
-		this.eventManager.registerDomEvent(this.searchInput, 'input', this.handleSearchInput);
-		this.eventManager.registerDomEvent(this.searchInput, 'keydown', this.handleKeyboardNavigation);
+		this.component.registerDomEvent(this.searchInput, 'input', this.handleSearchInput);
+		this.component.registerDomEvent(this.searchInput, 'keydown', this.handleKeyboardNavigation);
 	}
 
 	onClose() {
-		// Clear any pending timeouts
 		if (this.searchTimeout) {
 			clearTimeout(this.searchTimeout);
 		}
-
-		// Clean up event listeners
-		this.eventManager.cleanup();
-
-		// Clear content
+		this.component.unload();
 		this.contentEl.empty();
 	}
 
@@ -151,7 +141,6 @@ export class LiveFoodSearchModal extends Modal {
 			this.loadingIndicator.classList.add('is-hidden');
 			this.renderResults(searchTerm);
 		} catch (error) {
-			// Use console.error as fallback if plugin logger isn't available
 			if (this.plugin && this.plugin.logger) {
 				this.plugin.logger.error('Error fetching food data:', error);
 			} else {
@@ -204,13 +193,12 @@ export class LiveFoodSearchModal extends Modal {
 					foodDiv.addClass('highlighted-result');
 				}
 
-				// Use EventManager for event handling
-				this.eventManager.registerDomEvent(foodDiv, 'click', () => {
+				this.component.registerDomEvent(foodDiv, 'click', () => {
 					this.onSelect(food);
 					this.close();
 				});
 
-				this.eventManager.registerDomEvent(foodDiv, 'mouseenter', () => {
+				this.component.registerDomEvent(foodDiv, 'mouseenter', () => {
 					this.selectedIndex = index;
 					this.highlightSelectedResult();
 				});

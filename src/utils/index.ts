@@ -21,7 +21,6 @@ import {
 // Import classes for re-export
 import { DOMUtils } from './DOMUtils';
 import { ChartLoader } from './ChartLoader';
-import { EventManager } from './EventManager';
 
 // Export from other modules that don't have conflicts
 export * from './constants';
@@ -42,9 +41,6 @@ export { DOMUtils };
 // Export ChartLoader with unique names
 export { ChartLoader };
 export { ensureChartJsLoaded } from './ChartLoader';
-
-// Export EventManager for unified event handling
-export { EventManager };
 
 // Explicitly re-export the functions that had ambiguity issues
 // File utils

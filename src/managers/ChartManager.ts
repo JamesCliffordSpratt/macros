@@ -1,9 +1,7 @@
 import MacrosPlugin from '../main';
 import { Chart, ChartConfiguration, ChartDataset, TooltipItem, registerables } from 'chart.js';
 import { ChartLoader, MacrosState, DOMUtils } from '../utils';
-import { EventManager } from '../utils/EventManager';
 
-// Define interface for the global Chart extensions we're using
 interface ExtendedWindow extends Window {
 	Chart?: typeof Chart;
 	macroCharts?: Record<string, Chart>;
@@ -18,19 +16,13 @@ interface ExtendedWindow extends Window {
 export class ChartManager {
 	private plugin: MacrosPlugin;
 	private chartLoader: ChartLoader = ChartLoader.getInstance();
-	private eventManager: EventManager;
 
 	constructor(plugin: MacrosPlugin) {
 		this.plugin = plugin;
-		this.eventManager = new EventManager(this.plugin);
 
-		// Make sure Chart.js is pre-registered
 		Chart.register(...registerables);
-
-		// Initialize global window.Chart reference for backward compatibility
 		(window as ExtendedWindow).Chart = Chart;
 
-		// Initialize window.macroCharts object for legacy support
 		if (!(window as ExtendedWindow).macroCharts) {
 			(window as ExtendedWindow).macroCharts = {};
 		}
@@ -41,8 +33,10 @@ export class ChartManager {
 	 */
 	async drawMacrospc(id: string | string[], el: HTMLElement, width = 300, height = 300) {
 		try {
-			// Use the ChartLoader instead of the old function
+			// Ensure Chart.js is loaded first - this is critical
 			await this.chartLoader.loadChart();
+			
+			// Clear any existing content and add container class
 			el.empty();
 			el.addClass('macrospc-container');
 
@@ -50,7 +44,6 @@ export class ChartManager {
 			if (Array.isArray(id)) {
 				ids = id;
 			} else if (typeof id === 'string' && id.includes(',')) {
-				// Handle comma-separated IDs in a string
 				ids = id
 					.split(',')
 					.map((i) => i.trim())
@@ -59,7 +52,6 @@ export class ChartManager {
 				ids = [id as string];
 			}
 
-			// Ensure all IDs in the list are valid
 			ids = ids.filter((i) => i && i.trim() !== '');
 			if (ids.length === 0) {
 				this.plugin.logger.error(`No valid IDs found in: ${id}`);
@@ -67,40 +59,62 @@ export class ChartManager {
 				return;
 			}
 
-			// Create a consistent combinedId format for state management
 			const combinedId = ids.join(',');
+			
+			// Create dashboard container with proper error handling
 			const dashboardContainer = el.createDiv({ cls: 'macro-dashboard' });
 
-			// Create a loading indicator while we ensure data is available
+			// Show loading state
 			const loadingEl = dashboardContainer.createEl('div', {
 				cls: 'macrospc-loading',
 				text: 'Loading chart data...',
 			});
 
-			// CRITICAL FIX: Always reload all data from vault first to ensure freshness
-			// UPDATED: Use centralized DataManager methods
+			// Data loading phase - with better error handling
+			interface DataLoadResult {
+				id: string;
+				success: boolean;
+				data: string[];
+			}
+			
+			const dataLoadResults: DataLoadResult[] = [];
 			for (const currentId of ids) {
 				try {
-					this.plugin.logger.debug(`Explicitly reloading data for ID: ${currentId} from vault`);
+					this.plugin.logger.debug(`Loading data for ID: ${currentId}`);
 
-					// Use centralized method to get the latest data
-					const freshData = await this.plugin.dataManager.getFullMacrosData(currentId);
+					// Force fresh data load with timeout
+					const freshDataPromise = this.plugin.dataManager.getFullMacrosData(currentId);
+					const timeoutPromise = new Promise<string[]>((_, reject) => 
+						setTimeout(() => reject(new Error('Data load timeout')), 5000)
+					);
 
-					if (freshData && freshData.length > 0) {
-						// Update the global cache with fresh data
+					const freshData = await Promise.race([freshDataPromise, timeoutPromise]) as string[];
+
+					if (freshData && Array.isArray(freshData) && freshData.length > 0) {
 						this.plugin.dataManager.macroTables.set(currentId, freshData);
 						this.plugin.logger.debug(`Loaded ${freshData.length} lines for ID: ${currentId}`);
+						dataLoadResults.push({ id: currentId, success: true, data: freshData });
 					} else {
-						this.plugin.logger.warn(`No data found for ID: ${currentId} in vault`);
+						this.plugin.logger.warn(`No data found for ID: ${currentId}`);
+						dataLoadResults.push({ id: currentId, success: false, data: [] });
 					}
 				} catch (error) {
 					this.plugin.logger.error(`Error loading data for ID: ${currentId}:`, error);
+					dataLoadResults.push({ id: currentId, success: false, data: [] });
 				}
 			}
 
-			// Remove loading indicator now that data is verified
+			// Check if we have any successful data loads
+			const successfulLoads = dataLoadResults.filter((result): result is DataLoadResult => result.success);
+			if (successfulLoads.length === 0) {
+				loadingEl.textContent = `No data found for IDs: ${ids.join(', ')}`;
+				return;
+			}
+
+			// Remove loading indicator
 			loadingEl.remove();
 
+			// Create header with better state management
 			const allDates = ids
 				.map((id) => {
 					const parsed = Date.parse(id);
@@ -109,60 +123,27 @@ export class ChartManager {
 				.filter((d): d is { id: string; date: Date } => d !== null)
 				.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-			// Create the improved header that matches macroscalc style
 			const dashboardHeader = dashboardContainer.createDiv({
 				cls: 'macroscalc-dashboard-header macro-dashboard-header',
 			});
 
-			// Create header content with proper spacing
 			const headerContent = dashboardHeader.createDiv({
 				cls: 'macroscalc-header-content',
 			});
 
-			const dynamicHeaderText =
-				allDates.length === ids.length
-					? ids.length === 1
-						? ((): string => {
-								const onlyDate = allDates[0].date;
-								const today = new Date();
-								const isToday =
-									onlyDate.getFullYear() === today.getFullYear() &&
-									onlyDate.getMonth() === today.getMonth() &&
-									onlyDate.getDate() === today.getDate();
+			// Dynamic header text with better logic
+			const dynamicHeaderText = this.generateHeaderText(allDates, ids);
 
-								return isToday
-									? "Today's Macros"
-									: `Macros for ${onlyDate.toLocaleDateString(undefined, {
-											weekday: 'long',
-											year: 'numeric',
-											month: 'short',
-											day: 'numeric',
-										})}`;
-							})()
-						: (() => {
-								const newest = allDates[0].date;
-								const oldest = allDates[allDates.length - 1].date;
-								const diffInMs = newest.getTime() - oldest.getTime();
-								const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1;
-								// Updated format to match macroscalc
-								return `Combined Macros (last ${days} days)`;
-							})()
-					: ids.length === 1
-						? `Macros for ${ids[0]}`
-						: `Combined Macros: ${ids.join(', ')}`;
-
-			// Add title with proper class
 			headerContent.createSpan({
 				cls: 'macroscalc-header-title',
 				text: dynamicHeaderText,
 			});
 
-			// Create toggle button that matches macroscalc style
 			const toggleButton = headerContent.createSpan({
 				cls: 'macroscalc-toggle-button toggle-icon',
 			});
 
-			// Get collapsed state using MacrosState directly
+			// Load collapse state
 			const isCollapsed = MacrosState.getChartCollapsedState(combinedId, this.plugin);
 			this.plugin.logger.debug(`Retrieved collapse state for ${combinedId}: ${isCollapsed}`);
 
@@ -171,72 +152,66 @@ export class ChartManager {
 				dashboardHeader.classList.add('collapsed');
 			}
 
-			// Create the flex container for chart and summary
+			// Create flex container
 			const flexContainer = dashboardContainer.createDiv({ cls: 'macro-dashboard-flex-container' });
 
-			// Apply initial collapsed state if needed
 			if (isCollapsed) {
 				flexContainer.classList.add('collapsed');
 			}
 
+			// Chart container with explicit sizing
 			const chartContainer = flexContainer.createDiv({ cls: 'macro-pie-chart-container' });
-			const canvas = chartContainer.createEl('canvas');
+			const canvas = chartContainer.createEl('canvas', {
+				attr: {
+					'data-width': width.toString(),
+					'data-height': height.toString()
+				}
+			});
 			canvas.width = width;
 			canvas.height = height;
 
+			// Summary container
 			const summaryContainer = flexContainer.createDiv({
 				cls: 'macro-pie-chart-summary-container',
 			});
+
+			// Get canvas context with error handling
 			const ctx = canvas.getContext('2d');
 			if (!ctx) {
 				el.createEl('div', { text: 'Error: Unable to get canvas context.' });
 				return;
 			}
 
-			let totalProtein = 0,
-				totalFat = 0,
-				totalCarbs = 0,
-				totalCalories = 0;
-
-			// Process each macro ID - wait for all calculations to complete
-			// NEW: Process each ID individually with a more robust approach
+			// Calculate totals with better error handling
+			let totalProtein = 0, totalFat = 0, totalCarbs = 0, totalCalories = 0;
 			const allResults: {
 				id: string;
 				result: { protein: number; fat: number; carbs: number; calories: number };
 			}[] = [];
 
-			for (const macroId of ids) {
+			// Process each successful data load
+			for (const loadResult of successfulLoads) {
 				try {
-					// Always process from COMPLETE data, including bullet points
-					// UPDATED: Use centralized DataManager method
-					const fullMacrosData = await this.plugin.dataManager.getFullMacrosData(macroId);
+					const result = await this.plugin.calculateMacrosFromLinesAsync(loadResult.data);
+					allResults.push({
+						id: loadResult.id,
+						result: {
+							protein: parseFloat(result.protein.toFixed(1)),
+							fat: parseFloat(result.fat.toFixed(1)),
+							carbs: parseFloat(result.carbs.toFixed(1)),
+							calories: parseFloat(result.calories.toFixed(1)),
+						},
+					});
 
-					if (fullMacrosData && fullMacrosData.length > 0) {
-						const result = await this.plugin.calculateMacrosFromLinesAsync(fullMacrosData);
-						// Add with specific rounding to avoid floating point issues
-						allResults.push({
-							id: macroId,
-							result: {
-								protein: parseFloat(result.protein.toFixed(1)),
-								fat: parseFloat(result.fat.toFixed(1)),
-								carbs: parseFloat(result.carbs.toFixed(1)),
-								calories: parseFloat(result.calories.toFixed(1)),
-							},
-						});
-
-						this.plugin.logger.debug(
-							`Calculated for ${macroId}: protein=${result.protein.toFixed(1)}g, fat=${result.fat.toFixed(1)}g, carbs=${result.carbs.toFixed(1)}g, calories=${result.calories.toFixed(1)}`
-						);
-					} else {
-						this.plugin.logger.warn(`No data found for ID ${macroId}`);
-					}
+					this.plugin.logger.debug(
+						`Calculated for ${loadResult.id}: protein=${result.protein.toFixed(1)}g, fat=${result.fat.toFixed(1)}g, carbs=${result.carbs.toFixed(1)}g, calories=${result.calories.toFixed(1)}`
+					);
 				} catch (error) {
-					this.plugin.logger.error(`Error calculating macros for ID ${macroId}:`, error);
+					this.plugin.logger.error(`Error calculating macros for ID ${loadResult.id}:`, error);
 				}
 			}
 
-			// Sum up all the results
-			// NEW: Use explicit rounded addition to avoid floating point issues
+			// Aggregate totals
 			for (const item of allResults) {
 				totalProtein += item.result.protein;
 				totalFat += item.result.fat;
@@ -244,7 +219,6 @@ export class ChartManager {
 				totalCalories += item.result.calories;
 			}
 
-			// Round final values for display consistency
 			totalProtein = parseFloat(totalProtein.toFixed(1));
 			totalFat = parseFloat(totalFat.toFixed(1));
 			totalCarbs = parseFloat(totalCarbs.toFixed(1));
@@ -261,7 +235,7 @@ export class ChartManager {
 				return;
 			}
 
-			// Render calorie total in summary
+			// Create summary
 			const calorieDiv = summaryContainer.createDiv({ cls: 'macro-summary-item' });
 			calorieDiv.createSpan({ cls: 'macro-summary-label', text: 'Calories:' });
 			calorieDiv.createSpan({ cls: 'macro-summary-value', text: `${totalCalories}` });
@@ -288,12 +262,23 @@ export class ChartManager {
 				this.plugin.settings.carbsColor
 			);
 
-			// Create a unique ID for this chart
+			// Create chart with retry logic
 			const chartId = `macro-pie-${combinedId}`;
 			canvas.id = chartId;
 
-			// Draw chart using our common chart creation method
-			this.createPieChart(
+			// Add a small delay to ensure DOM is ready
+			await new Promise(resolve => setTimeout(resolve, 50));
+
+			// Verify Chart.js is still available
+			if (!window.Chart) {
+				this.plugin.logger.error('Chart.js not available when creating pie chart');
+				el.createEl('div', { text: 'Chart library not available' });
+				return;
+			}
+
+			// Create the pie chart with error handling
+			try {
+			const chart = this.createPieChart(
 				ctx,
 				chartId,
 				[totalProtein, totalFat, totalCarbs],
@@ -306,25 +291,30 @@ export class ChartManager {
 				totalMacros
 			);
 
-			// Set up click handler for the header - FIXED HERE
+			if (!chart) {
+				throw new Error('Chart creation failed');
+			}
+
+				this.plugin.logger.debug(`Successfully created pie chart with ID: ${chartId}`);
+			} catch (chartError) {
+				this.plugin.logger.error('Error creating pie chart:', chartError);
+				el.createEl('div', { text: 'Error creating chart visualization' });
+				return;
+			}
+
+			// Setup header click handler
 			const headerClickHandler = (e: Event) => {
-				// Cast to MouseEvent to access preventDefault and stopPropagation
 				const mouseEvent = e as MouseEvent;
 				mouseEvent.preventDefault();
 				mouseEvent.stopPropagation();
 
-				// Toggle the collapsed state based on current visual state
 				const currentCollapsedState = toggleButton.classList.contains('collapsed');
 				const newCollapsedState = !currentCollapsedState;
 
-				// Update toggle button visual state
 				toggleButton.classList.toggle('collapsed', newCollapsedState);
 				dashboardHeader.classList.toggle('collapsed', newCollapsedState);
-
-				// Update the flex container visibility
 				flexContainer.classList.toggle('collapsed', newCollapsedState);
 
-				// Save the new state
 				MacrosState.saveChartCollapsedState(combinedId, this.plugin, newCollapsedState);
 
 				this.plugin.logger.debug(
@@ -332,13 +322,10 @@ export class ChartManager {
 				);
 			};
 
-			// Use the EventManager for proper cleanup
-			dashboardHeader.addEventListener('click', headerClickHandler);
+			// Use plugin's registerDomListener for proper cleanup
+			this.plugin.registerDomListener(dashboardHeader, 'click', headerClickHandler);
 
-			// Also use EventManager for proper cleanup
-			this.eventManager.registerDomEvent(dashboardHeader, 'click', headerClickHandler);
-
-			// Store the container in the macrospcContainers map for future updates
+			// Register containers for refresh
 			for (const currentId of ids) {
 				if (!this.plugin.dataManager.macrospcContainers.has(currentId)) {
 					this.plugin.dataManager.macrospcContainers.set(currentId, new Set());
@@ -349,7 +336,6 @@ export class ChartManager {
 				}
 			}
 
-			// Also store with combined ID for multi-ID charts
 			if (!this.plugin.dataManager.macrospcContainers.has(combinedId)) {
 				this.plugin.dataManager.macrospcContainers.set(combinedId, new Set());
 			}
@@ -357,9 +343,9 @@ export class ChartManager {
 			if (containerSet) {
 				containerSet.add(el);
 			}
+
 		} catch (err) {
 			this.plugin.logger.error('drawMacrospc error', err);
-			// Display a user-friendly error
 			el.empty();
 			el.createEl('div', {
 				text: 'Unable to render macro chart. Please reload the page.',
@@ -368,9 +354,39 @@ export class ChartManager {
 		}
 	}
 
-	/**
-	 * Creates a summary item for a macro nutrient with visual representation
-	 */
+	// Helper method to generate header text
+	private generateHeaderText(allDates: {id: string, date: Date}[], ids: string[]): string {
+		if (allDates.length === ids.length) {
+			if (ids.length === 1) {
+				const onlyDate = allDates[0].date;
+				const today = new Date();
+				const isToday =
+					onlyDate.getFullYear() === today.getFullYear() &&
+					onlyDate.getMonth() === today.getMonth() &&
+					onlyDate.getDate() === today.getDate();
+
+				return isToday
+					? "Today's Macros"
+					: `Macros for ${onlyDate.toLocaleDateString(undefined, {
+							weekday: 'long',
+							year: 'numeric',
+							month: 'short',
+							day: 'numeric',
+						})}`;
+			} else {
+				const newest = allDates[0].date;
+				const oldest = allDates[allDates.length - 1].date;
+				const diffInMs = newest.getTime() - oldest.getTime();
+				const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1;
+				return `Combined Macros (last ${days} days)`;
+			}
+		} else {
+			return ids.length === 1
+				? `Macros for ${ids[0]}`
+				: `Combined Macros: ${ids.join(', ')}`;
+		}
+	}
+
 	private createMetricCard(
 		container: HTMLElement,
 		label: string,
@@ -380,7 +396,6 @@ export class ChartManager {
 	) {
 		const itemDiv = container.createDiv({ cls: 'macro-summary-item' });
 
-		// Colored dot - use CSS variable instead of inline style
 		const indicator = itemDiv.createSpan({ cls: 'macro-color-indicator' });
 		DOMUtils.setCSSProperty(indicator, '--indicator-color', color);
 
@@ -388,16 +403,12 @@ export class ChartManager {
 
 		const progressContainer = itemDiv.createDiv({ cls: 'macro-pie-progress-container' });
 
-		// Create a progress bar with CSS variables for color and width
 		const progressBar = progressContainer.createDiv({ cls: 'macro-pie-progress-bar' });
 		DOMUtils.setCSSProperty(progressBar, '--progress-color', color);
 
-		// Calculate percentage and use class-based width
 		const percentage = Math.round((value / total) * 100);
-		// Find the closest pie-progress-width class
 		const roundedPercentage = Math.round(percentage / 5) * 5;
 		progressBar.classList.add(`pie-progress-width-${roundedPercentage}`);
-		// Also add exact width using CSS variable
 		DOMUtils.setCSSProperty(progressBar, '--progress-width', `${percentage}%`);
 
 		progressContainer.createDiv({
@@ -406,38 +417,56 @@ export class ChartManager {
 		});
 	}
 
-	/**
-	 * Creates and renders a pie chart with the given data
-	 * This is the central chart creation method that will be used by all components
-	 * @param ctx Canvas context to draw on
-	 * @param chartId Unique ID for the chart
-	 * @param data Array of data values
-	 * @param labels Array of labels corresponding to data
-	 * @param colors Array of colors for each data slice
-	 * @param totalValue Optional total value for percentage calculations
-	 * @returns The created chart instance
-	 */
-	public createPieChart(
-		ctx: CanvasRenderingContext2D,
-		chartId: string,
-		data: number[],
-		labels: string[],
-		colors: string[],
-		totalValue?: number
-	): Chart {
-		// Get ChartConstructor
+public createPieChart(
+	ctx: CanvasRenderingContext2D,
+	chartId: string,
+	data: number[],
+	labels: string[],
+	colors: string[],
+	totalValue?: number
+): Chart | null {
+	try {
+		// Validate inputs
+		if (!ctx) {
+			this.plugin.logger.error('No canvas context provided to createPieChart');
+			return null;
+		}
+
+		if (!data || data.length === 0) {
+			this.plugin.logger.error('No data provided to createPieChart');
+			return null;
+		}
+
+		if (!labels || labels.length !== data.length) {
+			this.plugin.logger.error('Labels array length does not match data array length');
+			return null;
+		}
+
+		if (!colors || colors.length !== data.length) {
+			this.plugin.logger.error('Colors array length does not match data array length');
+			return null;
+		}
+
+		// Check if Chart.js is available
 		const ChartConstructor = (window as ExtendedWindow).Chart;
 		if (!ChartConstructor) {
-			throw new Error('Chart.js not loaded properly');
+			this.plugin.logger.error('Chart.js not available in createPieChart');
+			return null;
 		}
+
+		this.plugin.logger.debug(`Creating pie chart with ID: ${chartId}`);
 
 		// Destroy any existing chart with this ID
 		this.chartLoader.destroyChart(chartId);
 
-		// Calculate the total if not provided
 		const total = totalValue || data.reduce((sum, val) => sum + val, 0);
 
-		// Define chart configuration with proper types
+		if (total <= 0) {
+			this.plugin.logger.error('Total value is zero or negative, cannot create pie chart');
+			return null;
+		}
+
+		// Create chart configuration with better error handling
 		const config: ChartConfiguration = {
 			type: 'pie',
 			data: {
@@ -486,29 +515,42 @@ export class ChartManager {
 			},
 		};
 
-		// Create the new chart
-		const chart = new ChartConstructor(ctx, config);
+		this.plugin.logger.debug('Chart configuration created, attempting to instantiate chart');
 
-		// Register the chart with the ChartLoader for proper management
+		// Create the chart with try-catch
+		let chart;
+		try {
+			chart = new ChartConstructor(ctx, config);
+		} catch (chartCreationError) {
+			this.plugin.logger.error('Error during Chart.js instantiation:', chartCreationError);
+			return null;
+		}
+
+		if (!chart) {
+			this.plugin.logger.error('Chart creation returned null/undefined');
+			return null;
+		}
+
+		this.plugin.logger.debug('Chart instance created successfully');
+
+		// Register the chart for management
 		this.chartLoader.registerChart(chartId, chart);
 
-		// For backward compatibility, also store in window.macroCharts
+		// Maintain backward compatibility with global charts object
 		if (!(window as ExtendedWindow).macroCharts) {
 			(window as ExtendedWindow).macroCharts = {};
 		}
 		(window as ExtendedWindow).macroCharts[chartId] = chart;
 
+		this.plugin.logger.debug(`Pie chart created and registered with ID: ${chartId}`);
 		return chart;
-	}
 
-	/**
-	 * Creates a line chart for data comparison
-	 * @param ctx Canvas context to draw on
-	 * @param chartId Unique ID for the chart
-	 * @param labels X-axis labels (usually dates)
-	 * @param datasets Array of dataset objects
-	 * @returns The created chart instance
-	 */
+	} catch (error) {
+		this.plugin.logger.error('Unexpected error in createPieChart:', error);
+		return null;
+	}
+}
+
 	public createLineChart(
 		ctx: CanvasRenderingContext2D,
 		chartId: string,
@@ -520,16 +562,13 @@ export class ChartManager {
 			backgroundColor: string;
 		}[]
 	): Chart {
-		// Get ChartConstructor
 		const ChartConstructor = (window as ExtendedWindow).Chart;
 		if (!ChartConstructor) {
 			throw new Error('Chart.js not loaded properly');
 		}
 
-		// Destroy any existing chart with this ID
 		this.chartLoader.destroyChart(chartId);
 
-		// Define chart configuration with proper types
 		const config: ChartConfiguration = {
 			type: 'line',
 			data: {
@@ -578,13 +617,10 @@ export class ChartManager {
 			},
 		};
 
-		// Create the new chart
 		const chart = new ChartConstructor(ctx, config);
 
-		// Register the chart with the ChartLoader for proper management
 		this.chartLoader.registerChart(chartId, chart);
 
-		// For backward compatibility, also store in window.macroCharts
 		if (!(window as ExtendedWindow).macroCharts) {
 			(window as ExtendedWindow).macroCharts = {};
 		}
@@ -593,18 +629,12 @@ export class ChartManager {
 		return chart;
 	}
 
-	/**
-	 * Iterates over all macrospc container elements and redraws their charts.
-	 */
 	async redrawAllMacrospc() {
 		try {
-			// First, invalidate and reload ALL macro tables from vault
 			const idsToRefresh = new Set([...this.plugin.dataManager.macroTables.keys()]);
 
-			// Also get IDs from containers that might not be in the macroTables yet
 			for (const [id, _] of this.plugin.dataManager.macrospcContainers.entries()) {
 				if (typeof id === 'string') {
-					// Handle comma-separated IDs (for combined charts)
 					if (id.includes(',')) {
 						id.split(',')
 							.map((i) => i.trim())
@@ -617,13 +647,10 @@ export class ChartManager {
 				}
 			}
 
-			// Reload fresh data for all IDs
-			// UPDATED: Use centralized DataManager methods
 			for (const id of idsToRefresh) {
 				try {
 					const loaded = await this.plugin.dataManager.getFullMacrosData(id);
 					if (loaded && loaded.length > 0) {
-						// Update the cache with fresh data
 						this.plugin.dataManager.macroTables.set(id, loaded);
 					}
 				} catch (error) {
@@ -631,17 +658,20 @@ export class ChartManager {
 				}
 			}
 
-			// Now redraw all containers with fresh data
 			for (const [id, containerSet] of this.plugin.dataManager.macrospcContainers.entries()) {
 				const aliveElements = new Set<HTMLElement>();
 				for (const el of containerSet) {
 					if (el.isConnected) {
-						// Ensure the element is still in the DOM
-						await this.drawMacrospc(id, el);
+						// Get dimensions from data attributes if available
+						const widthAttr = el.getAttribute('data-width');
+						const heightAttr = el.getAttribute('data-height');
+						const width = widthAttr ? parseInt(widthAttr) : 300;
+						const height = heightAttr ? parseInt(heightAttr) : 300;
+
+						await this.drawMacrospc(id, el, width, height);
 						aliveElements.add(el);
 					}
 				}
-				// Update the container set to only include connected elements
 				this.plugin.dataManager.macrospcContainers.set(id, aliveElements);
 			}
 		} catch (error) {
@@ -649,17 +679,11 @@ export class ChartManager {
 		}
 	}
 
-	/**
-	 * Redraw all macroscalc tables
-	 */
 	async redrawAllMacrocalc(): Promise<void> {
 		try {
 			this.plugin.logger.debug('Redrawing all macroscalc tables');
 
-			// First, invalidate ALL macros tables
-			// UPDATED: Use centralized DataManager methods
 			for (const id of this.plugin.dataManager.macroTables.keys()) {
-				// Force reload from vault
 				const freshData = await this.plugin.dataManager.getFullMacrosData(id);
 				if (freshData && freshData.length > 0) {
 					this.plugin.dataManager.macroTables.set(id, freshData);
@@ -669,7 +693,6 @@ export class ChartManager {
 				}
 			}
 
-			// Now update all renderers
 			if (
 				this.plugin.dataManager._activeMacrosCalcRenderers &&
 				this.plugin.dataManager._activeMacrosCalcRenderers.size > 0
@@ -678,18 +701,14 @@ export class ChartManager {
 					`Updating ${this.plugin.dataManager._activeMacrosCalcRenderers.size} macroscalc renderers`
 				);
 
-				// Process each renderer
 				for (const renderer of this.plugin.dataManager._activeMacrosCalcRenderers) {
 					try {
-						// Mark for refresh
 						renderer.setNeedsRefresh();
 
-						// Get IDs and recalculate
 						const ids = renderer.getIds();
 						this.plugin.logger.debug(`Recalculating for IDs: ${ids.join(',')}`);
 						const { aggregate, breakdown } = this.plugin.processNutritionalDataFromLines(ids);
 
-						// Render with fresh data
 						await renderer.render(aggregate, breakdown);
 						this.plugin.logger.debug(`Renderer updated successfully`);
 					} catch (error) {
@@ -705,17 +724,12 @@ export class ChartManager {
 	}
 
 	/**
-	 * Clean up all resources before plugin unload
+	 * Cleanup handled by plugin's onunload - no explicit cleanup needed
 	 */
 	cleanup(): void {
 		try {
-			// Clean up event listeners
-			this.eventManager.cleanup();
-
-			// Clean up all chart instances
 			this.chartLoader.destroyAllCharts();
 
-			// Clean up any legacy charts stored in window.macroCharts
 			const windowExt = window as ExtendedWindow;
 			if (windowExt.macroCharts) {
 				Object.values(windowExt.macroCharts).forEach((chart: Chart) => {

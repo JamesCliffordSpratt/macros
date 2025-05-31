@@ -1,11 +1,7 @@
 import MacrosPlugin from '../../main';
-import { EventManager } from '../../utils/EventManager';
 
 export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
 	plugin.registerMarkdownCodeBlockProcessor('macrospc', async (source: string, el: HTMLElement) => {
-		// Create EventManager for this processor instance
-		const eventManager = new EventManager(plugin);
-
 		const lines = source
 			.split('\n')
 			.map((l) => l.trim())
@@ -70,7 +66,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
 
 					if (fullData && fullData.length > 0) {
 						// Store in the macroTables cache
-						plugin.macroService.macroTables.set(id, fullData);
+						plugin.dataManager.macroTables.set(id, fullData);
 						plugin.logger.debug(`Successfully loaded ${fullData.length} lines for ID: ${id}`);
 						return true;
 					} else {
@@ -102,10 +98,10 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
 			// Store in multiple formats for better refresh handling
 			// 1. Store with each individual ID
 			for (const id of ids) {
-				if (!plugin.macroService.macrospcContainers.has(id)) {
-					plugin.macroService.macrospcContainers.set(id, new Set());
+				if (!plugin.dataManager.macrospcContainers.has(id)) {
+					plugin.dataManager.macrospcContainers.set(id, new Set());
 				}
-				const containerSet = plugin.macroService.macrospcContainers.get(id);
+				const containerSet = plugin.dataManager.macrospcContainers.get(id);
 				if (containerSet) {
 					containerSet.add(el);
 					plugin.logger.debug(`Registered container with ID: ${id}`);
@@ -113,10 +109,10 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
 			}
 
 			// 2. Store with combined ID string (comma-separated)
-			if (!plugin.macroService.macrospcContainers.has(combinedId)) {
-				plugin.macroService.macrospcContainers.set(combinedId, new Set());
+			if (!plugin.dataManager.macrospcContainers.has(combinedId)) {
+				plugin.dataManager.macrospcContainers.set(combinedId, new Set());
 			}
-			const containerSet = plugin.macroService.macrospcContainers.get(combinedId);
+			const containerSet = plugin.dataManager.macrospcContainers.get(combinedId);
 			if (containerSet) {
 				containerSet.add(el);
 				plugin.logger.debug(`Registered container with combined ID: ${combinedId}`);
@@ -125,20 +121,6 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
 			// Draw with the actual array of IDs - this will create the chart
 			await plugin.drawMacrospc(ids, el, width, height);
 			plugin.logger.debug(`Drew chart for IDs: ${ids.join(', ')}`);
-
-			// Let the event listeners on the chart handle the collapsing/expanding
-			// The ChartManager.drawMacrospc method should attach the click handlers
-
-			// Register cleanup when element is removed from DOM
-			plugin.registerEvent(
-				plugin.app.workspace.on('layout-change', () => {
-					// If element is removed from DOM, clean up event listeners
-					if (!el.isConnected) {
-						eventManager.cleanup();
-						plugin.logger.debug('Cleaned up event listeners for removed macrospc block');
-					}
-				})
-			);
 		} catch (error) {
 			// Clear loading and show error
 			el.empty();

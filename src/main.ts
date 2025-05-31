@@ -117,6 +117,7 @@ export default class MacrosPlugin extends Plugin {
 			totals: { calories: number; protein: number; fat: number; carbs: number };
 		}[];
 	} {
+		// CRITICAL FIX: Use the MacroService method which has the merging logic
 		return this.macroService.processNutritionalDataFromLines(ids);
 	}
 
@@ -158,13 +159,5 @@ export default class MacrosPlugin extends Plugin {
 
 	async redrawAllMacrocalc() {
 		return this.refreshManager.refreshAllMacroscalc();
-	}
-
-	getDefaultApiKey(): string {
-		return this.apiService.getDefaultApiKey();
-	}
-
-	getDefaultApiSecret(): string {
-		return this.apiService.getDefaultApiSecret();
 	}
 }

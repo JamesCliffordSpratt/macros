@@ -1,32 +1,31 @@
-import { App, Modal, Notice, TFile, normalizePath } from 'obsidian';
+import { App, Modal, Notice, TFile, normalizePath, Component } from 'obsidian';
 import { parseGrams, processNutritionalData, findMatchingFoodFile } from '../../utils';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
-import { EventManager } from '../../utils/EventManager';
 
 export class AddToMacrosModal extends Modal {
 	plugin: MacrosPlugin;
 	tableId: string;
 	onDone: () => Promise<void>;
 	selectedItems: string[] = [];
-	private eventManager: EventManager;
+	private component: Component;
 
 	constructor(app: App, plugin: MacrosPlugin, tableId: string, onDone: () => Promise<void>) {
 		super(app);
 		this.plugin = plugin;
 		this.tableId = tableId;
 		this.onDone = onDone;
-		this.eventManager = new EventManager(plugin);
+		this.component = new Component();
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl('h2', { text: 'Add to Macros', cls: 'mod-header' });
+		contentEl.createEl('h2', { text: 'Add to macros', cls: 'mod-header' });
 
 		const mealRow = contentEl.createDiv({ cls: 'add-to-macros-row' });
-		mealRow.createEl('label', { text: 'Select Meal:' });
+		mealRow.createEl('label', { text: 'Select meal:' });
 		const mealControl = mealRow.createDiv({ cls: 'setting-item-control' });
 		const mealSelect = mealRow.createEl('select');
 		mealControl.appendChild(mealSelect);
@@ -35,12 +34,12 @@ export class AddToMacrosModal extends Modal {
 			mealSelect.createEl('option', { text: meal.name, value: `interactive:meal:${meal.name}` });
 		});
 
-		const addMealBtn = mealRow.createEl('button', { text: 'Add Meal' });
+		const addMealBtn = mealRow.createEl('button', { text: 'Add meal' });
 		addMealBtn.addClass('mod-button');
 		const mealBtnControl = mealRow.createDiv({ cls: 'setting-item-control' });
 		mealBtnControl.appendChild(addMealBtn);
 
-		this.eventManager.registerDomEvent(addMealBtn, 'click', () => {
+		this.component.registerDomEvent(addMealBtn, 'click', () => {
 			const mealValue = mealSelect.value;
 			if (mealValue) {
 				this.selectedItems.push(mealValue);
@@ -50,7 +49,7 @@ export class AddToMacrosModal extends Modal {
 		});
 
 		const foodRow = contentEl.createDiv({ cls: 'add-to-macros-row' });
-		foodRow.createEl('label', { text: 'Select Food:' });
+		foodRow.createEl('label', { text: 'Select food:' });
 		const foodControl = foodRow.createDiv({ cls: 'setting-item-control' });
 		const foodSelect = foodRow.createEl('select');
 		foodControl.appendChild(foodSelect);
@@ -65,12 +64,12 @@ export class AddToMacrosModal extends Modal {
 			foodSelect.createEl('option', { text: food, value: 'interactive:' + food });
 		});
 
-		const addFoodBtn = foodRow.createEl('button', { text: 'Add Food' });
+		const addFoodBtn = foodRow.createEl('button', { text: 'Add food' });
 		addFoodBtn.addClass('mod-button');
 		const foodBtnControl = foodRow.createDiv({ cls: 'setting-item-control' });
 		foodBtnControl.appendChild(addFoodBtn);
 
-		this.eventManager.registerDomEvent(addFoodBtn, 'click', async () => {
+		this.component.registerDomEvent(addFoodBtn, 'click', async () => {
 			const foodValue = foodSelect.value;
 			if (foodValue) {
 				const foodName = foodValue.substring('interactive:'.length);
@@ -124,7 +123,7 @@ export class AddToMacrosModal extends Modal {
 					},
 				});
 
-				this.eventManager.registerDomEvent(removeBtn, 'click', () => {
+				this.component.registerDomEvent(removeBtn, 'click', () => {
 					this.selectedItems.splice(index, 1);
 					refreshSummary();
 				});
@@ -132,11 +131,11 @@ export class AddToMacrosModal extends Modal {
 		};
 
 		const confirmBtn = contentEl.createEl('button', {
-			text: 'Confirm Changes',
+			text: 'Confirm changes',
 			cls: 'confirm-changes-button',
 		});
 
-		this.eventManager.registerDomEvent(confirmBtn, 'click', async () => {
+		this.component.registerDomEvent(confirmBtn, 'click', async () => {
 			if (this.selectedItems.length === 0) {
 				new Notice('No items selected to add.');
 				return;
@@ -185,7 +184,7 @@ export class AddToMacrosModal extends Modal {
 	}
 
 	onClose() {
-		this.eventManager.cleanup();
+		this.component.unload();
 		this.contentEl.empty();
 	}
 }

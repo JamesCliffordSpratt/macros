@@ -1,27 +1,26 @@
-import { Modal, Notice, normalizePath } from 'obsidian';
+import { Modal, Notice, normalizePath, Component } from 'obsidian';
 import { parseGrams, processNutritionalData, findMatchingFoodFile } from '../../utils';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
-import { EventManager } from '../../utils/EventManager';
 
 export class EditMealTemplateModal extends Modal {
 	plugin: MacrosPlugin;
 	meal: MealTemplate;
 	files: string[] = [];
 	itemListEl: HTMLElement | null = null;
-	private eventManager: EventManager;
+	private component: Component;
 
 	constructor(plugin: MacrosPlugin, meal: MealTemplate) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.meal = meal;
-		this.eventManager = new EventManager(plugin);
+		this.component = new Component();
 	}
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: `Edit Meal Template: "${this.meal.name}"` });
+		contentEl.createEl('h2', { text: `Edit meal template: "${this.meal.name}"` });
 
 		const row = contentEl.createDiv({ cls: 'edit-meal-row' });
 
@@ -32,17 +31,17 @@ export class EditMealTemplateModal extends Modal {
 		this.files = fileList.map((f) => f.name.replace(/\.md$/, ''));
 
 		const dropdown = row.createEl('select');
-		dropdown.createEl('option', { text: '-- Select Food --', value: '' });
+		dropdown.createEl('option', { text: '-- Select food --', value: '' });
 		this.files.forEach((fname) => {
 			const option = dropdown.createEl('option');
 			option.value = fname;
 			option.text = fname;
 		});
 
-		const addBtn = row.createEl('button', { text: '+ Add Item' });
+		const addBtn = row.createEl('button', { text: '+ Add item' });
 		addBtn.classList.add('mod-button');
 
-		this.eventManager.registerDomEvent(addBtn, 'click', async () => {
+		this.component.registerDomEvent(addBtn, 'click', async () => {
 			const selected = dropdown.value;
 			if (selected && !this.meal.items.some((item) => item.startsWith(selected))) {
 				const matchingFile = findMatchingFoodFile(fileList, selected);
@@ -87,7 +86,7 @@ export class EditMealTemplateModal extends Modal {
 		const finishBtn = contentEl.createEl('button', { text: 'Finish' });
 		finishBtn.classList.add('finish-meal-edit-button');
 
-		this.eventManager.registerDomEvent(finishBtn, 'click', () => {
+		this.component.registerDomEvent(finishBtn, 'click', () => {
 			this.close();
 			this.plugin.nutritionalSettingTab.display();
 		});
@@ -105,7 +104,7 @@ export class EditMealTemplateModal extends Modal {
 			const removeBtn = li.createEl('button', { text: '×' });
 			removeBtn.classList.add('mod-button', 'mod-warning', 'remove-meal-button');
 
-			this.eventManager.registerDomEvent(removeBtn, 'click', async () => {
+			this.component.registerDomEvent(removeBtn, 'click', async () => {
 				this.meal.items.splice(index, 1);
 				await this.plugin.saveSettings();
 				this.refreshItemList();
@@ -115,7 +114,7 @@ export class EditMealTemplateModal extends Modal {
 	}
 
 	onClose() {
-		this.eventManager.cleanup();
+		this.component.unload();
 		this.contentEl.empty();
 	}
 }

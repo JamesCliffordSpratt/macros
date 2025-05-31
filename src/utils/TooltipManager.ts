@@ -1,5 +1,5 @@
 import { DOMUtils } from './DOMUtils';
-import MacrosPlugin from '../../main';
+import MacrosPlugin from '@/main';
 
 // Global tooltip element and tracking variables
 let tooltipEl: HTMLDivElement | null = null;

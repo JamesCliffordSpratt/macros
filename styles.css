@@ -1258,6 +1258,52 @@
    margin: 1rem 0;
 }
 
+.api-credentials-warning {
+	color: var(--text-error);
+	font-weight: var(--font-weight-medium);
+	background-color: var(--background-modifier-error-hover);
+	border: 1px solid var(--background-modifier-error);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-2);
+	margin: var(--size-4-2) 0;
+}
+
+.api-credentials-success {
+	color: var(--text-success);
+	font-weight: var(--font-weight-medium);
+	background-color: var(--background-modifier-success-hover);
+	border: 1px solid var(--background-modifier-success);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-2);
+	margin: var(--size-4-2) 0;
+}
+
+/* Fallback for themes that don't have success/error colors */
+body:not(.theme-obsidian) .api-credentials-warning {
+	color: #e74c3c;
+	background-color: rgba(231, 76, 60, 0.1);
+	border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+body:not(.theme-obsidian) .api-credentials-success {
+	color: #27ae60;
+	background-color: rgba(39, 174, 96, 0.1);
+	border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+/* Dark theme support */
+.theme-dark .api-credentials-warning {
+	color: #ff6b6b;
+	background-color: rgba(255, 107, 107, 0.15);
+	border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.theme-dark .api-credentials-success {
+	color: #51cf66;
+	background-color: rgba(81, 207, 102, 0.15);
+	border: 1px solid rgba(81, 207, 102, 0.3);
+}
+
 /* ==============================
 * 11. MACRO DASHBOARD
 * ============================== */
@@ -1628,10 +1674,23 @@
 }
 
 .macroscalc-chart-error {
- padding: 1rem;
- color: var(--text-error);
- background-color: var(--background-modifier-error);
- border-radius: 4px;
+    padding: 1rem;
+    background: var(--background-modifier-error);
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+.error-message {
+    color: var(--text-error);
+    font-weight: 500;
+    margin: 0;
+}
+
+.macroscalc-chart-info {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 2rem;
 }
 
 .macroscalc-metric-card.protein-card {

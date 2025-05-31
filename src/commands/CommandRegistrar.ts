@@ -19,20 +19,29 @@ export function registerCommands(plugin: MacrosPlugin): void {
 		},
 	});
 
-	// Command: Search for food (always available)
+	// Command: Search for food (check for API credentials)
 	plugin.addCommand({
 		id: 'search-food-live',
 		name: 'Search for food (live search)',
 		callback: () => {
-			const apiKey = plugin.apiService.getActiveApiKey();
-			const apiSecret = plugin.apiService.getActiveApiSecret();
+			try {
+				// Check if API credentials are configured
+				const credentials = plugin.apiService.getCredentialsSafe();
+				if (!credentials) {
+					new Notice('API credentials not configured. Please add your FatSecret API credentials in the plugin settings to use food search.');
+					return;
+				}
 
-			new LiveFoodSearchModal(
-				plugin.app,
-				apiKey,
-				apiSecret,
-				plugin.dataManager.createFoodItemCallback()
-			).open();
+				new LiveFoodSearchModal(
+					plugin.app,
+					credentials.key,
+					credentials.secret,
+					plugin.dataManager.createFoodItemCallback()
+				).open();
+			} catch (error) {
+				plugin.logger.error('Error opening food search:', error);
+				new Notice('Unable to open food search. Please check your API credentials in settings.');
+			}
 		},
 	});
 

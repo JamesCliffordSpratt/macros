@@ -1,3 +1,4 @@
+
 /**
  * Default settings schema for the Macros plugin
  */
@@ -9,8 +10,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	fatColor: '#f44336',
 	carbsColor: '#2196f3',
 	mealTemplates: [],
-	fatSecretApiKey: '',
-	fatSecretApiSecret: '',
+	fatSecretApiKey: '', // Users must configure their own API credentials
+	fatSecretApiSecret: '', // Users must configure their own API credentials
 	dailyCaloriesTarget: 2000,
 	dailyProteinTarget: 150,
 	dailyFatTarget: 65,

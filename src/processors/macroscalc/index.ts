@@ -70,15 +70,19 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
 				if (linesWithBullets.length > 0) {
 					plugin.logger.debug(`Loaded ${linesWithBullets.length} lines for ${id} with bullets`);
 
-					// Update the cache with these lines
+					// CRITICAL FIX: Store the raw lines and let the calculator handle processing
+					// This prevents double-processing of multipliers
 					plugin.macroService.macroTables.set(id, linesWithBullets);
+					
+					plugin.logger.debug(`Stored raw data for ${id} with ${linesWithBullets.length} lines`);
 				} else {
-					plugin.logger.warn(`Could not load data for ID ${id}`);
+					plugin.logger.warn(`Could not load data for ID: ${id}`);
 				}
 			}
 
-			// Now calculate with our newly updated cache that includes bullet points
-			const { aggregate, breakdown } = processNutritionalDataFromLines(plugin, ids);
+			// Use the calculator's processNutritionalDataFromLines (which processes raw data correctly)
+			plugin.logger.debug('Using calculator.ts processNutritionalDataFromLines for macroscalc');
+			const { aggregate, breakdown } = await processNutritionalDataFromLines(plugin, ids);
 
 			// Use the enhanced renderer
 			const renderer = new MacrosCalcRenderer(plugin, el, ids);
@@ -124,7 +128,7 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
 			plugin.logger.debug(`Found ${macroscalcElements.length} macroscalc elements to refresh`);
 
 			// Process each element
-			for (const el of macroscalcElements) {
+			for (const el of Array.from(macroscalcElements)) {
 				try {
 					// Get the IDs this element is using
 					const idsAttr = el.getAttribute('data-macroscalc-ids');
@@ -152,8 +156,9 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
 						}
 					}
 
-					// Calculate fresh data
-					const { aggregate, breakdown } = processNutritionalDataFromLines(plugin, ids);
+					// Use the calculator's function (which now uses pre-processed data correctly)
+					plugin.logger.debug('Using calculator.ts processNutritionalDataFromLines for refresh');
+					const { aggregate, breakdown } = await processNutritionalDataFromLines(plugin, ids);
 
 					// Clear the element and create a new renderer
 					(el as HTMLElement).empty();

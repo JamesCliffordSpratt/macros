@@ -5,7 +5,6 @@ import { MacrosDashboard } from '../dashboard';
 import { GroupRenderer } from './GroupRenderer';
 import { processLinesIntoGroups } from '../utils/group-utils';
 import { Notice, debounce, TFile } from 'obsidian';
-import { EventManager } from '../../../utils/EventManager';
 
 /**
  * Helper function to ensure consistent calorie calculation in groups
@@ -42,7 +41,6 @@ export class MacrosTableRenderer {
 	private updateInProgress = false;
 	private cachedLines: string[] | null = null;
 	private cachedProcessedGroups: Array<Record<string, unknown>> | null = null;
-	private eventManager: EventManager;
 
 	// Debounced redraw function to prevent multiple consecutive redraws
 	private debouncedRedraw = debounce(
@@ -61,7 +59,6 @@ export class MacrosTableRenderer {
 		this.el = el;
 		this.id = id;
 		this.state = null;
-		this.eventManager = new EventManager(this.plugin);
 
 		if (id) {
 			// Create state with plugin ID for better isolation
@@ -73,7 +70,7 @@ export class MacrosTableRenderer {
 
 		this.groupRenderer = new GroupRenderer(this.plugin, this.state);
 
-		// Register event handlers to detect external file changes
+		// Register event handlers to detect external file changes using Obsidian's API
 		this.plugin.registerEvent(this.plugin.app.vault.on('modify', this.handleFileModify.bind(this)));
 	}
 
@@ -623,19 +620,5 @@ export class MacrosTableRenderer {
 	public invalidateCache(): void {
 		this.cachedLines = null;
 		this.cachedProcessedGroups = null;
-	}
-
-	/**
-	 * Clean up resources when no longer needed
-	 */
-	public cleanup(): void {
-		// Clean up event listeners
-		this.eventManager.cleanup();
-
-		// Clean up child components
-		if (this.tableHeader) {
-			this.tableHeader.cleanup();
-		}
-		this.groupRenderer.cleanup();
 	}
 }

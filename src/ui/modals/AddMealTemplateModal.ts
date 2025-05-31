@@ -1,31 +1,23 @@
-import { Modal, Notice } from 'obsidian';
+import { Modal, Notice, Component } from 'obsidian';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { AddFoodToMealModal } from './AddFoodToMealModal';
-import { EventManager } from '../../utils/EventManager';
 
-/**
- * AddMealTemplateModal
- * --------------------
- * Provides a modal interface for creating a new meal template.
- *
- * @param plugin - The instance of MacrosPlugin.
- */
 export class AddMealTemplateModal extends Modal {
 	plugin: MacrosPlugin;
-	private eventManager: EventManager;
+	private component: Component;
 
 	constructor(plugin: MacrosPlugin) {
 		super(plugin.app);
 		this.plugin = plugin;
-		this.eventManager = new EventManager(plugin);
+		this.component = new Component();
 	}
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'New Meal Template', cls: 'mod-header' });
+		contentEl.createEl('h2', { text: 'New meal template', cls: 'mod-header' });
 		const nameInput = contentEl.createEl('input', { type: 'text' });
-		nameInput.placeholder = 'Meal Name (e.g., Meal1)';
+		nameInput.placeholder = 'Meal name (e.g., Meal1)';
 
 		const createMeal = async () => {
 			const mealName = nameInput.value.trim();
@@ -54,22 +46,20 @@ export class AddMealTemplateModal extends Modal {
 			this.plugin.nutritionalSettingTab.display();
 		};
 
-		// Use EventManager for event handling
-		this.eventManager.registerDomEvent(nameInput, 'keydown', (event: KeyboardEvent) => {
+		this.component.registerDomEvent(nameInput, 'keydown', (event: KeyboardEvent) => {
 			if (event.key === 'Enter') {
 				event.preventDefault();
 				createMeal();
 			}
 		});
 
-		const createBtn = contentEl.createEl('button', { text: 'Create Meal Template' });
+		const createBtn = contentEl.createEl('button', { text: 'Create meal template' });
 		createBtn.addClass('mod-button', 'mod-cta');
-
-		this.eventManager.registerDomEvent(createBtn, 'click', createMeal);
+		this.component.registerDomEvent(createBtn, 'click', createMeal);
 	}
 
 	onClose() {
-		this.eventManager.cleanup();
+		this.component.unload();
 		this.contentEl.empty();
 	}
 }

@@ -1,26 +1,14 @@
-import { App, Modal } from 'obsidian';
+import { App, Modal, Component } from 'obsidian';
 import { extractServingSize } from '../../utils/nutritionUtils';
 import { fetchFoodData, FoodItem } from '../../core/api';
-import { EventManager } from '../../utils/EventManager';
 import MacrosPlugin from '../../main';
 
-/**
- * FoodResultsModal
- * ----------------
- * Displays a list of food items fetched from the FatSecret API based on the user's search term.
- *
- * @param app - The Obsidian application instance.
- * @param searchTerm - The search term provided by the user.
- * @param apiKey - The FatSecret API key.
- * @param apiSecret - The FatSecret API secret.
- * @param onSelect - A callback function that handles the selection of a food item.
- */
 export class FoodResultsModal extends Modal {
 	currentPage = 0;
 	maxResults = 25;
 	results: FoodItem[] = [];
 	selectedIndex = -1;
-	private eventManager: EventManager;
+	private component: Component;
 	private plugin: MacrosPlugin;
 
 	constructor(
@@ -33,7 +21,7 @@ export class FoodResultsModal extends Modal {
 	) {
 		super(app);
 		this.plugin = plugin;
-		this.eventManager = new EventManager(plugin);
+		this.component = new Component();
 	}
 
 	async loadPage(page: number) {
@@ -52,16 +40,13 @@ export class FoodResultsModal extends Modal {
 	onOpen() {
 		this.loadPage(0);
 
-		// Add document-level event handling through EventManager
-		document.addEventListener('keydown', this.handleKeyNav);
+		// Add document-level event handling - register with component for cleanup
+		this.component.registerDomEvent(document, 'keydown', this.handleKeyNav);
 	}
 
 	onClose() {
-		// Remove document-level event listener
-		document.removeEventListener('keydown', this.handleKeyNav);
-
-		// Clean up other event listeners
-		this.eventManager.cleanup();
+		// Component cleanup will handle the document event listener
+		this.component.unload();
 		this.contentEl.empty();
 	}
 
@@ -126,7 +111,7 @@ export class FoodResultsModal extends Modal {
 						foodDiv.addClass('highlighted-result');
 					}
 
-					this.eventManager.registerDomEvent(foodDiv, 'click', () => {
+					this.component.registerDomEvent(foodDiv, 'click', () => {
 						this.onSelect(food);
 						this.close();
 					});
@@ -139,9 +124,7 @@ export class FoodResultsModal extends Modal {
 			const prevBtn = navDiv.createEl('button', { text: '< Prev' });
 			prevBtn.addClass('mod-button');
 
-			this.eventManager.registerDomEvent(prevBtn, 'click', () =>
-				this.loadPage(this.currentPage - 1)
-			);
+			this.component.registerDomEvent(prevBtn, 'click', () => this.loadPage(this.currentPage - 1));
 		}
 
 		navDiv.createEl('span', { text: ` Page ${this.currentPage + 1} ` });
@@ -150,9 +133,7 @@ export class FoodResultsModal extends Modal {
 			const nextBtn = navDiv.createEl('button', { text: 'Next >' });
 			nextBtn.addClass('mod-button');
 
-			this.eventManager.registerDomEvent(nextBtn, 'click', () =>
-				this.loadPage(this.currentPage + 1)
-			);
+			this.component.registerDomEvent(nextBtn, 'click', () => this.loadPage(this.currentPage + 1));
 		}
 	}
 }

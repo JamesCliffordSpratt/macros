@@ -1,7 +1,6 @@
 import MacrosPlugin from '../main';
 import { TooltipManager } from '../utils';
 import { Notice } from 'obsidian';
-import { EventManager } from '../utils/EventManager';
 
 /**
  * UIManager
@@ -12,11 +11,9 @@ import { EventManager } from '../utils/EventManager';
 export class UIManager {
 	private plugin: MacrosPlugin;
 	private static instance: UIManager;
-	private eventManager: EventManager;
 
 	private constructor(plugin: MacrosPlugin) {
 		this.plugin = plugin;
-		this.eventManager = new EventManager(plugin);
 	}
 
 	/**
@@ -29,7 +26,7 @@ export class UIManager {
 			// Initialize the tooltip system
 			TooltipManager.initGlobalTooltipSystem(plugin);
 
-			// Register global event listeners for tooltips
+			// Register global event listeners for tooltips using Obsidian's API
 			plugin.registerEvent(
 				plugin.app.workspace.on('active-leaf-change', () => TooltipManager.hide())
 			);
@@ -49,13 +46,9 @@ export class UIManager {
 	}
 
 	/**
-	 * Clean up event listeners and resources
+	 * Cleanup handled by plugin's onunload - no explicit cleanup needed
 	 */
 	cleanup(): void {
-		// Clean up any event listeners registered through EventManager
-		this.eventManager.cleanup();
-
-		// Additional cleanup if needed
 		TooltipManager.cleanup();
 	}
 
