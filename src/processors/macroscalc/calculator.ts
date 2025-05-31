@@ -3,79 +3,81 @@ import MacrosPlugin from '@/main';
 import { NutritionData, MacroTotals } from '../../utils';
 
 export interface CalcBreakdown {
-	id: string;
-	totals: MacroTotals;
+  id: string;
+  totals: MacroTotals;
 }
 
 interface CalcResult {
-	aggregate: MacroTotals;
-	breakdown: CalcBreakdown[];
+  aggregate: MacroTotals;
+  breakdown: CalcBreakdown[];
 }
 
-export async function processNutritionalDataFromLines(plugin: MacrosPlugin, ids: string[]): Promise<CalcResult> {
-	const aggregate: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
-	const breakdown: CalcBreakdown[] = [];
+export async function processNutritionalDataFromLines(
+  plugin: MacrosPlugin,
+  ids: string[]
+): Promise<CalcResult> {
+  const aggregate: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  const breakdown: CalcBreakdown[] = [];
 
-	// Add debug logging
-	plugin.logger.debug(`Processing nutrition data for ${ids.length} IDs: ${ids.join(', ')}`);
+  // Add debug logging
+  plugin.logger.debug(`Processing nutrition data for ${ids.length} IDs: ${ids.join(', ')}`);
 
-	// Helper function for processing food items
-	function processFoodItem(foodQuery: string, specifiedQuantity: number | null): NutritionData {
-		// Use centralized method from DataManager
-		const matchingFile = plugin.dataManager.findFoodFile(foodQuery);
+  // Helper function for processing food items
+  function processFoodItem(foodQuery: string, specifiedQuantity: number | null): NutritionData {
+    // Use centralized method from DataManager
+    const matchingFile = plugin.dataManager.findFoodFile(foodQuery);
 
-		if (!matchingFile) {
-			plugin.logger.debug(`No matching food file found for: ${foodQuery}`);
-			return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-		}
+    if (!matchingFile) {
+      plugin.logger.debug(`No matching food file found for: ${foodQuery}`);
+      return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+    }
 
-		const nutrition = processNutritionalData(plugin.app, matchingFile, specifiedQuantity);
-		return nutrition || { calories: 0, protein: 0, fat: 0, carbs: 0 };
-	}
+    const nutrition = processNutritionalData(plugin.app, matchingFile, specifiedQuantity);
+    return nutrition || { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  }
 
-	for (const id of ids) {
-		const total: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  for (const id of ids) {
+    const total: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
-		// Get the raw data from the cache
-		const tableLines = plugin.macroService.macroTables.get(id);
-		if (!tableLines) {
-			plugin.logger.debug(`No table lines found for ID: ${id}`);
-			continue;
-		}
+    // Get the raw data from the cache
+    const tableLines = plugin.macroService.macroTables.get(id);
+    if (!tableLines) {
+      plugin.logger.debug(`No table lines found for ID: ${id}`);
+      continue;
+    }
 
-		plugin.logger.debug(`Processing ${tableLines.length} raw lines for ID: ${id}`);
+    plugin.logger.debug(`Processing ${tableLines.length} raw lines for ID: ${id}`);
 
-		// CRITICAL FIX: Use MacroService's calculateMacrosFromLinesAsync to get consistent processing
-		// This ensures the same merging and processing logic as used in the main macros processor
-		try {
-			const result = await plugin.macroService.calculateMacrosFromLinesAsync(tableLines);
-			
-			total.calories = result.calories;
-			total.protein = result.protein;
-			total.fat = result.fat;
-			total.carbs = result.carbs;
+    // CRITICAL FIX: Use MacroService's calculateMacrosFromLinesAsync to get consistent processing
+    // This ensures the same merging and processing logic as used in the main macros processor
+    try {
+      const result = await plugin.macroService.calculateMacrosFromLinesAsync(tableLines);
 
-			plugin.logger.debug(
-				`MacroService calculated totals for ${id}: calories=${total.calories.toFixed(1)}, protein=${total.protein.toFixed(1)}g, fat=${total.fat.toFixed(1)}g, carbs=${total.carbs.toFixed(1)}g`
-			);
+      total.calories = result.calories;
+      total.protein = result.protein;
+      total.fat = result.fat;
+      total.carbs = result.carbs;
 
-		} catch (error) {
-			plugin.logger.error(`Error calculating macros for ID ${id}:`, error);
-			continue;
-		}
+      plugin.logger.debug(
+        `MacroService calculated totals for ${id}: calories=${total.calories.toFixed(1)}, protein=${total.protein.toFixed(1)}g, fat=${total.fat.toFixed(1)}g, carbs=${total.carbs.toFixed(1)}g`
+      );
+    } catch (error) {
+      plugin.logger.error(`Error calculating macros for ID ${id}:`, error);
+      continue;
+    }
 
-		// Add the totals for this ID
-		breakdown.push({ id, totals: total });
-		aggregate.calories += total.calories;
-		aggregate.protein += total.protein;
-		aggregate.fat += total.fat;
-		aggregate.carbs += total.carbs;
-	}
+    // Add the totals for this ID
+    breakdown.push({ id, totals: total });
+    aggregate.calories += total.calories;
+    aggregate.protein += total.protein;
+    aggregate.fat += total.fat;
+    aggregate.carbs += total.carbs;
+  }
 
-	// Log the final aggregate
-	plugin.logger.debug(
-		`Calculated aggregate totals: calories=${aggregate.calories.toFixed(1)}, protein=${aggregate.protein.toFixed(1)}g, fat=${aggregate.fat.toFixed(1)}g, carbs=${aggregate.carbs.toFixed(1)}g`
-	);
+  // Log the final aggregate
+  plugin.logger.debug(
+    `Calculated aggregate totals: calories=${aggregate.calories.toFixed(1)}, protein=${aggregate.protein.toFixed(1)}g, fat=${aggregate.fat.toFixed(1)}g, carbs=${aggregate.carbs.toFixed(1)}g`
+  );
 
-	return { aggregate, breakdown };
+  return { aggregate, breakdown };
 }

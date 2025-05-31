@@ -10,23 +10,23 @@ import { ManagerRegistry } from './ManagerRegistry';
  * This centralizes bootstrap logic outside of the main plugin class.
  */
 export async function initializePlugin(plugin: MacrosPlugin): Promise<void> {
-	// First load settings
-	await plugin.loadSettings();
+  // First load settings
+  await plugin.loadSettings();
 
-	// Initialize all managers through registry
-	ManagerRegistry.initAll(plugin);
+  // Initialize all managers through registry
+  ManagerRegistry.initAll(plugin);
 
-	// Make sure the logger respects the developer mode setting
-	plugin.logger.setDebugMode(plugin.settings.developerModeEnabled);
+  // Make sure the logger respects the developer mode setting
+  plugin.logger.setDebugMode(plugin.settings.developerModeEnabled);
 
-	// Setup components in dependency order
-	setupSettings(plugin);
-	setupRibbon(plugin);
-	registerCommands(plugin);
-	registerProcessors(plugin);
+  // Setup components in dependency order
+  setupSettings(plugin);
+  setupRibbon(plugin);
+  registerCommands(plugin);
+  registerProcessors(plugin);
 
-	// Log successful initialization
-	plugin.logger.debug('Plugin initialized successfully');
+  // Log successful initialization
+  plugin.logger.debug('Plugin initialized successfully');
 }
 
 /**
@@ -34,8 +34,8 @@ export async function initializePlugin(plugin: MacrosPlugin): Promise<void> {
  * This centralizes cleanup logic outside of the main plugin class.
  */
 export function shutdownPlugin(plugin: MacrosPlugin): void {
-	// Clean up all managers through registry
-	ManagerRegistry.unloadAll(plugin);
+  // Clean up all managers through registry
+  ManagerRegistry.unloadAll(plugin);
 
-	plugin.logger.debug('Plugin shutdown complete');
+  plugin.logger.debug('Plugin shutdown complete');
 }

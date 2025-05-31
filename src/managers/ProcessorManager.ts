@@ -10,10 +10,10 @@ import { registerMacrosCalcProcessor } from '../processors/macroscalc';
  * for the Macros plugin. This helps keep the main plugin class clean.
  */
 export function registerProcessors(plugin: MacrosPlugin): void {
-	// Register all processors
-	registerMacrosProcessor(plugin);
-	registerMacrosPCProcessor(plugin);
-	registerMacrosCalcProcessor(plugin);
+  // Register all processors
+  registerMacrosProcessor(plugin);
+  registerMacrosPCProcessor(plugin);
+  registerMacrosCalcProcessor(plugin);
 
-	plugin.logger.debug('All processors registered');
+  plugin.logger.debug('All processors registered');
 }

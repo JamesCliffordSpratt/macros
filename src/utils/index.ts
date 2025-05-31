@@ -1,21 +1,21 @@
 import { findMatchingFoodFile } from './file';
 import {
-	parseGrams,
-	extractServingSize,
-	extractNutritionalData,
-	escapeRegExp,
-	normalizeName,
+  parseGrams,
+  extractServingSize,
+  extractNutritionalData,
+  escapeRegExp,
+  normalizeName,
 } from './parsing';
 import {
-	calculatePieChartAngles,
-	createPieChartLegend,
-	renderMacronutrientPieChart,
-	cleanupMacroCharts,
+  calculatePieChartAngles,
+  createPieChartLegend,
+  renderMacronutrientPieChart,
+  cleanupMacroCharts,
 } from './charts';
 import {
-	processNutritionalData as processNutritionData,
-	mergeMacroLines as mergeMacroLinesNutrition,
-	calculateConsistentCalories,
+  processNutritionalData as processNutritionData,
+  mergeMacroLines as mergeMacroLinesNutrition,
+  calculateConsistentCalories,
 } from './nutrition';
 
 // Import classes for re-export
@@ -29,10 +29,10 @@ export * from './formatters';
 export * from './MacrosState';
 export * from './progress-bars';
 export {
-	TooltipManager,
-	attachTooltip,
-	attachLazyTooltip,
-	safeAttachTooltip,
+  TooltipManager,
+  attachTooltip,
+  attachLazyTooltip,
+  safeAttachTooltip,
 } from './TooltipManager';
 
 // Export from DOMUtils
@@ -51,17 +51,17 @@ export { parseGrams, extractServingSize, extractNutritionalData, escapeRegExp, n
 
 // From charts
 export {
-	calculatePieChartAngles,
-	createPieChartLegend,
-	renderMacronutrientPieChart,
-	cleanupMacroCharts,
+  calculatePieChartAngles,
+  createPieChartLegend,
+  renderMacronutrientPieChart,
+  cleanupMacroCharts,
 };
 
 // From nutrition - rename to avoid conflicts
 export {
-	processNutritionData as processNutritionalData,
-	mergeMacroLinesNutrition as mergeMacroLines,
-	calculateConsistentCalories,
+  processNutritionData as processNutritionalData,
+  mergeMacroLinesNutrition as mergeMacroLines,
+  calculateConsistentCalories,
 };
 
 // Re-export types to maintain backward compatibility

@@ -10,8 +10,8 @@
  * @returns The extracted number or NaN if parsing fails
  */
 export function parseGrams(value: string): number {
-	const match = value.match(/(\d+(\.\d+)?)/);
-	return match ? parseFloat(match[0]) : NaN;
+  const match = value.match(/(\d+(\.\d+)?)/);
+  return match ? parseFloat(match[0]) : NaN;
 }
 
 /**
@@ -20,5 +20,5 @@ export function parseGrams(value: string): number {
  * @returns A normalized version of the name
  */
 export function normalizeName(name: string): string {
-	return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }

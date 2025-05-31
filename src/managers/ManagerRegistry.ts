@@ -13,49 +13,49 @@ import { APIService } from '../core/APIService';
  * This reduces code in the main plugin class and ensures consistent lifecycle management.
  */
 export class ManagerRegistry {
-	/**
-	 * Initialize all managers
-	 */
-	static initAll(plugin: MacrosPlugin): void {
-		// Initialize in dependency order
-		plugin.logger = Logger.init(plugin);
-		plugin.uiManager = UIManager.init(plugin);
-		plugin.macroService = MacroService.init(plugin);
-		plugin.apiService = APIService.init(plugin); // Add the APIService
-		plugin.dataManager = new DataManager(plugin);
-		plugin.chartManager = new ChartManager(plugin);
-		plugin.refreshManager = new RefreshManager(plugin);
+  /**
+   * Initialize all managers
+   */
+  static initAll(plugin: MacrosPlugin): void {
+    // Initialize in dependency order
+    plugin.logger = Logger.init(plugin);
+    plugin.uiManager = UIManager.init(plugin);
+    plugin.macroService = MacroService.init(plugin);
+    plugin.apiService = APIService.init(plugin); // Add the APIService
+    plugin.dataManager = new DataManager(plugin);
+    plugin.chartManager = new ChartManager(plugin);
+    plugin.refreshManager = new RefreshManager(plugin);
 
-		// Register file system event handlers
-		plugin.registerEvent(
-			plugin.app.vault.on('modify', () => plugin.dataManager.invalidateFileCache())
-		);
-		plugin.registerEvent(
-			plugin.app.vault.on('create', () => plugin.dataManager.invalidateFileCache())
-		);
-		plugin.registerEvent(
-			plugin.app.vault.on('delete', () => plugin.dataManager.invalidateFileCache())
-		);
-		plugin.registerEvent(
-			plugin.app.vault.on('rename', () => plugin.dataManager.invalidateFileCache())
-		);
+    // Register file system event handlers
+    plugin.registerEvent(
+      plugin.app.vault.on('modify', () => plugin.dataManager.invalidateFileCache())
+    );
+    plugin.registerEvent(
+      plugin.app.vault.on('create', () => plugin.dataManager.invalidateFileCache())
+    );
+    plugin.registerEvent(
+      plugin.app.vault.on('delete', () => plugin.dataManager.invalidateFileCache())
+    );
+    plugin.registerEvent(
+      plugin.app.vault.on('rename', () => plugin.dataManager.invalidateFileCache())
+    );
 
-		plugin.logger.debug('All managers initialized');
-	}
+    plugin.logger.debug('All managers initialized');
+  }
 
-	/**
-	 * Clean up all managers
-	 */
-	static unloadAll(plugin: MacrosPlugin): void {
-		// Clean up in reverse dependency order
-		plugin.refreshManager?.refreshMarkdownViews();
-		plugin.chartManager?.cleanup?.();
-		plugin.dataManager?.cleanup?.();
-		MacroService.unload();
-		APIService.unload(); // Add APIService cleanup
-		UIManager.unload();
-		Logger.unload();
+  /**
+   * Clean up all managers
+   */
+  static unloadAll(plugin: MacrosPlugin): void {
+    // Clean up in reverse dependency order
+    plugin.refreshManager?.refreshMarkdownViews();
+    plugin.chartManager?.cleanup?.();
+    plugin.dataManager?.cleanup?.();
+    MacroService.unload();
+    APIService.unload(); // Add APIService cleanup
+    UIManager.unload();
+    Logger.unload();
 
-		plugin.logger?.debug?.('All managers unloaded');
-	}
+    plugin.logger?.debug?.('All managers unloaded');
+  }
 }
