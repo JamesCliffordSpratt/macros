@@ -1808,27 +1808,446 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 /* ==============================
-* 16. RESPONSIVE DESIGN
-* ============================== */
+ * FOOD ENTRY SELECTION MODAL
+ * ============================== */
 
+.food-entry-selection-modal {
+  max-width: 600px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.food-entry-selection-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.food-entry-selection-modal .modal-title {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.food-entry-selection-modal .modal-description {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.food-entry-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.food-entry-option {
+  flex: 1;
+  min-width: 250px;
+  max-width: 280px;
+  padding: 2rem 1.5rem;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 12px;
+  background-color: var(--background-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  margin: 0 auto;
+}
+
+.food-entry-option:hover:not(.option-disabled) {
+  border-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.food-entry-option.option-hover:not(.option-disabled) {
+  border-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+
+.food-entry-option.option-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: var(--background-modifier-border-hover);
+}
+
+.food-entry-option .option-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.food-entry-option .option-content {
+  width: 100%;
+  text-align: center;
+}
+
+.food-entry-option .option-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-normal);
+  text-align: center;
+}
+
+.food-entry-option .option-content p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.food-entry-option .option-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--background-modifier-border);
+  width: 100%;
+  text-align: center;
+}
+
+.status-indicator {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.status-indicator.status-success {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--text-success, #4caf50);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-indicator.status-warning {
+  background-color: rgba(255, 152, 0, 0.15);
+  color: var(--text-warning, #ff9800);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.api-error-message {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--background-modifier-error-hover, rgba(255, 107, 107, 0.15));
+  border: 1px solid var(--background-modifier-error, rgba(255, 107, 107, 0.3));
+  border-radius: 6px;
+  color: var(--text-error, #ff6b6b);
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ==============================
+ * MANUAL FOOD ENTRY MODAL
+ * ============================== */
+
+.manual-food-entry-modal {
+  max-width: 600px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.manual-food-entry-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.manual-food-entry-modal .modal-title {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.manual-food-entry-modal .modal-description {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.manual-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--text-normal);
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: var(--text-error, #e74c3c);
+  font-weight: bold;
+}
+
+.form-input {
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 1rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+  transform: translateY(-1px);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+  text-align: center;
+}
+
+.nutrition-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.validation-info {
+  margin: 1rem 0;
+  text-align: center;
+  width: 100%;
+}
+
+.required-note {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+.validation-errors {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  background-color: var(--background-modifier-error-hover, rgba(255, 107, 107, 0.15));
+  border: 2px solid var(--background-modifier-error, rgba(255, 107, 107, 0.3));
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.error-message {
+  margin: 0.5rem 0;
+  color: var(--text-error, #ff6b6b);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.error-message:first-child {
+  margin-top: 0;
+}
+
+.error-message:last-child {
+  margin-bottom: 0;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--background-modifier-border);
+  width: 100%;
+}
+
+.button-container .mod-button {
+  padding: 0.875rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 8px;
+  min-width: 120px;
+  transition: all 0.2s ease;
+  border: 2px solid var(--background-modifier-border);
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.button-container .mod-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-color: var(--background-modifier-hover);
+}
+
+.button-container .mod-cta {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  border-color: var(--interactive-accent) !important;
+  opacity: 1 !important;
+}
+
+.button-container .mod-cta:hover {
+  background-color: var(--interactive-accent-hover) !important;
+  border-color: var(--interactive-accent-hover) !important;
+  box-shadow: 0 2px 12px rgba(var(--interactive-accent-rgb), 0.3) !important;
+}
+
+/* Enhanced input styling for better visual hierarchy */
+.form-group:first-child .form-input {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.nutrition-fields .form-input {
+  font-weight: 500;
+}
+
+/* Responsive design for smaller screens */
 @media (max-width: 600px) {
-   .live-food-search-modal {
-   	max-width: 95%;
-   }
+  .manual-food-entry-modal {
+    width: 95%;
+    max-width: none;
+  }
 
-   .results-container {
-   	max-height: 350px;
-   }
+  .manual-entry-form {
+    max-width: none;
+    gap: 1.25rem;
+  }
 
-   .macro-dashboard-content {
-   	flex-direction: column;
-   }
+  .nutrition-fields {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 
-   .macro-metric-card {
-   	width: 100%;
-   }
-   
-   .macrospc-container .macro-pie-chart-summary-container {
-   	min-height: auto;
-   }
+  .button-container {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .button-container .mod-button {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .form-input {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Dark theme support */
+.theme-dark .form-input {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-dark .form-input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+.theme-dark .validation-errors {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+.theme-dark .error-message {
+  color: #ff8a80;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 600px) {
+  .food-entry-options {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .food-entry-option {
+    min-width: auto;
+    max-width: none;
+  }
+
+  .nutrition-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .button-container {
+    flex-direction: column-reverse;
+  }
+
+  .button-container .mod-button {
+    width: 100%;
+  }
+}
+
+/* Dark theme support */
+.theme-dark .status-indicator.status-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .status-indicator.status-warning {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .api-error-message {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #ff8a80;
+}
+
+.theme-dark .validation-errors {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+.theme-dark .error-message {
+  color: #ff8a80;
 }

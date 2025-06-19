@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import MacrosPlugin from '../main';
-import { LiveFoodSearchModal } from '../ui';
+import { FoodEntrySelectionModal } from '../ui';
 
 /**
  * CommandManager
@@ -19,30 +19,20 @@ export function registerCommands(plugin: MacrosPlugin): void {
     },
   });
 
-  // Command: Search for food (check for API credentials)
+  // Command: Add food item (search or manual entry)
   plugin.addCommand({
-    id: 'search-food-live',
-    name: 'Search for food (live search)',
+    id: 'add-food-item',
+    name: 'Add food item (search or manual entry)',
     callback: () => {
       try {
-        // Check if API credentials are configured
-        const credentials = plugin.apiService.getCredentialsSafe();
-        if (!credentials) {
-          new Notice(
-            'API credentials not configured. Please add your FatSecret API credentials in the plugin settings to use food search.'
-          );
-          return;
-        }
-
-        new LiveFoodSearchModal(
+        new FoodEntrySelectionModal(
           plugin.app,
-          credentials.key,
-          credentials.secret,
+          plugin,
           plugin.dataManager.createFoodItemCallback()
         ).open();
       } catch (error) {
-        plugin.logger.error('Error opening food search:', error);
-        new Notice('Unable to open food search. Please check your API credentials in settings.');
+        plugin.logger.error('Error opening food entry selection:', error);
+        new Notice('Unable to open food entry selection. Please try again.');
       }
     },
   });

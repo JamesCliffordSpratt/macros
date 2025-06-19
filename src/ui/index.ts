@@ -12,4 +12,6 @@ export { AddMealTemplateModal } from './modals/AddMealTemplateModal';
 export { EditMealTemplateModal } from './modals/EditMealTemplateModal';
 export { CustomServingSizeModal } from './modals/CustomServingSizeModal';
 export { AddFoodToMealModal } from './modals/AddFoodToMealModal';
+export { FoodEntrySelectionModal } from './modals/FoodEntrySelectionModal';
+export { ManualFoodEntryModal } from './modals/ManualFoodEntryModal';
 export { LiveFoodSearchModal } from './live-search/LiveSearchModal';

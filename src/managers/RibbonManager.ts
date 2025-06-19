@@ -1,5 +1,5 @@
 import MacrosPlugin from '../main';
-import { LiveFoodSearchModal } from '../ui';
+import { FoodEntrySelectionModal } from '../ui';
 import { Notice } from 'obsidian';
 
 /**
@@ -8,27 +8,19 @@ import { Notice } from 'obsidian';
  * Handles the setup of ribbon icons and their functionality.
  */
 export function setupRibbon(plugin: MacrosPlugin): void {
-  // Add ribbon icon for quick food search
-  plugin.addRibbonIcon('apple', 'Search for food (live search)', () => {
+  // Add ribbon icon for food entry (live search or manual entry)
+  plugin.addRibbonIcon('apple', 'Add food item (search or manual entry)', () => {
     try {
-      // Check if API credentials are configured
-      const credentials = plugin.apiService.getCredentialsSafe();
-      if (!credentials) {
-        new Notice(
-          'API credentials not configured. Please add your FatSecret API credentials in the plugin settings to use food search.'
-        );
-        return;
-      }
-
-      new LiveFoodSearchModal(
+      // Open the selection modal that gives users the choice between live search and manual entry
+      new FoodEntrySelectionModal(
         plugin.app,
-        credentials.key,
-        credentials.secret,
+        plugin,
         plugin.dataManager.createFoodItemCallback()
       ).open();
+      
     } catch (error) {
-      plugin.logger.error('Error opening food search:', error);
-      new Notice('Unable to open food search. Please check your API credentials in settings.');
+      plugin.logger.error('Error opening food entry selection:', error);
+      new Notice('Unable to open food entry selection. Please try again.');
     }
   });
 
