@@ -18,7 +18,7 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ## Features
 
-- 🥑 **Food Search** using FatSecret API
+- 🥑 **Food Search** using FatSecret API or manually add your own
 - 📝 **Markdown food entries** with calories, protein, fat, and carbs
 - 📊 **Macros blocks** for organizing food and meals
 - 🥗 **Meal templates** for quick reusable meal groups
@@ -30,7 +30,12 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ## Installation
 
-### Manual (from GitHub)
+## Install directly from Community Plugins via Obsidian
+1. Enable community plugins
+2. Search Macros
+3. Install and enable Macros
+
+### Manual (from GitHub):
 
 1. Clone or download this repository.
 2. Copy the following files into your Obsidian plugin directory:
@@ -38,10 +43,6 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
    - `manifest.json`
    - `styles.css`
 3. Enable the plugin in Obsidian settings under **Community Plugins**.
-
-### From Obsidian Marketplace (coming soon)
-
-Once submitted and approved, this plugin will be available in the Community Plugins marketplace.
 
 ---
 
@@ -55,10 +56,16 @@ Watch the full walkthrough on YouTube:
 
 ## Usage
 
-### 📦 Searching for Food
-Use the command palette or ribbon icon to open **Search for Food**.
+### 📦 Searching for Food:
+
+#### Through the live search feature:
+Use the command palette or ribbon icon (apple icon) to open **Search for Food**.
+Select live search.
 Type a food name (e.g., "banana") and select a result.
 The plugin saves a `.md` file in your configured folder with nutritional info.
+#### Or manually add your own:
+Select manual food entry.
+Enter the nutritional information of that food item.
 
 ### 📋 Creating Macros Blocks
 Add a code block like this to your notes:
@@ -66,10 +73,6 @@ Add a code block like this to your notes:
 ````markdown
 ```macros
 id: today
-meal:Dinner
-- Chicken Breast:30g
-- Cooked Rice:150g
-- Broccoli:100g
 ```
 ````
 
