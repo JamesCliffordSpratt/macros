@@ -460,8 +460,44 @@ serving_size: ${servingSize}
             // Merge duplicate meal entries and food items
             const mergedLines = mergeMacroLines(allLines);
 
-            // Now expand the meal templates after the merging is complete
+            // FIXED: Now expand the meal templates while preserving existing bullet point quantities
             let expandedContent = '';
+
+            // First pass: collect existing bullet point quantities for each meal
+            const existingBulletPoints = new Map<string, Map<string, string>>();
+
+            // Parse existing content to find bullet points under meals
+            const existingLines = blockContent
+              .split('\n')
+              .map((l) => l.trim())
+              .filter((l) => l !== '');
+            let currentMeal = '';
+
+            for (const line of existingLines) {
+              if (line.toLowerCase().startsWith('meal:')) {
+                const fullMealText = line.substring(5).trim();
+                let mealName = fullMealText;
+                const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
+                if (countMatch) {
+                  mealName = countMatch[1];
+                }
+                currentMeal = mealName.toLowerCase();
+
+                if (!existingBulletPoints.has(currentMeal)) {
+                  existingBulletPoints.set(currentMeal, new Map());
+                }
+              } else if (line.startsWith('-') && currentMeal) {
+                const itemText = line.substring(1).trim();
+                if (itemText.includes(':')) {
+                  const parts = itemText.split(':');
+                  const foodName = parts[0].trim().toLowerCase();
+                  const quantity = parts[1].trim();
+                  existingBulletPoints.get(currentMeal)?.set(foodName, quantity);
+                }
+              }
+            }
+
+            // Second pass: expand meals with preserved quantities
             mergedLines.forEach((line: string) => {
               if (line.toLowerCase().startsWith('meal:')) {
                 // Extract meal name and potential multiplier
@@ -483,20 +519,33 @@ serving_size: ${servingSize}
                 if (meal && meal.items.length > 0) {
                   expandedContent += line + '\n';
 
-                  // Add meal items with calculated quantities
+                  // Get existing bullet points for this meal
+                  const existingBullets =
+                    existingBulletPoints.get(mealName.toLowerCase()) || new Map();
+
+                  // Add meal items with preserved or calculated quantities
                   meal.items.forEach((item) => {
                     const parts = item.split(':');
-                    if (parts.length > 1 && parts[1].includes('g')) {
-                      // Extract the serving size and multiply by count
+                    const foodName = parts[0].trim();
+                    const foodNameLower = foodName.toLowerCase();
+
+                    // Check if we have an existing custom quantity for this food item
+                    if (existingBullets.has(foodNameLower)) {
+                      // Use the existing custom quantity
+                      const existingQuantity = existingBullets.get(foodNameLower);
+                      expandedContent += `- ${foodName}:${existingQuantity}\n`;
+                    } else if (parts.length > 1 && parts[1].includes('g')) {
+                      // Use template quantity with count multiplier
                       const servingMatch = parts[1].match(/^([\d.]+)g/);
                       if (servingMatch) {
                         const serving = parseFloat(servingMatch[1]);
                         const multipliedServing = serving * count;
-                        expandedContent += `- ${parts[0]}:${multipliedServing}g\n`;
+                        expandedContent += `- ${foodName}:${multipliedServing}g\n`;
                       } else {
                         expandedContent += `- ${item}\n`;
                       }
                     } else {
+                      // No quantity specified in template
                       expandedContent += `- ${item}\n`;
                     }
                   });
