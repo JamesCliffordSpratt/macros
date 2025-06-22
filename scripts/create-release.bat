@@ -32,5 +32,5 @@ echo === Step 5: Creating GitHub release (published)...
 gh release create %VERSION% main.js manifest.json styles.css --title "%VERSION%" --notes "%NOTES%"
 
 echo.
-echo ✅ Release v%VERSION% created and published!
+echo Release v%VERSION% created and published!
 pause
