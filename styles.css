@@ -512,6 +512,27 @@
 	background-color: var(--calories-color, #e8962b);
 }
 
+/* Extend the colored borders to column headers */
+.macros-table th.protein-cell::before,
+.macros-table .column-header.protein-cell::before {
+	background-color: var(--protein-color, #4caf50);
+}
+
+.macros-table th.fat-cell::before,
+.macros-table .column-header.fat-cell::before {
+	background-color: var(--fat-color, #f44336);
+}
+
+.macros-table th.carbs-cell::before,
+.macros-table .column-header.carbs-cell::before {
+	background-color: var(--carbs-color, #2196f3);
+}
+
+.macros-table th.calories-cell::before,
+.macros-table .column-header.calories-cell::before {
+	background-color: var(--calories-color, #e8962b);
+}
+
 /* ==============================
  * 5. PROGRESS BARS
  * ============================== */
@@ -2250,4 +2271,423 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 .theme-dark .error-message {
   color: #ff8a80;
+}
+
+/* ==============================
+ * 16. MOBILE RESPONSIVE STYLES
+ * ============================== */
+
+/* Default: Show desktop text, hide mobile text */
+.header-text-desktop {
+  display: inline;
+}
+
+.header-text-mobile {
+  display: none;
+}
+
+/* Macroscalc header and ID alignment fixes for all screen sizes */
+.macroscalc-header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+}
+
+.macroscalc-sort-icon {
+  margin-left: 3px;
+  align-self: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.macroscalc-sort-icon:hover {
+  opacity: 1;
+}
+
+.macroscalc-sort-icon.active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.macroscalc-id-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  padding-left: 4px;
+}
+
+/* Desktop layout - toggle next to ID name (explicit desktop styles) */
+@media (min-width: 769px) {
+  .macroscalc-id-cell-container {
+    text-align: center !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-expand-toggle {
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 4px !important;
+    margin-left: 0 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-id-text {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin-left: 0 !important;
+  }
+}
+
+/* Default fallback styles */
+.macroscalc-id-cell-container {
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.macroscalc-id-cell-container .macroscalc-expand-toggle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  margin-left: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.macroscalc-id-cell-container .macroscalc-id-text {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0;
+}
+
+.macroscalc-id-text {
+  text-align: left;
+  flex: 1;
+  margin-left: 4px !important;
+  margin-right: 0 !important;
+}
+
+.macroscalc-expand-toggle {
+  flex-shrink: 0;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  transform: translateY(0) !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Mobile breakpoint - tablets and small laptops */
+@media (max-width: 768px) {
+  /* Hide desktop text and show mobile text on small screens */
+  .header-text-desktop {
+    display: none;
+  }
+  
+  .header-text-mobile {
+    display: inline;
+  }
+  
+  /* Reduce table padding on mobile */
+  .macros-table td,
+  .macros-table th,
+  .macros-table .column-header {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+  
+  /* Adjust macro percentage font size for mobile */
+  .macro-percentage {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Make remove buttons slightly smaller on mobile */
+  .remove-item-button {
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+  }
+  
+  /* Adjust editable quantity styling for mobile */
+  .editable-quantity {
+    padding: 4px 6px !important;
+    font-size: 0.9rem;
+  }
+  
+  .editable-quantity input {
+    width: 60px !important;
+    padding: 3px 6px !important;
+    font-size: 0.9rem;
+  }
+  
+  /* Optimize dashboard for mobile - 2x2 grid layout */
+  .macro-dashboard {
+    margin-top: 0.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .macro-dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .macro-metric-card {
+    min-width: auto;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 80px;
+  }
+  
+  /* Ensure consistent card sizing */
+  .macro-metric-card .macro-metric-label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+  
+  .macro-metric-card .macro-metric-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .macro-metric-card .macro-metric-percentage {
+    font-size: 0.85rem;
+  }
+  
+  /* Adjust pie chart container for mobile */
+  .macro-pie-chart-container {
+    width: 250px;
+    height: 250px;
+    margin-left: 8px;
+  }
+  
+  .macro-pie-chart-summary-container {
+    min-height: 250px;
+    padding: 8px 12px;
+  }
+  
+  /* Mobile layout - toggle to the left, text follows */
+  .macroscalc-id-cell-container {
+    text-align: left;
+    padding-left: 8px;
+    padding-right: 4px;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-expand-toggle {
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
+  }
+  .macroscalc-details-table {
+    font-size: 0.85rem;
+  }
+  
+  .macroscalc-details-table th,
+  .macroscalc-details-table td {
+    padding: 4px 6px;
+  }
+  
+  .macroscalc-meal-header {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+  
+  .macroscalc-expand-toggle {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 12px !important;
+  }
+  
+  .macroscalc-id-text {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra small screens (phones) */
+@media (max-width: 480px) {
+  .macros-table td,
+  .macros-table th,
+  .macros-table .column-header {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+  }
+  
+  /* Further reduce text sizes */
+  .header-text-mobile {
+    font-size: 0.8rem;
+  }
+  
+  .macro-percentage {
+    font-size: 0.65rem !important;
+  }
+  
+  /* Mobile dashboard - maintain 2x2 grid but with tighter spacing */
+  .macro-dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .macro-metric-card {
+    min-width: auto;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 70px;
+  }
+  
+  /* Tighter text sizing for phones */
+  .macro-metric-card .macro-metric-label {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+  
+  .macro-metric-card .macro-metric-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .macro-metric-card .macro-metric-percentage {
+    font-size: 0.75rem;
+  }
+  
+  /* Progress bars in cards */
+  .macro-metric-card .macro-metric-progress-container {
+    height: 6px;
+    margin-top: 4px;
+  }
+  
+  /* Stack pie chart elements vertically on phones */
+  .macro-dashboard-flex-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .macro-pie-chart-container {
+    width: 200px;
+    height: 200px;
+    margin-left: 0;
+  }
+  
+  .macro-pie-chart-summary-container {
+    min-height: auto;
+    max-width: none;
+    width: 100%;
+  }
+  
+  /* Adjust table header spacing for phones */
+  .macros-table-header {
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+  
+  .macros-table-controls {
+    gap: 6px;
+  }
+  
+  /* Optimize meal headers for phones */
+  .meal-header-content {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .header-calorie-summary {
+    font-size: 0.85rem;
+    margin-left: 6px;
+  }
+  
+  /* Further optimize macroscalc for very small screens */
+  .macroscalc-details-table {
+    font-size: 0.8rem;
+  }
+  
+  .macroscalc-details-table th,
+  .macroscalc-details-table td {
+    padding: 3px 4px;
+  }
+  
+  .macroscalc-meal-header {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+  }
+  
+  .macroscalc-header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .macroscalc-sort-icon {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  /* Make detail tables more compact */
+  .macroscalc-detail-row td {
+    padding: 4px 6px;
+  }
+  
+  /* Adjust chart section for phones */
+  .macroscalc-chart-section {
+    margin-top: 0.5rem;
+  }
+  
+  .macroscalc-chart-wrapper {
+    height: 250px;
+  }
+  
+  /* Fix macroscalc header alignment */
+  .macroscalc-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+  
+  .macroscalc-sort-icon {
+    margin-left: 2px;
+    align-self: center;
+    font-size: 0.7rem;
+  }
+  
+  /* Fix ID cell alignment */
+  .macroscalc-id-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .macroscalc-id-text {
+    text-align: center;
+  }
 }
