@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.6](https://github.com/JamesCliffordSpratt/macros/compare/v2.0.3...v2.0.6) (2025-06-24)
+
 ### [2.0.5](https://github.com/JamesCliffordSpratt/macros/compare/v2.0.4...v2.0.5) (2025-06-22)
 
 ### [2.0.4](https://github.com/JamesCliffordSpratt/macros/compare/v2.0.3...v2.0.4) (2025-06-22)
