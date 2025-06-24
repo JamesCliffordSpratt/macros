@@ -17,7 +17,6 @@ export function setupRibbon(plugin: MacrosPlugin): void {
         plugin,
         plugin.dataManager.createFoodItemCallback()
       ).open();
-      
     } catch (error) {
       plugin.logger.error('Error opening food entry selection:', error);
       new Notice('Unable to open food entry selection. Please try again.');

@@ -17,11 +17,7 @@ export class ManualFoodEntryModal extends Modal {
   private fatInput: HTMLInputElement;
   private carbsInput: HTMLInputElement;
 
-  constructor(
-    app: App,
-    plugin: MacrosPlugin,
-    onFoodSelected: (item: any) => void
-  ) {
+  constructor(app: App, plugin: MacrosPlugin, onFoodSelected: (item: any) => void) {
     super(app);
     this.plugin = plugin;
     this.onFoodSelected = onFoodSelected;
@@ -31,16 +27,16 @@ export class ManualFoodEntryModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.addClass('manual-food-entry-modal');
-    
+
     // Create header
-    contentEl.createEl('h2', { 
-      text: 'Manual Food Entry', 
-      cls: 'modal-title' 
+    contentEl.createEl('h2', {
+      text: 'Manual Food Entry',
+      cls: 'modal-title',
     });
-    
+
     contentEl.createEl('p', {
       text: 'Enter the nutritional information for your food item:',
-      cls: 'modal-description'
+      cls: 'modal-description',
     });
 
     // Create form container
@@ -48,24 +44,24 @@ export class ManualFoodEntryModal extends Modal {
 
     // Food Name Field
     const nameGroup = formContainer.createDiv({ cls: 'form-group' });
-    nameGroup.createEl('label', { 
-      text: 'Food Name', 
-      cls: 'form-label required' 
+    nameGroup.createEl('label', {
+      text: 'Food Name',
+      cls: 'form-label required',
     });
     this.foodNameInput = nameGroup.createEl('input', {
       type: 'text',
       cls: 'form-input',
       attr: {
         placeholder: 'e.g., Chicken Breast',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Serving Size Field
     const servingGroup = formContainer.createDiv({ cls: 'form-group' });
-    servingGroup.createEl('label', { 
-      text: 'Serving Size (grams)', 
-      cls: 'form-label required' 
+    servingGroup.createEl('label', {
+      text: 'Serving Size (grams)',
+      cls: 'form-label required',
     });
     this.servingSizeInput = servingGroup.createEl('input', {
       type: 'number',
@@ -74,18 +70,18 @@ export class ManualFoodEntryModal extends Modal {
         placeholder: '100',
         min: '0',
         step: '0.1',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Nutrition Fields Container
     const nutritionContainer = formContainer.createDiv({ cls: 'nutrition-fields' });
-    
+
     // Calories Field
     const caloriesGroup = nutritionContainer.createDiv({ cls: 'form-group' });
-    caloriesGroup.createEl('label', { 
-      text: 'Calories', 
-      cls: 'form-label required' 
+    caloriesGroup.createEl('label', {
+      text: 'Calories',
+      cls: 'form-label required',
     });
     this.caloriesInput = caloriesGroup.createEl('input', {
       type: 'number',
@@ -94,15 +90,15 @@ export class ManualFoodEntryModal extends Modal {
         placeholder: '0',
         min: '0',
         step: '0.1',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Protein Field
     const proteinGroup = nutritionContainer.createDiv({ cls: 'form-group' });
-    proteinGroup.createEl('label', { 
-      text: 'Protein (g)', 
-      cls: 'form-label required' 
+    proteinGroup.createEl('label', {
+      text: 'Protein (g)',
+      cls: 'form-label required',
     });
     this.proteinInput = proteinGroup.createEl('input', {
       type: 'number',
@@ -111,15 +107,15 @@ export class ManualFoodEntryModal extends Modal {
         placeholder: '0',
         min: '0',
         step: '0.1',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Fat Field
     const fatGroup = nutritionContainer.createDiv({ cls: 'form-group' });
-    fatGroup.createEl('label', { 
-      text: 'Fat (g)', 
-      cls: 'form-label required' 
+    fatGroup.createEl('label', {
+      text: 'Fat (g)',
+      cls: 'form-label required',
     });
     this.fatInput = fatGroup.createEl('input', {
       type: 'number',
@@ -128,15 +124,15 @@ export class ManualFoodEntryModal extends Modal {
         placeholder: '0',
         min: '0',
         step: '0.1',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Carbs Field
     const carbsGroup = nutritionContainer.createDiv({ cls: 'form-group' });
-    carbsGroup.createEl('label', { 
-      text: 'Carbohydrates (g)', 
-      cls: 'form-label required' 
+    carbsGroup.createEl('label', {
+      text: 'Carbohydrates (g)',
+      cls: 'form-label required',
     });
     this.carbsInput = carbsGroup.createEl('input', {
       type: 'number',
@@ -145,28 +141,28 @@ export class ManualFoodEntryModal extends Modal {
         placeholder: '0',
         min: '0',
         step: '0.1',
-        required: 'true'
-      }
+        required: 'true',
+      },
     });
 
     // Add validation info
     const validationInfo = formContainer.createDiv({ cls: 'validation-info' });
     validationInfo.createEl('p', {
       text: '* Required fields',
-      cls: 'required-note'
+      cls: 'required-note',
     });
 
     // Button container
     const buttonContainer = formContainer.createDiv({ cls: 'button-container' });
-    
+
     const cancelBtn = buttonContainer.createEl('button', {
       text: 'Cancel',
-      cls: 'mod-button'
+      cls: 'mod-button',
     });
 
     const saveBtn = buttonContainer.createEl('button', {
       text: 'Save Food Item',
-      cls: 'mod-button mod-cta'
+      cls: 'mod-button mod-cta',
     });
 
     // Add event handlers
@@ -193,8 +189,8 @@ export class ManualFoodEntryModal extends Modal {
       this.caloriesInput,
       this.proteinInput,
       this.fatInput,
-      this.carbsInput
-    ].forEach(input => {
+      this.carbsInput,
+    ].forEach((input) => {
       this.component.registerDomEvent(input, 'keydown', handleEnterKey);
     });
 
@@ -240,7 +236,7 @@ export class ManualFoodEntryModal extends Modal {
     const folderPath = normalizePath(this.plugin.settings.storageFolder);
     const fileName = `${foodName}.md`;
     const filePath = normalizePath(`${folderPath}/${fileName}`);
-    
+
     try {
       // Check if the file already exists in the vault
       const existingFile = this.plugin.app.vault.getAbstractFileByPath(filePath);
@@ -254,7 +250,7 @@ export class ManualFoodEntryModal extends Modal {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -270,7 +266,7 @@ export class ManualFoodEntryModal extends Modal {
         }
 
         const errorsDiv = this.contentEl.createDiv({ cls: 'validation-errors' });
-        validation.errors.forEach(error => {
+        validation.errors.forEach((error) => {
           errorsDiv.createEl('p', { text: error, cls: 'error-message' });
         });
 

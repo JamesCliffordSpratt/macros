@@ -23,12 +23,29 @@ export class CustomServingSizeModal extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl('h2', { text: `Custom serving size for ${this.foodName}` });
-    contentEl.createEl('p', {
-      text: `Default serving is ${this.defaultServing}g. Enter a custom serving size in grams:`,
+
+    // Add mobile-friendly class to the modal
+    contentEl.addClass('custom-serving-modal');
+
+    // Create header with better mobile spacing
+    const headerEl = contentEl.createEl('h2', {
+      text: `Custom serving size for ${this.foodName}`,
+      cls: 'custom-serving-modal-title',
     });
 
-    const inputEl = contentEl.createEl('input', { type: 'number' });
+    // Create description with mobile-friendly text
+    const descEl = contentEl.createEl('p', {
+      text: `Default serving is ${this.defaultServing}g. Enter a custom serving size in grams:`,
+      cls: 'custom-serving-modal-description',
+    });
+
+    // Create input container for better mobile layout
+    const inputContainer = contentEl.createDiv({ cls: 'custom-serving-input-container' });
+
+    const inputEl = inputContainer.createEl('input', {
+      type: 'number',
+      cls: 'custom-serving-input',
+    });
     inputEl.placeholder = `${this.defaultServing}`;
     inputEl.value = `${this.defaultServing}`;
 
@@ -51,10 +68,21 @@ export class CustomServingSizeModal extends Modal {
       }
     });
 
-    const submitBtn = contentEl.createEl('button', { text: 'Submit' });
+    // Create button container for better mobile layout
+    const buttonContainer = contentEl.createDiv({ cls: 'custom-serving-button-container' });
+
+    const submitBtn = buttonContainer.createEl('button', {
+      text: 'Submit',
+      cls: 'custom-serving-submit-btn mod-cta',
+    });
+
     this.component.registerDomEvent(submitBtn, 'click', handleSubmit);
 
-    inputEl.focus();
+    // Focus input after a small delay to ensure proper rendering
+    setTimeout(() => {
+      inputEl.focus();
+      inputEl.select();
+    }, 100);
   }
 
   onClose() {

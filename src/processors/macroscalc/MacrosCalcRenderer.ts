@@ -138,15 +138,32 @@ export class MacrosCalcRenderer {
 
     const table = tableContainer.createEl('table', { cls: CLASS_NAMES.TABLE.CONTAINER });
 
-    // Create header row with styled headers and sort buttons
+    // Create header row with mobile-responsive headers
     const headerRow = table.insertRow();
-    ['Table ID', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach((text, index) => {
+    const headerData = [
+      { text: 'Table ID', mobileText: 'ID' },
+      { text: 'Calories', mobileText: 'Cal' },
+      { text: 'Protein', mobileText: 'Pro' },
+      { text: 'Fat', mobileText: 'Fat' },
+      { text: 'Carbs', mobileText: 'Carb' },
+    ];
+
+    headerData.forEach((headerInfo, index) => {
       const cell = headerRow.insertCell();
 
       // Create a container for the header content to allow sorting UI
       const headerContainer = cell.createDiv({ cls: 'macroscalc-header-container' });
 
-      headerContainer.createSpan({ text });
+      // Create spans for responsive text
+      const desktopSpan = headerContainer.createSpan({
+        cls: 'header-text-desktop',
+        text: headerInfo.text,
+      });
+
+      const mobileSpan = headerContainer.createSpan({
+        cls: 'header-text-mobile',
+        text: headerInfo.mobileText,
+      });
 
       if (index > 0) {
         // Don't add sort button to Table ID column
@@ -154,24 +171,24 @@ export class MacrosCalcRenderer {
         sortButton.setText('⇅');
 
         // Set initial sort indicator if this is the current sort column
-        if (this.sortConfig.column === text) {
+        if (this.sortConfig.column === headerInfo.text) {
           sortButton.setText(this.sortConfig.ascending ? '↑' : '↓');
           sortButton.classList.add('active');
         }
 
         // Add sort functionality
         sortButton.addEventListener('click', () => {
-          this.sortTable(table, text);
+          this.sortTable(table, headerInfo.text);
         });
       }
 
       cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
 
       // Add specific macro styling for appropriate columns
-      if (text === 'Protein') cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
-      if (text === 'Fat') cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
-      if (text === 'Carbs') cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
-      if (text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
+      if (headerInfo.text === 'Protein') cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
+      if (headerInfo.text === 'Fat') cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
+      if (headerInfo.text === 'Carbs') cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
+      if (headerInfo.text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
     });
 
     // Render each breakdown row - use the FRESH breakdown data
@@ -187,8 +204,18 @@ export class MacrosCalcRenderer {
     aggregateRow.classList.add(CLASS_NAMES.TABLE.TOTALS_ROW);
 
     const aggLabelCell = aggregateRow.insertCell();
-    aggLabelCell.innerText = 'Combined Totals';
     aggLabelCell.classList.add('macro-bold-cell');
+
+    // Create responsive text for "Combined Totals" vs "Totals"
+    const desktopLabel = aggLabelCell.createSpan({
+      cls: 'header-text-desktop',
+      text: 'Combined Totals',
+    });
+
+    const mobileLabel = aggLabelCell.createSpan({
+      cls: 'header-text-mobile',
+      text: 'Totals',
+    });
 
     // Calculate total macros for percentages
     const totalMacros = finalAggregate.protein + finalAggregate.fat + finalAggregate.carbs;
@@ -465,10 +492,10 @@ export class MacrosCalcRenderer {
 
     // ID cell with expand toggle
     const idCell = row.insertCell();
-    const idCellContent = idCell.createDiv({ cls: 'macroscalc-id-cell' });
+    idCell.classList.add('macroscalc-id-cell-container');
 
     // Create the expand toggle with the new toggle-icon class
-    const expandToggle = idCellContent.createSpan({ cls: 'toggle-icon macroscalc-expand-toggle' });
+    const expandToggle = idCell.createSpan({ cls: 'toggle-icon macroscalc-expand-toggle' });
     if (this.expandedRows.has(item.id)) {
       expandToggle.classList.add('expanded');
     }
@@ -478,8 +505,8 @@ export class MacrosCalcRenderer {
       this.toggleDetailRow(item.id, expandToggle);
     });
 
-    // Add some spacing between the toggle and the ID text
-    idCellContent.createSpan({ text: item.id, cls: 'macroscalc-id-text' });
+    // Add the ID text directly after the toggle (no wrapper div)
+    idCell.createSpan({ text: item.id, cls: 'macroscalc-id-text' });
 
     // Calculate total macros for percentages
     const totalMacros = item.totals.protein + item.totals.fat + item.totals.carbs;
@@ -620,14 +647,36 @@ export class MacrosCalcRenderer {
           return;
         }
 
-        // Create a mini table for the food items
+        // Create a mini table for the food items with mobile optimization
         const foodList = detailContent.createEl('table', { cls: 'macroscalc-details-table' });
 
-        // Add header
+        // Add header with mobile-responsive text
         const foodHeader = foodList.createTHead().insertRow();
-        ['Food Item', 'Quantity', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach((text) => {
+        const detailHeaderData = [
+          { text: 'Food Item', mobileText: 'Food' },
+          { text: 'Quantity', mobileText: 'Qty' },
+          { text: 'Calories', mobileText: 'Cal' },
+          { text: 'Protein', mobileText: 'Pro' },
+          { text: 'Fat', mobileText: 'Fat' },
+          { text: 'Carbs', mobileText: 'Carb' },
+        ];
+
+        detailHeaderData.forEach((headerInfo) => {
           const th = document.createElement('th');
-          th.textContent = text;
+
+          // Create spans for responsive text
+          const desktopSpan = createEl('span', {
+            cls: 'header-text-desktop',
+            text: headerInfo.text,
+          });
+
+          const mobileSpan = createEl('span', {
+            cls: 'header-text-mobile',
+            text: headerInfo.mobileText,
+          });
+
+          th.appendChild(desktopSpan);
+          th.appendChild(mobileSpan);
           foodHeader.appendChild(th);
         });
 

@@ -30,7 +30,13 @@ export class AddToMacrosModal extends Modal {
     const mealSelect = mealRow.createEl('select');
     mealControl.appendChild(mealSelect);
     mealSelect.createEl('option', { text: '-- None --', value: '' });
-    this.plugin.settings.mealTemplates.forEach((meal: MealTemplate) => {
+
+    // Sort meal templates alphabetically by name before adding to dropdown
+    const sortedMealTemplates = [...this.plugin.settings.mealTemplates].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+
+    sortedMealTemplates.forEach((meal: MealTemplate) => {
       mealSelect.createEl('option', { text: meal.name, value: `interactive:meal:${meal.name}` });
     });
 
@@ -60,7 +66,13 @@ export class AddToMacrosModal extends Modal {
 
     const fileList = this.app.vault.getFiles().filter((f: TFile) => f.path.startsWith(folder));
     const foodNames = fileList.map((f: TFile) => f.name.replace(/\.md$/, ''));
-    foodNames.forEach((food: string) => {
+
+    // Sort food names alphabetically before adding to dropdown
+    const sortedFoodNames = foodNames.sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    );
+
+    sortedFoodNames.forEach((food: string) => {
       foodSelect.createEl('option', { text: food, value: 'interactive:' + food });
     });
 

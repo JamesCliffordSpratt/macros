@@ -196,12 +196,38 @@ export class GroupRenderer {
     const colHeaderRow = table.insertRow();
     colHeaderRow.dataset.parent = parentSection;
 
-    ['Food', 'Quantity', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach((text) => {
+    // Define the headers with their corresponding CSS classes and mobile truncation
+    const headers = [
+      { text: 'Food', class: '', mobileText: 'Food' },
+      { text: 'Quantity', class: '', mobileText: 'Qty' },
+      { text: 'Calories', class: 'calories-cell', mobileText: 'Cal' },
+      { text: 'Protein', class: 'protein-cell', mobileText: 'Pro' },
+      { text: 'Fat', class: 'fat-cell', mobileText: 'Fat' },
+      { text: 'Carbs', class: 'carbs-cell', mobileText: 'Carb' },
+    ];
+
+    headers.forEach(({ text, class: cssClass, mobileText }) => {
       const cell = colHeaderRow.insertCell();
-      cell.innerText = text;
       cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
 
-      if (text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
+      // Add the macro-specific class for colored borders
+      if (cssClass) {
+        cell.classList.add(cssClass);
+      }
+
+      // Create spans for responsive text
+      const desktopSpan = createEl('span', {
+        cls: 'header-text-desktop',
+        text: text,
+      });
+
+      const mobileSpan = createEl('span', {
+        cls: 'header-text-mobile',
+        text: mobileText,
+      });
+
+      cell.appendChild(desktopSpan);
+      cell.appendChild(mobileSpan);
     });
   }
 
