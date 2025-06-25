@@ -3213,3 +3213,488 @@ body:not(.theme-obsidian) .api-credentials-success {
   scrollbar-width: thin;
   scrollbar-color: var(--background-modifier-border) transparent;
 }
+
+/* Enhanced Meal Template Modal Styles */
+.enhanced-meal-template-modal {
+  max-width: 800px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.enhanced-meal-template-modal .modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .modal-title {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.enhanced-meal-template-modal .modal-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Meal Name Section (for AddMealTemplateModal) */
+.enhanced-meal-template-modal .meal-name-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .meal-name-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-normal);
+  font-size: 1rem;
+}
+
+.enhanced-meal-template-modal .meal-name-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.enhanced-meal-template-modal .meal-name-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+}
+
+.enhanced-meal-template-modal .meal-name-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Search Bar */
+.enhanced-meal-template-modal .search-container {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-meal-template-modal .search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.enhanced-meal-template-modal .search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.enhanced-meal-template-modal .search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  font-size: 1rem;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.enhanced-meal-template-modal .search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+}
+
+/* Foods Section */
+.enhanced-meal-template-modal .foods-section {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-meal-template-modal .section-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .section-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .foods-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: start;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-thumb {
+  background-color: var(--background-modifier-border);
+  border-radius: 6px;
+}
+
+/* Food Cards */
+.enhanced-meal-template-modal .food-card {
+  background: var(--background-secondary);
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.enhanced-meal-template-modal .food-card:hover {
+  border-color: var(--interactive-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-meal-template-modal .food-card.selected {
+  border-color: var(--interactive-accent);
+  background-color: rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+.enhanced-meal-template-modal .food-name {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .nutrition-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.enhanced-meal-template-modal .nutrition-item {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.enhanced-meal-template-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.15);
+  color: var(--calories-color, #e8962b);
+  border: 1px solid rgba(232, 150, 43, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--protein-color, #4caf50);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--fat-color, #f44336);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--carbs-color, #2196f3);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.enhanced-meal-template-modal .serving-info {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.enhanced-meal-template-modal .serving-size {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Button Container for Food Cards */
+.enhanced-meal-template-modal .button-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.enhanced-meal-template-modal .add-button,
+.enhanced-meal-template-modal .remove-button,
+.enhanced-meal-template-modal .edit-button {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid;
+  background: transparent;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.enhanced-meal-template-modal .add-button {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.enhanced-meal-template-modal .add-button:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.enhanced-meal-template-modal .remove-button {
+  border-color: var(--text-error, #e74c3c);
+  color: var(--text-error, #e74c3c);
+}
+
+.enhanced-meal-template-modal .remove-button:hover {
+  background: var(--text-error, #e74c3c);
+  color: white;
+}
+
+.enhanced-meal-template-modal .edit-button {
+  border-color: var(--text-warning, #f39c12);
+  color: var(--text-warning, #f39c12);
+}
+
+.enhanced-meal-template-modal .edit-button:hover {
+  background: var(--text-warning, #f39c12);
+  color: white;
+}
+
+/* Selected Items Section */
+.enhanced-meal-template-modal .selected-items-section {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .selected-title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .selected-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.enhanced-meal-template-modal .no-selected-items {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+}
+
+.enhanced-meal-template-modal .selected-item-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.enhanced-meal-template-modal .remove-item-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--text-on-accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease;
+}
+
+.enhanced-meal-template-modal .remove-item-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Action Buttons */
+.enhanced-meal-template-modal .action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .cancel-button,
+.enhanced-meal-template-modal .save-button,
+.enhanced-meal-template-modal .create-button {
+  padding: 12px 24px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.enhanced-meal-template-modal .cancel-button {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .cancel-button:hover {
+  background: var(--background-modifier-hover);
+  transform: translateY(-1px);
+}
+
+.enhanced-meal-template-modal .save-button,
+.enhanced-meal-template-modal .create-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.enhanced-meal-template-modal .save-button:hover:not(.disabled),
+.enhanced-meal-template-modal .create-button:hover:not(.disabled) {
+  background: var(--interactive-accent-hover);
+  border-color: var(--interactive-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--interactive-accent-rgb), 0.3);
+}
+
+.enhanced-meal-template-modal .save-button.disabled,
+.enhanced-meal-template-modal .create-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  border-color: var(--background-modifier-border);
+}
+
+/* No Results */
+.enhanced-meal-template-modal .no-results {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .enhanced-meal-template-modal {
+    width: 95%;
+    max-width: none;
+  }
+
+  .enhanced-meal-template-modal .foods-container {
+    grid-template-columns: 1fr;
+  }
+
+  .enhanced-meal-template-modal .nutrition-info {
+    grid-template-columns: 1fr;
+  }
+
+  .enhanced-meal-template-modal .action-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .enhanced-meal-template-modal .cancel-button,
+  .enhanced-meal-template-modal .save-button,
+  .enhanced-meal-template-modal .create-button {
+    width: 100%;
+  }
+
+  .enhanced-meal-template-modal .button-container {
+    flex-direction: column;
+  }
+}
+
+/* Dark theme support */
+.theme-dark .enhanced-meal-template-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .enhanced-meal-template-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .enhanced-meal-template-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+.theme-dark .enhanced-meal-template-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+}
+
+/* Loading states */
+.enhanced-meal-template-modal .loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enhanced-meal-template-modal .food-card {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Custom scrollbar for better UX */
+.enhanced-meal-template-modal .foods-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--background-modifier-border) transparent;
+}
