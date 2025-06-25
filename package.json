@@ -1,6 +1,6 @@
 {
 	"name": "macros",
-	"version": "2.0.7",
+	"version": "2.0.8",
 	"description": "Track and visualize your daily macros, meals and nutrition inside your notes.",
 	"main": "main.js",
 	"scripts": {
