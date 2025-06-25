@@ -2691,3 +2691,525 @@ body:not(.theme-obsidian) .api-credentials-success {
     text-align: center;
   }
 }
+
+/* Enhanced Add to Macros Modal Styles */
+.enhanced-add-to-macros-modal {
+  max-width: 800px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.enhanced-add-to-macros-modal .modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-add-to-macros-modal .modal-title {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.enhanced-add-to-macros-modal .modal-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Search Bar */
+.enhanced-add-to-macros-modal .search-container {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-add-to-macros-modal .search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.enhanced-add-to-macros-modal .search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.enhanced-add-to-macros-modal .search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  font-size: 1rem;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.enhanced-add-to-macros-modal .search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+}
+
+/* Tabs */
+.enhanced-add-to-macros-modal .tabs-container {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-add-to-macros-modal .tab-button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.enhanced-add-to-macros-modal .tab-button:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.enhanced-add-to-macros-modal .tab-button.active {
+  color: var(--interactive-accent);
+  border-bottom-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+
+/* Content Area */
+.enhanced-add-to-macros-modal .content-area {
+  position: relative;
+  min-height: 300px;
+  max-height: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-add-to-macros-modal .items-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: start;
+}
+
+.enhanced-add-to-macros-modal .items-container.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar-thumb {
+  background-color: var(--background-modifier-border);
+  border-radius: 6px;
+}
+
+/* Meal Cards */
+.enhanced-add-to-macros-modal .meal-card {
+  background: var(--background-secondary);
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.enhanced-add-to-macros-modal .meal-card:hover {
+  border-color: var(--interactive-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-add-to-macros-modal .meal-card.selected {
+  border-color: var(--interactive-accent);
+  background-color: rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+.enhanced-add-to-macros-modal .meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.enhanced-add-to-macros-modal .meal-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-add-to-macros-modal .meal-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--background-modifier-border);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.enhanced-add-to-macros-modal .meal-items-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.enhanced-add-to-macros-modal .preview-item {
+  font-size: 0.8rem;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-add-to-macros-modal .preview-more {
+  font-size: 0.8rem;
+  color: var(--text-accent);
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+/* Food Cards */
+.enhanced-add-to-macros-modal .food-card {
+  background: var(--background-secondary);
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.enhanced-add-to-macros-modal .food-card:hover {
+  border-color: var(--interactive-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-add-to-macros-modal .food-card.selected {
+  border-color: var(--interactive-accent);
+  background-color: rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+.enhanced-add-to-macros-modal .food-name {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-add-to-macros-modal .nutrition-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.enhanced-add-to-macros-modal .nutrition-item {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.enhanced-add-to-macros-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.15);
+  color: var(--calories-color, #e8962b);
+  border: 1px solid rgba(232, 150, 43, 0.3);
+}
+
+.enhanced-add-to-macros-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--protein-color, #4caf50);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.enhanced-add-to-macros-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--fat-color, #f44336);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.enhanced-add-to-macros-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--carbs-color, #2196f3);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.enhanced-add-to-macros-modal .serving-info {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.enhanced-add-to-macros-modal .serving-size {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Add Buttons */
+.enhanced-add-to-macros-modal .add-button {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--interactive-accent);
+  background: transparent;
+  color: var(--interactive-accent);
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.enhanced-add-to-macros-modal .add-button:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  transform: translateY(-1px);
+}
+
+.enhanced-add-to-macros-modal .add-button.selected {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+/* Selected Items Section */
+.enhanced-add-to-macros-modal .selected-items-section {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-add-to-macros-modal .selected-title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-add-to-macros-modal .selected-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.enhanced-add-to-macros-modal .no-selected-items {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+}
+
+.enhanced-add-to-macros-modal .selected-item-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.enhanced-add-to-macros-modal .remove-item-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--text-on-accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease;
+}
+
+.enhanced-add-to-macros-modal .remove-item-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Action Buttons */
+.enhanced-add-to-macros-modal .action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-add-to-macros-modal .cancel-button,
+.enhanced-add-to-macros-modal .confirm-button {
+  padding: 12px 24px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.enhanced-add-to-macros-modal .cancel-button {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.enhanced-add-to-macros-modal .cancel-button:hover {
+  background: var(--background-modifier-hover);
+  transform: translateY(-1px);
+}
+
+.enhanced-add-to-macros-modal .confirm-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.enhanced-add-to-macros-modal .confirm-button:hover:not(.disabled) {
+  background: var(--interactive-accent-hover);
+  border-color: var(--interactive-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--interactive-accent-rgb), 0.3);
+}
+
+.enhanced-add-to-macros-modal .confirm-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  border-color: var(--background-modifier-border);
+}
+
+/* No Results */
+.enhanced-add-to-macros-modal .no-results {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .enhanced-add-to-macros-modal {
+    width: 95%;
+    max-width: none;
+  }
+
+  .enhanced-add-to-macros-modal .items-container {
+    grid-template-columns: 1fr;
+  }
+
+  .enhanced-add-to-macros-modal .nutrition-info {
+    grid-template-columns: 1fr;
+  }
+
+  .enhanced-add-to-macros-modal .action-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .enhanced-add-to-macros-modal .cancel-button,
+  .enhanced-add-to-macros-modal .confirm-button {
+    width: 100%;
+  }
+
+  .enhanced-add-to-macros-modal .tabs-container {
+    flex-direction: column;
+  }
+
+  .enhanced-add-to-macros-modal .tab-button {
+    border-bottom: 1px solid var(--background-modifier-border);
+    border-right: none;
+  }
+
+  .enhanced-add-to-macros-modal .tab-button.active {
+    border-bottom-color: var(--interactive-accent);
+  }
+}
+
+/* Dark theme support */
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+}
+
+/* Loading states */
+.enhanced-add-to-macros-modal .loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enhanced-add-to-macros-modal .meal-card,
+.enhanced-add-to-macros-modal .food-card {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Custom scrollbar for better UX */
+.enhanced-add-to-macros-modal .items-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--background-modifier-border) transparent;
+}
