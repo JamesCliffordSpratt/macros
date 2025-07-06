@@ -3735,6 +3735,167 @@ body:not(.theme-obsidian) .api-credentials-success {
 	color: #27ae60;
 	background-color: rgba(39, 174, 96, 0.1);
 	border: 1px solid rgba(39, 174, 96, 0.3);
+<<<<<<< HEAD
+=======
+}
+
+.theme-dark .api-credentials-warning {
+	color: #ff6b6b;
+	background-color: rgba(255, 107, 107, 0.15);
+	border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.theme-dark .api-credentials-success {
+	color: #51cf66;
+	background-color: rgba(81, 207, 102, 0.15);
+	border: 1px solid rgba(81, 207, 102, 0.3);
+}
+
+.theme-dark .status-indicator.status-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .status-indicator.status-warning {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .api-error-message {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #ff8a80;
+}
+
+.theme-dark .validation-errors {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+.theme-dark .validation-errors .error-message {
+  color: #ff8a80;
+}
+
+.theme-dark .form-input {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-dark .form-input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.calories,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.protein,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.fat,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.carbs,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+}
+
+.theme-dark .macros-table tr.long-press-active {
+  background-color: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.theme-dark .macros-table tr.long-press-ready {
+  background-color: var(--text-error, #e74c3c);
+  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.3);
+}
+
+.theme-dark .delete-confirmation-content {
+  background-color: var(--background-primary);
+}
+
+.theme-dark .macro-tooltip-mobile {
+  background-color: rgba(25, 25, 25, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: var(--text-normal) !important;
+}
+
+.theme-light .macros-table tr.long-press-active {
+  background-color: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.theme-light .macros-table tr.long-press-ready {
+  background-color: #e74c3c;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+}
+
+.theme-light .macro-tooltip,
+.theme-light .macro-tooltip-mobile {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ==============================
+ * 23. ACCESSIBILITY AND PREFERENCES
+ * ============================== */
+
+@media (prefers-contrast: high) {
+  .macros-table tr.long-press-active {
+    background-color: var(--interactive-accent) !important;
+    border: 2px solid var(--text-normal) !important;
+  }
+  
+  .macros-table tr.long-press-ready {
+    background-color: #800000 !important;
+    border: 3px solid #ffffff !important;
+  }
+  
+  .delete-confirmation-title {
+    color: var(--text-error, #800000) !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .modal-button-container .mod-warning {
+    background-color: #800000 !important;
+    border: 2px solid #ffffff !important;
+  }
+  
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    background-color: black !important;
+    color: white !important;
+    border: 2px solid white !important;
+    font-weight: 500 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macros-table tr,
+  .modal-button-container button,
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .macros-table tr.long-press-active,
+  .macros-table tr.long-press-ready,
+  .modal-button-container button:hover {
+    transform: none !important;
+  }
+  
+  .macros-table tr.long-press-ready {
+    background-color: var(--text-error, #c0392b) !important;
+  }
+>>>>>>> 6bd3e450a42538aee715467f5a134958c3c06160
 }
 
 .theme-dark .api-credentials-warning {
