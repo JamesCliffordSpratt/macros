@@ -402,6 +402,7 @@ serving_size: ${servingSize}
 
   /**
    * Updates the macros code block in the active file by merging static and interactive lines.
+   * FIXED VERSION: Preserves manual changes to meal templates
    */
   async updateMacrosCodeBlock() {
     await this.queueUpdate(async () => {
@@ -460,11 +461,12 @@ serving_size: ${servingSize}
             // Merge duplicate meal entries and food items
             const mergedLines = mergeMacroLines(allLines);
 
-            // FIXED: Now expand the meal templates while preserving existing bullet point quantities
+            // FIXED: Preserve existing bullet points while expanding meal templates
             let expandedContent = '';
 
             // First pass: collect existing bullet point quantities for each meal
             const existingBulletPoints = new Map<string, Map<string, string>>();
+            const existingBulletOrder = new Map<string, string[]>(); // Track order of items
 
             // Parse existing content to find bullet points under meals
             const existingLines = blockContent
@@ -485,19 +487,26 @@ serving_size: ${servingSize}
 
                 if (!existingBulletPoints.has(currentMeal)) {
                   existingBulletPoints.set(currentMeal, new Map());
+                  existingBulletOrder.set(currentMeal, []);
                 }
               } else if (line.startsWith('-') && currentMeal) {
                 const itemText = line.substring(1).trim();
-                if (itemText.includes(':')) {
-                  const parts = itemText.split(':');
-                  const foodName = parts[0].trim().toLowerCase();
-                  const quantity = parts[1].trim();
-                  existingBulletPoints.get(currentMeal)?.set(foodName, quantity);
-                }
+                const foodName = itemText.includes(':')
+                  ? itemText.split(':')[0].trim().toLowerCase()
+                  : itemText.toLowerCase();
+
+                existingBulletPoints.get(currentMeal)?.set(foodName, itemText);
+                existingBulletOrder.get(currentMeal)?.push(foodName);
               }
             }
 
-            // Second pass: expand meals with preserved quantities
+            // Second pass: expand meals while preserving existing bullet points
+            // CRITICAL FIX: Only expand meal templates if new meal items are being added
+            const newMealLines = interactiveLines.filter((line) =>
+              line.toLowerCase().startsWith('meal:')
+            );
+            const shouldExpandMealTemplates = newMealLines.length > 0;
+
             mergedLines.forEach((line: string) => {
               if (line.toLowerCase().startsWith('meal:')) {
                 // Extract meal name and potential multiplier
@@ -516,41 +525,92 @@ serving_size: ${servingSize}
                   (m) => m.name.toLowerCase() === mealName.toLowerCase()
                 );
 
-                if (meal && meal.items.length > 0) {
+                // Check if this specific meal is being newly added
+                const isMealBeingAdded = newMealLines.some((newLine) => {
+                  const newMealText = newLine.substring(5).trim();
+                  let newMealName = newMealText;
+                  const newCountMatch = newMealText.match(/^(.*)\s+×\s+(\d+)$/);
+                  if (newCountMatch) {
+                    newMealName = newCountMatch[1];
+                  }
+                  return newMealName.toLowerCase() === mealName.toLowerCase();
+                });
+
+                if (
+                  meal &&
+                  meal.items.length > 0 &&
+                  (shouldExpandMealTemplates || isMealBeingAdded)
+                ) {
                   expandedContent += line + '\n';
 
                   // Get existing bullet points for this meal
                   const existingBullets =
                     existingBulletPoints.get(mealName.toLowerCase()) || new Map();
+                  const existingOrder = existingBulletOrder.get(mealName.toLowerCase()) || [];
 
-                  // Add meal items with preserved or calculated quantities
-                  meal.items.forEach((item) => {
-                    const parts = item.split(':');
-                    const foodName = parts[0].trim();
-                    const foodNameLower = foodName.toLowerCase();
+                  // Create a set of template items for easy lookup
+                  const templateItems = new Set(
+                    meal.items.map((item) => {
+                      const foodName = item.includes(':') ? item.split(':')[0].trim() : item;
+                      return foodName.toLowerCase();
+                    })
+                  );
 
-                    // Check if we have an existing custom quantity for this food item
-                    if (existingBullets.has(foodNameLower)) {
-                      // Use the existing custom quantity
-                      const existingQuantity = existingBullets.get(foodNameLower);
-                      expandedContent += `- ${foodName}:${existingQuantity}\n`;
-                    } else if (parts.length > 1 && parts[1].includes('g')) {
-                      // Use template quantity with count multiplier
-                      const servingMatch = parts[1].match(/^([\d.]+)g/);
-                      if (servingMatch) {
-                        const serving = parseFloat(servingMatch[1]);
-                        const multipliedServing = serving * count;
-                        expandedContent += `- ${foodName}:${multipliedServing}g\n`;
+                  // First, add all existing custom bullet points (preserving user modifications)
+                  for (const foodName of existingOrder) {
+                    const itemText = existingBullets.get(foodName);
+                    if (itemText) {
+                      // Check if this item exists in the template
+                      if (templateItems.has(foodName)) {
+                        // This is a template item with custom quantity - use the custom version
+                        expandedContent += `- ${itemText}\n`;
+                        templateItems.delete(foodName); // Remove from template items to avoid duplication
                       } else {
-                        expandedContent += `- ${item}\n`;
+                        // This is a custom item not in the template - preserve it
+                        expandedContent += `- ${itemText}\n`;
                       }
-                    } else {
-                      // No quantity specified in template
-                      expandedContent += `- ${item}\n`;
                     }
-                  });
+                  }
+
+                  // Then, add any remaining template items that weren't customized (only if meal is being added/modified)
+                  if (isMealBeingAdded) {
+                    meal.items.forEach((item) => {
+                      const foodName = item.includes(':') ? item.split(':')[0].trim() : item;
+                      const foodNameLower = foodName.toLowerCase();
+
+                      if (templateItems.has(foodNameLower)) {
+                        // This template item wasn't customized, so add it with multiplier
+                        if (item.includes(':') && item.includes('g')) {
+                          const parts = item.split(':');
+                          const servingMatch = parts[1].match(/^([\d.]+)g/);
+                          if (servingMatch) {
+                            const serving = parseFloat(servingMatch[1]);
+                            const multipliedServing = serving * count;
+                            expandedContent += `- ${foodName}:${multipliedServing}g\n`;
+                          } else {
+                            expandedContent += `- ${item}\n`;
+                          }
+                        } else {
+                          expandedContent += `- ${item}\n`;
+                        }
+                      }
+                    });
+                  }
                 } else {
+                  // If not expanding templates or no meal template found, just preserve existing structure
                   expandedContent += line + '\n';
+
+                  // Preserve existing bullet points exactly as they are
+                  const existingBullets =
+                    existingBulletPoints.get(mealName.toLowerCase()) || new Map();
+                  const existingOrder = existingBulletOrder.get(mealName.toLowerCase()) || [];
+
+                  for (const foodName of existingOrder) {
+                    const itemText = existingBullets.get(foodName);
+                    if (itemText) {
+                      expandedContent += `- ${itemText}\n`;
+                    }
+                  }
                 }
               } else {
                 expandedContent += line + '\n';

@@ -13,7 +13,115 @@ import {
   ProgressBarFactory,
 } from '../../../utils';
 import { parseGrams } from '../../../utils/parsingUtils';
-import { Notice } from 'obsidian';
+import { Notice, Modal, ButtonComponent } from 'obsidian';
+
+/**
+ * Confirmation Modal for Delete Actions
+ */
+class DeleteConfirmationModal extends Modal {
+  private itemName: string;
+  private isMealItem: boolean;
+  private mealName: string;
+  private onConfirm: () => Promise<void>;
+  private onCancel: () => void;
+
+  constructor(
+    plugin: MacrosPlugin,
+    itemName: string,
+    isMealItem: boolean,
+    mealName: string,
+    onConfirm: () => Promise<void>,
+    onCancel: () => void
+  ) {
+    super(plugin.app);
+    this.itemName = itemName;
+    this.isMealItem = isMealItem;
+    this.mealName = mealName;
+    this.onConfirm = onConfirm;
+    this.onCancel = onCancel;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    // Modal header
+    const header = contentEl.createEl('div', { cls: 'modal-header delete-confirmation-header' });
+    header.createEl('h2', {
+      text: 'Remove Item',
+      cls: 'delete-confirmation-title',
+    });
+
+    // Modal content
+    const content = contentEl.createEl('div', { cls: 'modal-content delete-confirmation-content' });
+
+    // Warning icon and message
+    const messageContainer = content.createEl('div', { cls: 'delete-message-container' });
+    messageContainer.createEl('div', {
+      cls: 'delete-warning-icon',
+      text: '⚠️',
+    });
+
+    const message = this.isMealItem
+      ? `Are you sure you want to remove "${this.itemName}" from "${this.mealName}"?`
+      : `Are you sure you want to remove "${this.itemName}" from the table?`;
+
+    messageContainer.createEl('p', {
+      text: message,
+      cls: 'delete-confirmation-message',
+    });
+
+    // Additional context
+    const contextText = this.isMealItem
+      ? 'This will only remove the item from this meal template instance, not from your food database.'
+      : 'This will remove the item from your macro tracking table.';
+
+    content.createEl('p', {
+      text: contextText,
+      cls: 'delete-context-message',
+    });
+
+    // Button container
+    const buttonContainer = content.createEl('div', { cls: 'modal-button-container' });
+
+    // Cancel button
+    const cancelBtn = new ButtonComponent(buttonContainer)
+      .setButtonText('Cancel')
+      .setClass('mod-muted')
+      .onClick(() => {
+        this.onCancel();
+        this.close();
+      });
+
+    // Delete button
+    const deleteBtn = new ButtonComponent(buttonContainer)
+      .setButtonText('Remove')
+      .setClass('mod-warning')
+      .onClick(async () => {
+        try {
+          await this.onConfirm();
+          this.close();
+        } catch (error) {
+          console.error('Error during delete:', error);
+          new Notice(`Failed to remove item: ${(error as Error).message}`);
+        }
+      });
+
+    // Focus the cancel button by default for safety
+    cancelBtn.buttonEl.focus();
+
+    // Handle escape key
+    this.scope.register([], 'Escape', () => {
+      this.onCancel();
+      this.close();
+    });
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
 
 export class RowRenderer {
   private plugin: MacrosPlugin;
@@ -68,6 +176,211 @@ export class RowRenderer {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  /**
+   * Detects if the current device is mobile/touch-capable
+   */
+  private isMobileDevice(): boolean {
+    return window.innerWidth <= 768 || 'ontouchstart' in window;
+  }
+
+  /**
+   * Implements long press to delete functionality for mobile devices
+   */
+  private setupLongPressToDelete(
+    tableRow: HTMLTableRowElement,
+    row: MacroRow,
+    isMealItem: boolean,
+    mealName: string
+  ): void {
+    if (!this.isMobileDevice()) {
+      return; // Only enable on mobile devices
+    }
+
+    let longPressTimer: NodeJS.Timeout | null = null;
+    let startTime = 0;
+    let startX = 0;
+    let startY = 0;
+    let isLongPress = false;
+    let hasMovedTooMuch = false;
+
+    const longPressDuration = 800; // 800ms for long press
+    const movementThreshold = 10; // 10px movement tolerance
+
+    // Visual feedback element
+    const createLongPressIndicator = (): HTMLElement => {
+      const indicator = document.createElement('div');
+      indicator.className = 'long-press-indicator';
+      indicator.innerHTML = `
+        <div class="long-press-content">
+          <div class="long-press-circle">
+            <div class="long-press-progress"></div>
+          </div>
+          <div class="long-press-text">Hold to delete</div>
+        </div>
+      `;
+      return indicator;
+    };
+
+    // Touch start handler
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return; // Only single touch
+
+      const touch = e.touches[0];
+      startTime = Date.now();
+      startX = touch.clientX;
+      startY = touch.clientY;
+      isLongPress = false;
+      hasMovedTooMuch = false;
+
+      // Add visual feedback class
+      tableRow.classList.add('long-press-active');
+
+      // Start long press timer
+      longPressTimer = setTimeout(() => {
+        if (!hasMovedTooMuch) {
+          isLongPress = true;
+          tableRow.classList.add('long-press-ready');
+
+          // Haptic feedback if available
+          if ('vibrate' in navigator) {
+            navigator.vibrate([50, 50, 100]); // Pattern: short, short, long
+          }
+
+          // Show delete confirmation modal
+          this.showDeleteConfirmation(row, isMealItem, mealName);
+        }
+      }, longPressDuration);
+    };
+
+    // Touch move handler
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1 || !longPressTimer) return;
+
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - startX);
+      const deltaY = Math.abs(touch.clientY - startY);
+
+      // If user moves too much, cancel long press
+      if (deltaX > movementThreshold || deltaY > movementThreshold) {
+        hasMovedTooMuch = true;
+        this.cancelLongPress(tableRow, longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    // Touch end handler
+    const handleTouchEnd = () => {
+      if (longPressTimer) {
+        this.cancelLongPress(tableRow, longPressTimer);
+        longPressTimer = null;
+      }
+
+      // Clean up visual states
+      tableRow.classList.remove('long-press-active', 'long-press-ready');
+      isLongPress = false;
+      hasMovedTooMuch = false;
+    };
+
+    // Touch cancel handler
+    const handleTouchCancel = () => {
+      if (longPressTimer) {
+        this.cancelLongPress(tableRow, longPressTimer);
+        longPressTimer = null;
+      }
+
+      tableRow.classList.remove('long-press-active', 'long-press-ready');
+      isLongPress = false;
+      hasMovedTooMuch = false;
+    };
+
+    // Register event listeners
+    this.plugin.registerDomEvent(tableRow, 'touchstart', handleTouchStart, { passive: true });
+    this.plugin.registerDomEvent(tableRow, 'touchmove', handleTouchMove, { passive: true });
+    this.plugin.registerDomEvent(tableRow, 'touchend', handleTouchEnd, { passive: true });
+    this.plugin.registerDomEvent(tableRow, 'touchcancel', handleTouchCancel, { passive: true });
+
+    // Prevent context menu on long press (which can interfere)
+    this.plugin.registerDomEvent(tableRow, 'contextmenu', (e: Event) => {
+      if (this.isMobileDevice()) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  /**
+   * Cancels an active long press
+   */
+  private cancelLongPress(tableRow: HTMLTableRowElement, timer: NodeJS.Timeout): void {
+    clearTimeout(timer);
+    tableRow.classList.remove('long-press-active', 'long-press-ready');
+  }
+
+  /**
+   * Shows the delete confirmation modal
+   */
+  private showDeleteConfirmation(row: MacroRow, isMealItem: boolean, mealName: string): void {
+    const modal = new DeleteConfirmationModal(
+      this.plugin,
+      row.name,
+      isMealItem,
+      mealName,
+      async () => {
+        // Confirm action
+        try {
+          if (isMealItem) {
+            await this.onRemoveMealItem(mealName, row.name, row.macroLine);
+          } else {
+            await this.onRemove(row.macroLine);
+          }
+
+          const itemDescription = isMealItem ? `${row.name} from ${mealName}` : row.name;
+          new Notice(`Removed ${itemDescription}`);
+        } catch (error) {
+          this.plugin.logger.error('Error removing item:', error);
+          new Notice(`Failed to remove item: ${(error as Error).message}`);
+        }
+      },
+      () => {
+        // Cancel action
+        new Notice('Removal cancelled');
+      }
+    );
+
+    modal.open();
+  }
+
+  /**
+   * Creates a desktop remove button (only shown on non-mobile devices)
+   */
+  private createDesktopRemoveButton(
+    container: HTMLElement,
+    isMealItem: boolean,
+    mealName: string,
+    row: MacroRow
+  ): HTMLElement | null {
+    if (this.isMobileDevice()) {
+      return null; // Don't create button on mobile
+    }
+
+    const removeBtn = container.createSpan({
+      cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE} macro-food-remove-btn`,
+      text: '–',
+    });
+
+    const tooltipText = isMealItem ? `Remove ${row.name} from ${mealName}` : 'Remove this item';
+
+    safeAttachTooltip(removeBtn, tooltipText, this.plugin);
+
+    this.plugin.registerDomEvent(removeBtn, 'click', async (e: MouseEvent) => {
+      e.stopPropagation();
+
+      // Show confirmation modal on desktop too for consistency
+      this.showDeleteConfirmation(row, isMealItem, mealName);
+    });
+
+    return removeBtn;
+  }
+
   async onRemove(macroLine: string): Promise<void> {
     if (this.removeCallback) {
       await this.removeCallback(macroLine);
@@ -94,61 +407,124 @@ export class RowRenderer {
     }
   }
 
-  private findAffectedIds(): string[] {
-    const affectedIds: string[] = [];
-
-    try {
-      if (this.plugin.dataManager._activeMacrosCalcRenderers) {
-        for (const renderer of this.plugin.dataManager._activeMacrosCalcRenderers) {
-          if (typeof renderer.getIds === 'function') {
-            const rendererIds = renderer.getIds();
-            affectedIds.push(...rendererIds);
-          }
-        }
-      }
-    } catch (error) {
-      this.plugin.logger.error('Error finding affected IDs:', error);
+  /**
+   * Remove a meal template item by modifying the macros block
+   */
+  async onRemoveMealItem(mealName: string, foodName: string, macroLine: string): Promise<void> {
+    if (!this.plugin.dataManager.getActiveFile()) {
+      new Notice('No active file to modify');
+      return;
     }
 
-    return [...new Set(affectedIds)];
-  }
-
-  private async refreshAffectedRenderers(affectedIds: string[]): Promise<void> {
-    if (!affectedIds.length) return;
-
     try {
-      for (const id of affectedIds) {
-        const freshData = await this.plugin.loadMacroTableFromVault(id);
-        if (freshData) {
-          this.plugin.dataManager.macroTables.set(id, freshData);
-          this.plugin.logger.debug(`Refreshed data for ID: ${id}`);
+      // Find the macros block ID from the current context
+      const macrosContainer = document.querySelector('[data-macros-id]');
+      const macrosId = macrosContainer?.getAttribute('data-macros-id');
+
+      if (!macrosId) {
+        // Fallback: try to find ID from DOM or use a different approach
+        this.plugin.logger.warn('Could not find macros ID, attempting fallback');
+
+        // Look for the ID in the page content
+        const activeFile = this.plugin.dataManager.getActiveFile();
+        if (!activeFile) {
+          throw new Error('No active file available');
         }
-      }
 
-      if (this.plugin.dataManager._activeMacrosCalcRenderers) {
-        for (const renderer of this.plugin.dataManager._activeMacrosCalcRenderers) {
-          if (typeof renderer.getIds === 'function') {
-            const rendererIds = renderer.getIds();
-            const shouldRefresh = rendererIds.some((id) => affectedIds.includes(id));
+        const content = await this.plugin.dataManager.readFileContent(activeFile, true);
+        const regex = /```macros\s+id:\s*(\S+)\s*([\s\S]*?)```/g;
+        let foundId = null;
+        let match;
 
-            if (shouldRefresh) {
-              if (typeof renderer.setNeedsRefresh === 'function') {
-                renderer.setNeedsRefresh();
-                this.plugin.logger.debug(`Marked renderer for refresh: ${rendererIds.join(',')}`);
-
-                if (typeof renderer.render === 'function') {
-                  const { aggregate, breakdown } =
-                    this.plugin.processNutritionalDataFromLines(rendererIds);
-                  await renderer.render(aggregate, breakdown);
-                  this.plugin.logger.debug(`Re-rendered renderer: ${rendererIds.join(',')}`);
-                }
-              }
-            }
+        while ((match = regex.exec(content)) !== null) {
+          const blockContent = match[2];
+          if (
+            blockContent.includes(`meal:${mealName}`) ||
+            blockContent.includes(`meal: ${mealName}`)
+          ) {
+            foundId = match[1];
+            break;
           }
         }
+
+        if (!foundId) {
+          throw new Error(`Could not find macros block containing meal: ${mealName}`);
+        }
+
+        await this.removeMealItemFromBlock(foundId, mealName, foodName);
+      } else {
+        await this.removeMealItemFromBlock(macrosId, mealName, foodName);
       }
+
+      await this.plugin.forceCompleteReload();
     } catch (error) {
-      this.plugin.logger.error('Error refreshing affected renderers:', error);
+      this.plugin.logger.error('Error removing meal item:', error);
+      throw error; // Re-throw so modal can handle it
+    }
+  }
+
+  /**
+   * Remove a specific food item from a meal template in the macros block
+   */
+  private async removeMealItemFromBlock(
+    macrosId: string,
+    mealName: string,
+    foodName: string
+  ): Promise<void> {
+    const context = await this.plugin.dataManager.getDocumentContext(macrosId);
+
+    if (!context || context.allLines.length === 0) {
+      throw new Error('No macros data found');
+    }
+
+    // Find the meal line
+    const mealLineIndex = context.allLines.findIndex((line) => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine.toLowerCase().startsWith('meal:')) return false;
+
+      const extractedMealName = trimmedLine.substring(5).trim();
+      const baseMealName = extractedMealName.includes(' × ')
+        ? extractedMealName.split(' × ')[0]
+        : extractedMealName;
+
+      return baseMealName.toLowerCase() === mealName.toLowerCase();
+    });
+
+    if (mealLineIndex === -1) {
+      throw new Error(`Meal '${mealName}' not found in macros block`);
+    }
+
+    // Create a new array of lines with the food item removed
+    const updatedLines = [...context.allLines];
+    let i = mealLineIndex + 1;
+    let itemRemoved = false;
+
+    // Look through bullet points following the meal line
+    while (i < context.allLines.length && context.allLines[i].trim().startsWith('-')) {
+      const line = context.allLines[i].trim();
+      const itemText = line.substring(1).trim(); // Remove the bullet
+      const itemFoodName = this.extractFoodName(itemText);
+
+      // Check if this item matches the food we want to remove
+      if (itemFoodName.toLowerCase() === foodName.toLowerCase()) {
+        // Remove this line
+        updatedLines.splice(i, 1);
+        itemRemoved = true;
+        break;
+      }
+
+      i++;
+    }
+
+    if (!itemRemoved) {
+      throw new Error(`Food item '${foodName}' not found under meal '${mealName}'`);
+    }
+
+    // Update the macros block
+    const success = await this.plugin.dataManager.updateMacrosBlock(macrosId, updatedLines);
+
+    if (!success) {
+      throw new Error('Failed to update macros block');
     }
   }
 
@@ -167,22 +543,42 @@ export class RowRenderer {
     const isMealItem = !!group.macroLine && group.macroLine.toLowerCase().startsWith('meal:');
     const mealName = isMealItem ? group.name : '';
 
+    // Set up long press to delete for mobile (applies to the whole row)
+    if (!group.macroLine || isMealItem) {
+      this.setupLongPressToDelete(r, row, isMealItem, mealName);
+    }
+
+    // Create name cell
     const nameCell = r.insertCell();
-    const nameContainer = nameCell.createDiv({ cls: 'macro-space-between' });
-    nameContainer.createSpan({ text: row.name });
+    const nameContainer = nameCell.createDiv({ cls: 'macro-food-name-container' });
 
-    if (!group.macroLine) {
-      const removeBtn = nameContainer.createSpan({
-        cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE}`,
-        text: '–',
-      });
+    // Create a span for the food name with text truncation
+    const nameSpan = nameContainer.createSpan({
+      cls: 'macro-food-name',
+    });
+    nameSpan.textContent = row.name;
 
-      safeAttachTooltip(removeBtn, 'Remove this item', this.plugin);
+    // Explicitly remove any title attribute that might have been set
+    nameSpan.removeAttribute('title');
 
-      this.plugin.registerDomListener(removeBtn, 'click', async (e: MouseEvent) => {
-        e.stopPropagation();
-        await this.onRemove(row.macroLine);
-      });
+    // Use TooltipManager for consistent tooltips - check if truncated after DOM is ready
+    setTimeout(() => {
+      // Check if the text is actually truncated by comparing scroll width vs client width
+      if (nameSpan.scrollWidth > nameSpan.clientWidth) {
+        // Double-check no title attribute is present
+        nameSpan.removeAttribute('title');
+        safeAttachTooltip(nameSpan, row.name, this.plugin);
+      }
+    }, 150);
+
+    // Add remove button only on desktop (mobile uses long press)
+    if (!group.macroLine || isMealItem) {
+      this.createDesktopRemoveButton(nameContainer, isMealItem, mealName, row);
+    }
+
+    // Add mobile instruction tooltip
+    if (this.isMobileDevice() && (!group.macroLine || isMealItem)) {
+      safeAttachTooltip(nameCell, 'Long press to delete this item', this.plugin);
     }
 
     const quantityCell = r.insertCell();
@@ -248,13 +644,13 @@ export class RowRenderer {
         }
       };
 
-      this.plugin.registerDomListener(input, 'blur', inputBlurHandler);
-      this.plugin.registerDomListener(input, 'keydown', inputKeydownHandler);
+      this.plugin.registerDomEvent(input, 'blur', inputBlurHandler);
+      this.plugin.registerDomEvent(input, 'keydown', inputKeydownHandler);
 
       e.stopPropagation();
     };
 
-    this.plugin.registerDomListener(quantityCell, 'click', quantityCellClickHandler);
+    this.plugin.registerDomEvent(quantityCell, 'click', quantityCellClickHandler);
 
     const caloriesCell = r.insertCell();
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CALORIES_CELL);

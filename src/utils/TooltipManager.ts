@@ -1,3 +1,5 @@
+// Simplified and more reliable mobile tooltip handling
+
 import { DOMUtils } from './DOMUtils';
 import MacrosPlugin from '@/main';
 
@@ -5,6 +7,12 @@ import MacrosPlugin from '@/main';
 let tooltipEl: HTMLDivElement | null = null;
 let mutationObserver: MutationObserver | null = null;
 let pluginInstance: MacrosPlugin | null = null;
+let isMobileDevice = false;
+
+// Simplified mobile detection
+function detectMobileDevice(): boolean {
+  return window.innerWidth <= 768 || 'ontouchstart' in window;
+}
 
 function ensureTooltipEl(): HTMLDivElement {
   if (!tooltipEl) {
@@ -24,40 +32,61 @@ export class TooltipManager {
 
   // Single timer for delayed operations
   private static timer: ReturnType<typeof setTimeout> | null = null;
+  private static mobileHideTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // Constants
-  private static readonly SHOW_DELAY = 50;
-  private static readonly HIDE_DELAY = 150;
+  // Simplified constants
+  private static readonly SHOW_DELAY = 100;
+  private static readonly HIDE_DELAY = 200;
 
   static initGlobalTooltipSystem(plugin: MacrosPlugin): void {
     // Store plugin instance for later use
     pluginInstance = plugin;
 
+    // Update mobile detection on resize
+    isMobileDevice = detectMobileDevice();
+
     const tooltip = ensureTooltipEl();
 
-    // Mouse enter/leave handlers for the tooltip itself - using registerDomEvent
+    // Desktop hover behavior
     plugin.registerDomEvent(tooltip, 'mouseenter', () => {
-      tooltip.classList.add('tooltip-visible');
+      if (!isMobileDevice) {
+        tooltip.classList.add('tooltip-visible');
+      }
     });
 
     plugin.registerDomEvent(tooltip, 'mouseleave', () => {
-      TooltipManager.hide();
+      if (!isMobileDevice) {
+        TooltipManager.hide();
+      }
     });
 
-    // Global event listeners - using registerDomEvent
+    // Global event listeners
     plugin.registerDomEvent(document, 'visibilitychange', () => {
       if (document.hidden) TooltipManager.forceHide();
     });
 
     plugin.registerDomEvent(window, 'resize', () => {
       TooltipManager.forceHide();
+      isMobileDevice = detectMobileDevice();
     });
 
     plugin.registerDomEvent(window, 'beforeunload', () => {
       TooltipManager.forceHide();
     });
 
-    // DOM mutation observer to hide tooltip when DOM changes
+    // Mobile: Hide tooltip when scrolling
+    plugin.registerDomEvent(
+      window,
+      'scroll',
+      () => {
+        if (isMobileDevice) {
+          TooltipManager.forceHide();
+        }
+      },
+      { passive: true }
+    );
+
+    // DOM mutation observer
     if (mutationObserver) {
       mutationObserver.disconnect();
     }
@@ -70,183 +99,217 @@ export class TooltipManager {
     mutationObserver.observe(root, { childList: true, subtree: true });
   }
 
-  /**
-   * Cleanup all resources used by the tooltip system
-   */
   static cleanup(): void {
-    // Clean up the mutation observer
     if (mutationObserver) {
       mutationObserver.disconnect();
       mutationObserver = null;
     }
 
-    // Clear any pending timers
     if (TooltipManager.timer !== null) {
       clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
-    // Remove tooltip element from the DOM
+    if (TooltipManager.mobileHideTimer !== null) {
+      clearTimeout(TooltipManager.mobileHideTimer);
+      TooltipManager.mobileHideTimer = null;
+    }
+
     if (tooltipEl && tooltipEl.parentNode) {
       tooltipEl.parentNode.removeChild(tooltipEl);
       tooltipEl = null;
     }
 
-    // Reset state
     TooltipManager.isActive = false;
     TooltipManager.activeTarget = null;
     TooltipManager.activeContent = '';
-
-    // Clear plugin reference
     pluginInstance = null;
   }
 
-  /**
-   * Request to show a tooltip on a target element
-   */
   static show(targetEl: HTMLElement, text: string): void {
-    // Always clear any pending timer first
+    // Clear any existing timers
     if (TooltipManager.timer !== null) {
       clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
-    // Update current state
+    if (TooltipManager.mobileHideTimer !== null) {
+      clearTimeout(TooltipManager.mobileHideTimer);
+      TooltipManager.mobileHideTimer = null;
+    }
+
     TooltipManager.activeTarget = targetEl;
     TooltipManager.activeContent = text;
 
-    // Set timer to show tooltip after delay
+    // Show immediately on mobile, with delay on desktop
+    const delay = isMobileDevice ? 0 : TooltipManager.SHOW_DELAY;
+
     TooltipManager.timer = setTimeout(() => {
       TooltipManager.displayTooltip();
       TooltipManager.timer = null;
-    }, TooltipManager.SHOW_DELAY);
+    }, delay);
   }
 
-  /**
-   * Actually display the tooltip at the target position
-   */
   private static displayTooltip(): void {
     if (!TooltipManager.activeTarget || !TooltipManager.activeContent) return;
 
     const el = ensureTooltipEl();
     const targetEl = TooltipManager.activeTarget;
 
-    // First reset all classes
+    // Reset classes
     el.classList.remove('tooltip-visible');
     el.classList.add('macro-tooltip-hidden');
 
     // Set content
     el.textContent = TooltipManager.activeContent;
 
-    // Position the tooltip
+    // Position tooltip
     const rect = targetEl.getBoundingClientRect();
-    const x = rect.left + rect.width / 2 + window.scrollX;
-    const y = rect.bottom + 8 + window.scrollY;
+    let x = rect.left + rect.width / 2 + window.scrollX;
+    let y = rect.bottom + 12 + window.scrollY;
+
+    // Mobile positioning adjustments
+    if (isMobileDevice) {
+      el.classList.add('macro-tooltip-mobile');
+
+      // Position near the bottom of the Obsidian app, but above the toolbar
+      const obsidianApp = document.querySelector('.app-container') || document.body;
+      const appRect = obsidianApp.getBoundingClientRect();
+
+      // Set Y position to be above the bottom toolbar (more clearance)
+      const bottomOffset = 120; // Increased distance from bottom to avoid toolbar
+      y = appRect.bottom - bottomOffset + window.scrollY;
+
+      // Center horizontally in the app
+      x = appRect.left + appRect.width / 2 + window.scrollX;
+
+      // Keep within viewport horizontally
+      const tooltipWidth = 240;
+      if (x + tooltipWidth / 2 > window.innerWidth - 10) {
+        x = window.innerWidth - tooltipWidth / 2 - 10;
+      }
+      if (x - tooltipWidth / 2 < 10) {
+        x = tooltipWidth / 2 + 10;
+      }
+
+      // Ensure it doesn't go below the viewport
+      if (y + 40 > window.innerHeight + window.scrollY) {
+        y = window.innerHeight + window.scrollY - 50;
+      }
+    } else {
+      el.classList.remove('macro-tooltip-mobile');
+    }
 
     // Set position
     DOMUtils.setCSSProperty(el, '--x', `${x}px`);
     DOMUtils.setCSSProperty(el, '--y', `${y}px`);
 
-    // Show tooltip (force reflow between class changes)
+    // Show tooltip
     el.classList.remove('macro-tooltip-hidden');
     el.classList.add('macro-tooltip-positioned');
 
     // Force reflow
     void el.offsetWidth;
 
-    // Make visible
     el.classList.add('tooltip-visible');
     TooltipManager.isActive = true;
+
+    // Auto-hide on mobile after 3 seconds
+    if (isMobileDevice) {
+      TooltipManager.mobileHideTimer = setTimeout(() => {
+        TooltipManager.forceHide();
+      }, 3000);
+    }
   }
 
-  /**
-   * Request to hide the tooltip
-   */
   static hide(): void {
-    // Clear any pending show timer
     if (TooltipManager.timer !== null) {
       clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
-    // Only proceed if tooltip is currently active
     if (!TooltipManager.isActive) return;
 
-    // Set timer to hide tooltip after delay
+    // Hide immediately on mobile
+    const hideDelay = isMobileDevice ? 0 : TooltipManager.HIDE_DELAY;
+
     TooltipManager.timer = setTimeout(() => {
       TooltipManager.hideTooltip();
       TooltipManager.timer = null;
-    }, TooltipManager.HIDE_DELAY);
+    }, hideDelay);
   }
 
-  /**
-   * Actually hide the tooltip
-   */
   private static hideTooltip(): void {
     const el = ensureTooltipEl();
 
-    // Remove visible class first (starts CSS transition)
     el.classList.remove('tooltip-visible');
 
-    // Wait for transition to complete before hiding completely
     setTimeout(() => {
       if (!el.classList.contains('tooltip-visible')) {
         el.classList.add('macro-tooltip-hidden');
         el.classList.remove('macro-tooltip-positioned');
+        el.classList.remove('macro-tooltip-mobile');
         DOMUtils.setCSSProperty(el, '--x', `-9999px`);
         DOMUtils.setCSSProperty(el, '--y', `-9999px`);
         el.textContent = '';
 
-        // Reset state
         TooltipManager.isActive = false;
         TooltipManager.activeTarget = null;
         TooltipManager.activeContent = '';
       }
-    }, 150); // Match transition duration in CSS
+    }, 150);
   }
 
-  /**
-   * Immediately hide tooltip without delay or animation
-   */
   static forceHide(): void {
-    // Clear any pending timers
     if (TooltipManager.timer !== null) {
       clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
+    if (TooltipManager.mobileHideTimer !== null) {
+      clearTimeout(TooltipManager.mobileHideTimer);
+      TooltipManager.mobileHideTimer = null;
+    }
+
     const el = tooltipEl;
     if (el) {
-      // Reset all classes immediately
       el.classList.remove('tooltip-visible');
+      el.classList.remove('macro-tooltip-mobile');
       el.classList.add('macro-tooltip-hidden');
       el.classList.remove('macro-tooltip-positioned');
 
-      // Move offscreen
       DOMUtils.setCSSProperty(el, '--x', `-9999px`);
       DOMUtils.setCSSProperty(el, '--y', `-9999px`);
       el.textContent = '';
     }
 
-    // Reset state
     TooltipManager.isActive = false;
     TooltipManager.activeTarget = null;
     TooltipManager.activeContent = '';
   }
 }
 
+// Simplified attachment functions
 export function attachTooltip(targetEl: HTMLElement, tooltipContent: string): void {
-  // Skip if no plugin instance available
   if (!pluginInstance) return;
 
-  // Use registerDomEvent for pointerenter/leave events
-  pluginInstance.registerDomEvent(targetEl, 'pointerenter', () => {
-    TooltipManager.show(targetEl, tooltipContent);
-  });
+  if (isMobileDevice) {
+    // Simple tap to show on mobile
+    pluginInstance.registerDomEvent(targetEl, 'click', (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      TooltipManager.show(targetEl, tooltipContent);
+    });
+  } else {
+    // Hover on desktop
+    pluginInstance.registerDomEvent(targetEl, 'pointerenter', () => {
+      TooltipManager.show(targetEl, tooltipContent);
+    });
 
-  pluginInstance.registerDomEvent(targetEl, 'pointerleave', () => {
-    TooltipManager.hide();
-  });
+    pluginInstance.registerDomEvent(targetEl, 'pointerleave', () => {
+      TooltipManager.hide();
+    });
+  }
 }
 
 export function attachLazyTooltip(targetEl: HTMLElement, tooltipContent: string): void {
@@ -258,9 +321,9 @@ export function safeAttachTooltip(
   tooltipContent: string,
   plugin: MacrosPlugin
 ): void {
-  // Store plugin instance if not already stored
   if (!pluginInstance) {
     pluginInstance = plugin;
+    isMobileDevice = detectMobileDevice();
   }
 
   if (plugin.settings.disableTooltips) {
