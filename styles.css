@@ -1,10 +1,3 @@
-/*
- * Macros Plugin for Obsidian
- * -------------------------
- * Optimized styles for the Macros plugin interface elements
- * Version 2.4.0 - Updated with consistent headers and improved styling
- */
-
 /* ==============================
  * 1. GENERAL LAYOUT AND BASE STYLES
  * ============================== */
@@ -88,6 +81,13 @@
 	width: 100%;
 	border-collapse: collapse;
 	margin: 1rem 0;
+	position: relative;
+	z-index: 1;
+}
+
+.macros-table tbody {
+	position: relative;
+	z-index: 2;
 }
 
 .macros-table td,
@@ -122,6 +122,17 @@
 	background-color: var(--background-modifier-hover);
 }
 
+.macros-table tr {
+	position: relative;
+	transition: background-color 0.2s ease;
+}
+
+.macros-table tr:focus-within {
+	outline: 2px solid var(--interactive-accent) !important;
+	outline-offset: 2px !important;
+	z-index: 15;
+}
+
 .macros-table td[colspan='2'] {
 	text-align: center;
 	font-weight: 600;
@@ -131,6 +142,10 @@
 .macros-table td:first-child {
 	text-align: left;
 	padding-right: 15px;
+	max-width: 200px;
+	min-width: 120px;
+	width: auto;
+	padding: 8px 12px;
 }
 
 .macros-table td:first-child > div {
@@ -158,10 +173,47 @@
 }
 
 .macro-food-name-container {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	width: 100%;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	width: 100% !important;
+	min-height: 24px !important;
+	gap: 8px !important;
+}
+
+.macro-food-name {
+	flex: 1 1 auto !important;
+	min-width: 0 !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
+	margin-right: 4px !important;
+	cursor: default !important;
+}
+
+.macro-food-remove-btn {
+	flex: 0 0 auto !important;
+	min-width: 20px !important;
+	width: 20px !important;
+	height: 20px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	margin-left: auto !important;
+	opacity: 0.7 !important;
+	transition: all 0.2s ease !important;
+	cursor: pointer !important;
+	border-radius: 3px !important;
+	font-size: 14px !important;
+	font-weight: bold !important;
+	color: var(--text-muted) !important;
+}
+
+.macro-food-remove-btn:hover {
+	opacity: 1 !important;
+	background-color: var(--background-modifier-hover) !important;
+	color: var(--text-error) !important;
+	transform: scale(1.1) !important;
 }
 
 .expanded-row {
@@ -280,24 +332,6 @@
 	font-weight: normal;
 }
 
-.toggle-icon {
-	width: 20px;
-	height: 20px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: transform 0.2s ease;
-	font-size: 12px;
-}
-
-.toggle-icon::after {
-	content: '▼';
-}
-
-.toggle-icon.collapsed::after {
-	content: '▸';
-}
-
 .meal-header,
 .combined-totals-header {
 	background-color: var(--background-modifier-form-field);
@@ -354,32 +388,6 @@
 
 .meal-name {
 	font-weight: 700;
-}
-
-.meal-toggle-icon {
-	opacity: 0.9;
-	font-size: 1.1rem;
-	font-weight: 700;
-	margin-left: 1rem;
-	transition: transform 0.3s ease;
-	width: 20px;
-	text-align: center;
-}
-
-.collapsed .meal-toggle-icon {
-	transform: none;
-}
-
-.collapsible-content {
-	transition: max-height 0.3s ease, opacity 0.3s ease;
-	overflow: hidden;
-	opacity: 1;
-	max-height: 1000px;
-}
-
-.collapsed + .collapsible-content {
-	opacity: 0;
-	max-height: 0;
 }
 
 .totals-row,
@@ -512,7 +520,6 @@
 	background-color: var(--calories-color, #e8962b);
 }
 
-/* Extend the colored borders to column headers */
 .macros-table th.protein-cell::before,
 .macros-table .column-header.protein-cell::before {
 	background-color: var(--protein-color, #4caf50);
@@ -531,6 +538,11 @@
 .macros-table th.calories-cell::before,
 .macros-table .column-header.calories-cell::before {
 	background-color: var(--calories-color, #e8962b);
+}
+
+.macro-color-indicator {
+  --indicator-color: transparent;
+  background-color: var(--indicator-color) !important;
 }
 
 /* ==============================
@@ -720,6 +732,36 @@
 	font-weight: bold;
 }
 
+.macro-pie-progress-bar {
+  --progress-color: transparent;
+  --progress-width: 0%;
+  background-color: var(--progress-color) !important;
+  width: var(--progress-width) !important;
+}
+
+.pie-progress-width-0 { --progress-width: 0%; }
+.pie-progress-width-1 { --progress-width: 1%; }
+.pie-progress-width-5 { --progress-width: 5%; }
+.pie-progress-width-10 { --progress-width: 10%; }
+.pie-progress-width-15 { --progress-width: 15%; }
+.pie-progress-width-20 { --progress-width: 20%; }
+.pie-progress-width-25 { --progress-width: 25%; }
+.pie-progress-width-30 { --progress-width: 30%; }
+.pie-progress-width-35 { --progress-width: 35%; }
+.pie-progress-width-40 { --progress-width: 40%; }
+.pie-progress-width-45 { --progress-width: 45%; }
+.pie-progress-width-50 { --progress-width: 50%; }
+.pie-progress-width-55 { --progress-width: 55%; }
+.pie-progress-width-60 { --progress-width: 60%; }
+.pie-progress-width-65 { --progress-width: 65%; }
+.pie-progress-width-70 { --progress-width: 70%; }
+.pie-progress-width-75 { --progress-width: 75%; }
+.pie-progress-width-80 { --progress-width: 80%; }
+.pie-progress-width-85 { --progress-width: 85%; }
+.pie-progress-width-90 { --progress-width: 90%; }
+.pie-progress-width-95 { --progress-width: 95%; }
+.pie-progress-width-100 { --progress-width: 100%; }
+
 /* ==============================
  * 6. DATA LABELS & TOOLTIPS
  * ============================== */
@@ -761,6 +803,14 @@
 
 .macro-tooltip-positioned {
 	display: block;
+}
+
+.macro-tooltip-mobile {
+	background-color: rgba(0, 0, 0, 0.9) !important;
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+	z-index: 10000 !important;
+	transition: all 0.2s ease !important;
 }
 
 /* ==============================
@@ -875,41 +925,6 @@
   max-height: 0;
   overflow: hidden;
 }
-
-.macro-color-indicator {
-  --indicator-color: transparent;
-  background-color: var(--indicator-color) !important;
-}
-
-.macro-pie-progress-bar {
-  --progress-color: transparent;
-  --progress-width: 0%;
-  background-color: var(--progress-color) !important;
-  width: var(--progress-width) !important;
-}
-
-.pie-progress-width-0 { --progress-width: 0%; }
-.pie-progress-width-1 { --progress-width: 1%; }
-.pie-progress-width-5 { --progress-width: 5%; }
-.pie-progress-width-10 { --progress-width: 10%; }
-.pie-progress-width-15 { --progress-width: 15%; }
-.pie-progress-width-20 { --progress-width: 20%; }
-.pie-progress-width-25 { --progress-width: 25%; }
-.pie-progress-width-30 { --progress-width: 30%; }
-.pie-progress-width-35 { --progress-width: 35%; }
-.pie-progress-width-40 { --progress-width: 40%; }
-.pie-progress-width-45 { --progress-width: 45%; }
-.pie-progress-width-50 { --progress-width: 50%; }
-.pie-progress-width-55 { --progress-width: 55%; }
-.pie-progress-width-60 { --progress-width: 60%; }
-.pie-progress-width-65 { --progress-width: 65%; }
-.pie-progress-width-70 { --progress-width: 70%; }
-.pie-progress-width-75 { --progress-width: 75%; }
-.pie-progress-width-80 { --progress-width: 80%; }
-.pie-progress-width-85 { --progress-width: 85%; }
-.pie-progress-width-90 { --progress-width: 90%; }
-.pie-progress-width-95 { --progress-width: 95%; }
-.pie-progress-width-100 { --progress-width: 100%; }
 
 .settings-preview-canvas {
   width: 300px !important;
@@ -1128,8 +1143,8 @@
 }
 
 /* ==============================
-* 9. LISTS
-* ============================== */
+ * 9. LISTS
+ * ============================== */
 
 .meal-item-list {
    list-style-type: none;
@@ -1161,8 +1176,8 @@
 }
 
 /* ==============================
-* 10. SETTINGS
-* ============================== */
+ * 10. SETTINGS
+ * ============================== */
 
 .edit-meal-row,
 .add-food-row,
@@ -1299,35 +1314,9 @@
 	margin: var(--size-4-2) 0;
 }
 
-/* Fallback for themes that don't have success/error colors */
-body:not(.theme-obsidian) .api-credentials-warning {
-	color: #e74c3c;
-	background-color: rgba(231, 76, 60, 0.1);
-	border: 1px solid rgba(231, 76, 60, 0.3);
-}
-
-body:not(.theme-obsidian) .api-credentials-success {
-	color: #27ae60;
-	background-color: rgba(39, 174, 96, 0.1);
-	border: 1px solid rgba(39, 174, 96, 0.3);
-}
-
-/* Dark theme support */
-.theme-dark .api-credentials-warning {
-	color: #ff6b6b;
-	background-color: rgba(255, 107, 107, 0.15);
-	border: 1px solid rgba(255, 107, 107, 0.3);
-}
-
-.theme-dark .api-credentials-success {
-	color: #51cf66;
-	background-color: rgba(81, 207, 102, 0.15);
-	border: 1px solid rgba(81, 207, 102, 0.3);
-}
-
 /* ==============================
-* 11. MACRO DASHBOARD
-* ============================== */
+ * 11. MACRO DASHBOARD
+ * ============================== */
 
 .macro-dashboard {
    margin-top: 1rem;
@@ -1389,8 +1378,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 /* ==============================
-* 12. COLLAPSIBLE SECTIONS
-* ============================== */
+ * 12. COLLAPSIBLE SECTIONS
+ * ============================== */
 
 .collapsible {
    cursor: pointer;
@@ -1411,9 +1400,21 @@ body:not(.theme-obsidian) .api-credentials-success {
    background-color: var(--background-modifier-hover);
 }
 
+.collapsible-content {
+	transition: max-height 0.3s ease, opacity 0.3s ease;
+	overflow: hidden;
+	opacity: 1;
+	max-height: 1000px;
+}
+
+.collapsed + .collapsible-content {
+	opacity: 0;
+	max-height: 0;
+}
+
 /* ==============================
-* 13. LIVE SEARCH MODAL
-* ============================== */
+ * 13. LIVE SEARCH MODAL
+ * ============================== */
 
 .live-food-search-modal {
    max-width: 550px;
@@ -1531,8 +1532,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 /* ==============================
-* 14. MACROSCALC STYLING
-* ============================== */
+ * 14. MACROSCALC STYLING
+ * ============================== */
 
 .macroscalc-container {
  margin-bottom: 1rem;
@@ -1573,16 +1574,6 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 .macroscalc-header-title {
  font-weight: 600;
-}
-
-.macroscalc-toggle-button {
- width: 24px;
- height: 24px;
- display: flex;
- align-items: center;
- justify-content: center;
- cursor: pointer;
- position: relative;
 }
 
 .macroscalc-dashboard-content {
@@ -1637,18 +1628,26 @@ body:not(.theme-obsidian) .api-credentials-success {
  margin-left: 4px;
 }
 
-.macroscalc-expand-toggle {
- margin-right: 8px;
- cursor: pointer;
- font-size: 16px;
- display: inline-block;
- text-align: center;
- width: 24px;
- min-width: 24px;
- height: 24px;
- line-height: 24px;
- flex-shrink: 0;
- transform: translateY(-1px);
+.macroscalc-id-cell-container {
+	text-align: center;
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
+.macroscalc-id-cell-container .macroscalc-expand-toggle {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-right: 4px;
+	margin-left: 0;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.macroscalc-id-cell-container .macroscalc-id-text {
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 0;
 }
 
 .macroscalc-detail-row td {
@@ -1760,8 +1759,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 /* ==============================
-* 15. CONSISTENT TOGGLE ICONS
-* ============================== */
+ * 15. CONSISTENT TOGGLE ICONS
+ * ============================== */
 
 .toggle-icon,
 .meal-toggle-icon,
@@ -1829,7 +1828,7 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 /* ==============================
- * FOOD ENTRY SELECTION MODAL
+ * 16. FOOD ENTRY MODALS
  * ============================== */
 
 .food-entry-selection-modal {
@@ -1977,10 +1976,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   text-align: center;
 }
 
-/* ==============================
- * MANUAL FOOD ENTRY MODAL
- * ============================== */
-
 .manual-food-entry-modal {
   max-width: 600px;
   width: 90%;
@@ -2106,7 +2101,7 @@ body:not(.theme-obsidian) .api-credentials-success {
   box-sizing: border-box;
 }
 
-.error-message {
+.validation-errors .error-message {
   margin: 0.5rem 0;
   color: var(--text-error, #ff6b6b);
   font-size: 0.95rem;
@@ -2114,11 +2109,11 @@ body:not(.theme-obsidian) .api-credentials-success {
   text-align: center;
 }
 
-.error-message:first-child {
+.validation-errors .error-message:first-child {
   margin-top: 0;
 }
 
-.error-message:last-child {
+.validation-errors .error-message:last-child {
   margin-bottom: 0;
 }
 
@@ -2164,535 +2159,10 @@ body:not(.theme-obsidian) .api-credentials-success {
   box-shadow: 0 2px 12px rgba(var(--interactive-accent-rgb), 0.3) !important;
 }
 
-/* Enhanced input styling for better visual hierarchy */
-.form-group:first-child .form-input {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.nutrition-fields .form-input {
-  font-weight: 500;
-}
-
-/* Responsive design for smaller screens */
-@media (max-width: 600px) {
-  .manual-food-entry-modal {
-    width: 95%;
-    max-width: none;
-  }
-
-  .manual-entry-form {
-    max-width: none;
-    gap: 1.25rem;
-  }
-
-  .nutrition-fields {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .button-container {
-    flex-direction: column-reverse;
-    gap: 0.75rem;
-  }
-
-  .button-container .mod-button {
-    width: 100%;
-    min-width: auto;
-  }
-
-  .form-input {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-}
-
-/* Dark theme support */
-.theme-dark .form-input {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.theme-dark .form-input:focus {
-  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
-}
-
-.theme-dark .validation-errors {
-  background-color: rgba(255, 107, 107, 0.2);
-}
-
-.theme-dark .error-message {
-  color: #ff8a80;
-}
-
-/* Responsive design for smaller screens */
-@media (max-width: 600px) {
-  .food-entry-options {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .food-entry-option {
-    min-width: auto;
-    max-width: none;
-  }
-
-  .nutrition-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .button-container {
-    flex-direction: column-reverse;
-  }
-
-  .button-container .mod-button {
-    width: 100%;
-  }
-}
-
-/* Dark theme support */
-.theme-dark .status-indicator.status-success {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #81c784;
-}
-
-.theme-dark .status-indicator.status-warning {
-  background-color: rgba(255, 152, 0, 0.2);
-  color: #ffb74d;
-}
-
-.theme-dark .api-error-message {
-  background-color: rgba(255, 107, 107, 0.2);
-  color: #ff8a80;
-}
-
-.theme-dark .validation-errors {
-  background-color: rgba(255, 107, 107, 0.2);
-}
-
-.theme-dark .error-message {
-  color: #ff8a80;
-}
-
 /* ==============================
- * 16. MOBILE RESPONSIVE STYLES
+ * 17. ENHANCED ADD TO MACROS MODAL
  * ============================== */
 
-/* Default: Show desktop text, hide mobile text */
-.header-text-desktop {
-  display: inline;
-}
-
-.header-text-mobile {
-  display: none;
-}
-
-/* Macroscalc header and ID alignment fixes for all screen sizes */
-.macroscalc-header-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 100%;
-}
-
-.macroscalc-sort-icon {
-  margin-left: 3px;
-  align-self: center;
-  font-size: 0.8rem;
-  opacity: 0.7;
-  cursor: pointer;
-}
-
-.macroscalc-sort-icon:hover {
-  opacity: 1;
-}
-
-.macroscalc-sort-icon.active {
-  opacity: 1;
-  font-weight: bold;
-}
-
-.macroscalc-id-cell {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0;
-  width: 100%;
-  padding-left: 4px;
-}
-
-/* Desktop layout - toggle next to ID name (explicit desktop styles) */
-@media (min-width: 769px) {
-  .macroscalc-id-cell-container {
-    text-align: center !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .macroscalc-id-cell-container .macroscalc-expand-toggle {
-    display: inline-block !important;
-    width: 16px !important;
-    height: 16px !important;
-    margin-right: 4px !important;
-    margin-left: 0 !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-  }
-
-  .macroscalc-id-cell-container .macroscalc-id-text {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    margin-left: 0 !important;
-  }
-}
-
-/* Default fallback styles */
-.macroscalc-id-cell-container {
-  text-align: center;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-.macroscalc-id-cell-container .macroscalc-expand-toggle {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  margin-left: 0;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.macroscalc-id-cell-container .macroscalc-id-text {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 0;
-}
-
-.macroscalc-id-text {
-  text-align: left;
-  flex: 1;
-  margin-left: 4px !important;
-  margin-right: 0 !important;
-}
-
-.macroscalc-expand-toggle {
-  flex-shrink: 0;
-  margin-right: 0 !important;
-  margin-left: 0 !important;
-  transform: translateY(0) !important;
-  width: 20px !important;
-  height: 20px !important;
-}
-
-/* Mobile breakpoint - tablets and small laptops */
-@media (max-width: 768px) {
-  /* Hide desktop text and show mobile text on small screens */
-  .header-text-desktop {
-    display: none;
-  }
-  
-  .header-text-mobile {
-    display: inline;
-  }
-  
-  /* Reduce table padding on mobile */
-  .macros-table td,
-  .macros-table th,
-  .macros-table .column-header {
-    padding: 6px 8px;
-    font-size: 0.9rem;
-  }
-  
-  /* Adjust macro percentage font size for mobile */
-  .macro-percentage {
-    font-size: 0.7rem !important;
-  }
-  
-  /* Make remove buttons slightly smaller on mobile */
-  .remove-item-button {
-    width: 24px;
-    height: 24px;
-    font-size: 1rem;
-  }
-  
-  /* Adjust editable quantity styling for mobile */
-  .editable-quantity {
-    padding: 4px 6px !important;
-    font-size: 0.9rem;
-  }
-  
-  .editable-quantity input {
-    width: 60px !important;
-    padding: 3px 6px !important;
-    font-size: 0.9rem;
-  }
-  
-  /* Optimize dashboard for mobile - 2x2 grid layout */
-  .macro-dashboard {
-    margin-top: 0.5rem;
-    margin-bottom: 15px;
-  }
-  
-  .macro-dashboard-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 12px;
-    padding: 12px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .macro-metric-card {
-    min-width: auto;
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 80px;
-  }
-  
-  /* Ensure consistent card sizing */
-  .macro-metric-card .macro-metric-label {
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-  }
-  
-  .macro-metric-card .macro-metric-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-  }
-  
-  .macro-metric-card .macro-metric-percentage {
-    font-size: 0.85rem;
-  }
-  
-  /* Adjust pie chart container for mobile */
-  .macro-pie-chart-container {
-    width: 250px;
-    height: 250px;
-    margin-left: 8px;
-  }
-  
-  .macro-pie-chart-summary-container {
-    min-height: 250px;
-    padding: 8px 12px;
-  }
-  
-  /* Mobile layout - toggle to the left, text follows */
-  .macroscalc-id-cell-container {
-    text-align: left;
-    padding-left: 8px;
-    padding-right: 4px;
-  }
-
-  .macroscalc-id-cell-container .macroscalc-expand-toggle {
-    margin-right: 6px;
-    width: 14px;
-    height: 14px;
-  }
-  .macroscalc-details-table {
-    font-size: 0.85rem;
-  }
-  
-  .macroscalc-details-table th,
-  .macroscalc-details-table td {
-    padding: 4px 6px;
-  }
-  
-  .macroscalc-meal-header {
-    font-size: 0.9rem;
-    padding: 6px 8px;
-  }
-  
-  .macroscalc-expand-toggle {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 12px !important;
-  }
-  
-  .macroscalc-id-text {
-    font-size: 0.9rem;
-  }
-}
-
-/* Extra small screens (phones) */
-@media (max-width: 480px) {
-  .macros-table td,
-  .macros-table th,
-  .macros-table .column-header {
-    padding: 4px 6px;
-    font-size: 0.85rem;
-  }
-  
-  /* Further reduce text sizes */
-  .header-text-mobile {
-    font-size: 0.8rem;
-  }
-  
-  .macro-percentage {
-    font-size: 0.65rem !important;
-  }
-  
-  /* Mobile dashboard - maintain 2x2 grid but with tighter spacing */
-  .macro-dashboard-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 8px;
-    padding: 8px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .macro-metric-card {
-    min-width: auto;
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 70px;
-  }
-  
-  /* Tighter text sizing for phones */
-  .macro-metric-card .macro-metric-label {
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-  }
-  
-  .macro-metric-card .macro-metric-value {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-  
-  .macro-metric-card .macro-metric-percentage {
-    font-size: 0.75rem;
-  }
-  
-  /* Progress bars in cards */
-  .macro-metric-card .macro-metric-progress-container {
-    height: 6px;
-    margin-top: 4px;
-  }
-  
-  /* Stack pie chart elements vertically on phones */
-  .macro-dashboard-flex-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .macro-pie-chart-container {
-    width: 200px;
-    height: 200px;
-    margin-left: 0;
-  }
-  
-  .macro-pie-chart-summary-container {
-    min-height: auto;
-    max-width: none;
-    width: 100%;
-  }
-  
-  /* Adjust table header spacing for phones */
-  .macros-table-header {
-    padding: 6px 8px;
-    margin-bottom: 8px;
-  }
-  
-  .macros-table-controls {
-    gap: 6px;
-  }
-  
-  /* Optimize meal headers for phones */
-  .meal-header-content {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  
-  .header-calorie-summary {
-    font-size: 0.85rem;
-    margin-left: 6px;
-  }
-  
-  /* Further optimize macroscalc for very small screens */
-  .macroscalc-details-table {
-    font-size: 0.8rem;
-  }
-  
-  .macroscalc-details-table th,
-  .macroscalc-details-table td {
-    padding: 3px 4px;
-  }
-  
-  .macroscalc-meal-header {
-    font-size: 0.85rem;
-    padding: 4px 6px;
-  }
-  
-  .macroscalc-header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-  
-  .macroscalc-sort-icon {
-    margin-left: 0;
-    align-self: flex-end;
-  }
-  
-  /* Make detail tables more compact */
-  .macroscalc-detail-row td {
-    padding: 4px 6px;
-  }
-  
-  /* Adjust chart section for phones */
-  .macroscalc-chart-section {
-    margin-top: 0.5rem;
-  }
-  
-  .macroscalc-chart-wrapper {
-    height: 250px;
-  }
-  
-  /* Fix macroscalc header alignment */
-  .macroscalc-header-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-  }
-  
-  .macroscalc-sort-icon {
-    margin-left: 2px;
-    align-self: center;
-    font-size: 0.7rem;
-  }
-  
-  /* Fix ID cell alignment */
-  .macroscalc-id-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    text-align: center;
-  }
-  
-  .macroscalc-id-text {
-    text-align: center;
-  }
-}
-
-/* Enhanced Add to Macros Modal Styles */
 .enhanced-add-to-macros-modal {
   max-width: 800px;
   width: 90%;
@@ -2720,7 +2190,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   line-height: 1.4;
 }
 
-/* Search Bar */
 .enhanced-add-to-macros-modal .search-container {
   margin-bottom: 1.5rem;
 }
@@ -2757,7 +2226,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
 }
 
-/* Tabs */
 .enhanced-add-to-macros-modal .tabs-container {
   display: flex;
   margin-bottom: 1rem;
@@ -2788,7 +2256,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   background-color: var(--background-modifier-hover);
 }
 
-/* Content Area */
 .enhanced-add-to-macros-modal .content-area {
   position: relative;
   min-height: 300px;
@@ -2811,6 +2278,8 @@ body:not(.theme-obsidian) .api-credentials-success {
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: var(--background-modifier-border) transparent;
 }
 
 .enhanced-add-to-macros-modal .items-container.active {
@@ -2831,8 +2300,8 @@ body:not(.theme-obsidian) .api-credentials-success {
   border-radius: 6px;
 }
 
-/* Meal Cards */
-.enhanced-add-to-macros-modal .meal-card {
+.enhanced-add-to-macros-modal .meal-card,
+.enhanced-add-to-macros-modal .food-card {
   background: var(--background-secondary);
   border: 2px solid var(--background-modifier-border);
   border-radius: 12px;
@@ -2840,15 +2309,18 @@ body:not(.theme-obsidian) .api-credentials-success {
   transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
+  animation: fadeInUp 0.3s ease forwards;
 }
 
-.enhanced-add-to-macros-modal .meal-card:hover {
+.enhanced-add-to-macros-modal .meal-card:hover,
+.enhanced-add-to-macros-modal .food-card:hover {
   border-color: var(--interactive-accent);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.enhanced-add-to-macros-modal .meal-card.selected {
+.enhanced-add-to-macros-modal .meal-card.selected,
+.enhanced-add-to-macros-modal .food-card.selected {
   border-color: var(--interactive-accent);
   background-color: rgba(var(--interactive-accent-rgb), 0.1);
 }
@@ -2860,8 +2332,9 @@ body:not(.theme-obsidian) .api-credentials-success {
   margin-bottom: 12px;
 }
 
-.enhanced-add-to-macros-modal .meal-name {
-  margin: 0;
+.enhanced-add-to-macros-modal .meal-name,
+.enhanced-add-to-macros-modal .food-name {
+  margin: 0 0 12px 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-normal);
@@ -2896,35 +2369,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   color: var(--text-accent);
   font-weight: 500;
   padding: 4px 8px;
-}
-
-/* Food Cards */
-.enhanced-add-to-macros-modal .food-card {
-  background: var(--background-secondary);
-  border: 2px solid var(--background-modifier-border);
-  border-radius: 12px;
-  padding: 16px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  position: relative;
-}
-
-.enhanced-add-to-macros-modal .food-card:hover {
-  border-color: var(--interactive-accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.enhanced-add-to-macros-modal .food-card.selected {
-  border-color: var(--interactive-accent);
-  background-color: rgba(var(--interactive-accent-rgb), 0.1);
-}
-
-.enhanced-add-to-macros-modal .food-name {
-  margin: 0 0 12px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-normal);
 }
 
 .enhanced-add-to-macros-modal .nutrition-info {
@@ -2977,7 +2421,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   font-style: italic;
 }
 
-/* Add Buttons */
 .enhanced-add-to-macros-modal .add-button {
   width: 100%;
   padding: 10px 16px;
@@ -3001,7 +2444,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   color: var(--text-on-accent);
 }
 
-/* Selected Items Section */
 .enhanced-add-to-macros-modal .selected-items-section {
   background: var(--background-secondary);
   border-radius: 8px;
@@ -3062,7 +2504,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Action Buttons */
 .enhanced-add-to-macros-modal .action-buttons {
   display: flex;
   gap: 12px;
@@ -3113,7 +2554,6 @@ body:not(.theme-obsidian) .api-credentials-success {
   border-color: var(--background-modifier-border);
 }
 
-/* No Results */
 .enhanced-add-to-macros-modal .no-results {
   text-align: center;
   padding: 32px 16px;
@@ -3122,27 +2562,899 @@ body:not(.theme-obsidian) .api-credentials-success {
   grid-column: 1 / -1;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-  .enhanced-add-to-macros-modal {
+.enhanced-add-to-macros-modal .loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ==============================
+ * 18. ENHANCED MEAL TEMPLATE MODAL
+ * ============================== */
+
+.enhanced-meal-template-modal {
+  max-width: 800px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.enhanced-meal-template-modal .modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .modal-title {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.enhanced-meal-template-modal .modal-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.enhanced-meal-template-modal .meal-name-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .meal-name-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-normal);
+  font-size: 1rem;
+}
+
+.enhanced-meal-template-modal .meal-name-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.enhanced-meal-template-modal .meal-name-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+}
+
+.enhanced-meal-template-modal .meal-name-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.enhanced-meal-template-modal .search-container {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-meal-template-modal .search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.enhanced-meal-template-modal .search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.enhanced-meal-template-modal .search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  font-size: 1rem;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.enhanced-meal-template-modal .search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.15);
+}
+
+.enhanced-meal-template-modal .foods-section {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-meal-template-modal .section-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .section-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .foods-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: var(--background-modifier-border) transparent;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-thumb {
+  background-color: var(--background-modifier-border);
+  border-radius: 6px;
+}
+
+.enhanced-meal-template-modal .food-card {
+  background: var(--background-secondary);
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.enhanced-meal-template-modal .food-card:hover {
+  border-color: var(--interactive-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-meal-template-modal .food-card.selected {
+  border-color: var(--interactive-accent);
+  background-color: rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+.enhanced-meal-template-modal .food-name {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .nutrition-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.enhanced-meal-template-modal .nutrition-item {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.enhanced-meal-template-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.15);
+  color: var(--calories-color, #e8962b);
+  border: 1px solid rgba(232, 150, 43, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--protein-color, #4caf50);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--fat-color, #f44336);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.enhanced-meal-template-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--carbs-color, #2196f3);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.enhanced-meal-template-modal .serving-info {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.enhanced-meal-template-modal .serving-size {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.enhanced-meal-template-modal .button-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.enhanced-meal-template-modal .add-button,
+.enhanced-meal-template-modal .remove-button,
+.enhanced-meal-template-modal .edit-button {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid;
+  background: transparent;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.enhanced-meal-template-modal .add-button {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.enhanced-meal-template-modal .add-button:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.enhanced-meal-template-modal .remove-button {
+  border-color: var(--text-error, #e74c3c);
+  color: var(--text-error, #e74c3c);
+}
+
+.enhanced-meal-template-modal .remove-button:hover {
+  background: var(--text-error, #e74c3c);
+  color: white;
+}
+
+.enhanced-meal-template-modal .edit-button {
+  border-color: var(--text-warning, #f39c12);
+  color: var(--text-warning, #f39c12);
+}
+
+.enhanced-meal-template-modal .edit-button:hover {
+  background: var(--text-warning, #f39c12);
+  color: white;
+}
+
+.enhanced-meal-template-modal .selected-items-section {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .selected-title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .selected-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.enhanced-meal-template-modal .no-selected-items {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+}
+
+.enhanced-meal-template-modal .selected-item-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.enhanced-meal-template-modal .remove-item-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--text-on-accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease;
+}
+
+.enhanced-meal-template-modal .remove-item-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.enhanced-meal-template-modal .action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .cancel-button,
+.enhanced-meal-template-modal .save-button,
+.enhanced-meal-template-modal .create-button {
+  padding: 12px 24px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.enhanced-meal-template-modal .cancel-button {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.enhanced-meal-template-modal .cancel-button:hover {
+  background: var(--background-modifier-hover);
+  transform: translateY(-1px);
+}
+
+.enhanced-meal-template-modal .save-button,
+.enhanced-meal-template-modal .create-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.enhanced-meal-template-modal .save-button:hover:not(.disabled),
+.enhanced-meal-template-modal .create-button:hover:not(.disabled) {
+  background: var(--interactive-accent-hover);
+  border-color: var(--interactive-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--interactive-accent-rgb), 0.3);
+}
+
+.enhanced-meal-template-modal .save-button.disabled,
+.enhanced-meal-template-modal .create-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  border-color: var(--background-modifier-border);
+}
+
+.enhanced-meal-template-modal .no-results {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+.enhanced-meal-template-modal .loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ==============================
+ * 19. LONG PRESS DELETION
+ * ============================== */
+
+.macros-table tr.long-press-active {
+  background-color: var(--background-modifier-hover);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.macros-table tr.long-press-ready {
+  background-color: var(--text-error, #e74c3c);
+  color: white;
+  animation: long-press-pulse 0.6s ease-in-out infinite alternate;
+}
+
+.long-press-ready td {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.delete-confirmation-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.delete-confirmation-title {
+  margin: 0;
+  color: var(--text-error, #e74c3c);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.delete-confirmation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+}
+
+.delete-message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.delete-warning-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.delete-confirmation-message {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-normal);
+  margin: 0;
+  line-height: 1.4;
+  max-width: 400px;
+}
+
+.delete-context-message {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.3;
+  max-width: 350px;
+  font-style: italic;
+}
+
+.modal-button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.modal-button-container button {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 6px;
+  min-width: 100px;
+  transition: all 0.2s ease;
+}
+
+.modal-button-container .mod-muted {
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.modal-button-container .mod-muted:hover {
+  background-color: var(--background-modifier-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-button-container .mod-warning {
+  background-color: var(--text-error, #e74c3c);
+  color: white;
+  border: 1px solid var(--text-error, #e74c3c);
+}
+
+.modal-button-container .mod-warning:hover {
+  background-color: var(--text-error, #c0392b);
+  border-color: var(--text-error, #c0392b);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* ==============================
+ * 20. MOBILE RESPONSIVE STYLES
+ * ============================== */
+
+.header-text-desktop {
+  display: inline;
+}
+
+.header-text-mobile {
+  display: none;
+}
+
+.macroscalc-header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+}
+
+.macroscalc-sort-icon {
+  margin-left: 3px;
+  align-self: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.macroscalc-sort-icon:hover {
+  opacity: 1;
+}
+
+.macroscalc-sort-icon.active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.macroscalc-id-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  padding-left: 4px;
+}
+
+.macroscalc-id-text {
+  text-align: left;
+  flex: 1;
+  margin-left: 4px !important;
+  margin-right: 0 !important;
+}
+
+.macroscalc-expand-toggle {
+  flex-shrink: 0;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  transform: translateY(0) !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+@media (min-width: 769px) {
+  .macroscalc-id-cell-container {
+    text-align: center !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-expand-toggle {
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 4px !important;
+    margin-left: 0 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-id-text {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin-left: 0 !important;
+  }
+
+  .macro-food-remove-btn {
+    display: inline-flex !important;
+  }
+
+  .macro-food-name {
+    max-width: calc(100% - 32px) !important;
+  }
+
+  .macro-food-name-container {
+    gap: 8px !important;
+    min-height: 24px !important;
+    padding: 2px 0 !important;
+  }
+
+  .modal-button-container {
+    flex-direction: row;
+  }
+
+  .modal-button-container button {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-text-desktop {
+    display: none;
+  }
+  
+  .header-text-mobile {
+    display: inline;
+  }
+
+  .macro-food-remove-btn {
+    display: none !important;
+  }
+  
+  .macros-table tr {
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+  
+  .macros-table tr.long-press-active {
+    background-color: var(--interactive-accent);
+    color: white;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .long-press-active td {
+    color: white !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .macro-food-name-container {
+    gap: 12px !important;
+    min-height: 36px !important;
+    padding: 4px 0 !important;
+  }
+  
+  .macro-food-name {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    font-weight: 500 !important;
+    max-width: 100% !important;
+  }
+  
+  .macros-table td,
+  .macros-table th,
+  .macros-table .column-header {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+  
+  .macro-percentage {
+    font-size: 0.7rem !important;
+  }
+  
+  .remove-item-button {
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+  }
+  
+  .editable-quantity {
+    padding: 4px 6px !important;
+    font-size: 0.9rem;
+    min-height: 32px !important;
+    border: 1px dashed rgba(255, 255, 255, 0.3) !important;
+    border-radius: 6px !important;
+  }
+
+  .editable-quantity:hover,
+  .editable-quantity:focus,
+  .editable-quantity:active {
+    border-color: var(--interactive-accent) !important;
+    background-color: var(--background-modifier-hover) !important;
+  }
+  
+  .editable-quantity input {
+    width: 60px !important;
+    padding: 3px 6px !important;
+    font-size: 16px !important;
+    min-height: 24px !important;
+    border-radius: 6px !important;
+  }
+  
+  .macro-dashboard {
+    margin-top: 0.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .macro-dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .macro-metric-card {
+    min-width: auto;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 80px;
+  }
+  
+  .macro-metric-card .macro-metric-label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+  
+  .macro-metric-card .macro-metric-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .macro-metric-card .macro-metric-percentage {
+    font-size: 0.85rem;
+  }
+  
+  .macro-pie-chart-container {
+    width: 250px;
+    height: 250px;
+    margin-left: 8px;
+  }
+  
+  .macro-pie-chart-summary-container {
+    min-height: 250px;
+    padding: 8px 12px;
+  }
+
+  .macroscalc-id-cell-container {
+    text-align: left;
+    padding-left: 8px;
+    padding-right: 4px;
+  }
+
+  .macroscalc-id-cell-container .macroscalc-expand-toggle {
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
+  }
+  
+  .macroscalc-details-table {
+    font-size: 0.85rem;
+  }
+  
+  .macroscalc-details-table th,
+  .macroscalc-details-table td {
+    padding: 4px 6px;
+  }
+  
+  .macroscalc-meal-header {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+  
+  .macroscalc-expand-toggle {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 12px !important;
+  }
+  
+  .macroscalc-id-text {
+    font-size: 0.9rem;
+  }
+
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    min-width: 180px !important;
+    max-width: calc(100vw - 40px) !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transform: translateX(-50%) translateY(-4px) scale(1) !important;
+  }
+  
+  .tooltip-visible {
+    transform: translateX(-50%) translateY(0px) scale(1) !important;
+  }
+
+  .macro-progress-container,
+  .target-progress-container,
+  .macro-metric-progress-container {
+    height: 6px !important;
+    margin-top: 3px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .delete-confirmation-content {
+    padding: 0 1rem;
+  }
+  
+  .delete-confirmation-message {
+    font-size: 1rem;
+    max-width: 300px;
+  }
+  
+  .delete-context-message {
+    font-size: 0.9rem;
+    max-width: 280px;
+  }
+  
+  .modal-button-container {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  
+  .modal-button-container button {
+    width: 100%;
+    min-width: auto;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .enhanced-add-to-macros-modal,
+  .enhanced-meal-template-modal {
     width: 95%;
     max-width: none;
   }
 
-  .enhanced-add-to-macros-modal .items-container {
+  .enhanced-add-to-macros-modal .items-container,
+  .enhanced-meal-template-modal .foods-container {
     grid-template-columns: 1fr;
   }
 
-  .enhanced-add-to-macros-modal .nutrition-info {
+  .enhanced-add-to-macros-modal .nutrition-info,
+  .enhanced-meal-template-modal .nutrition-info {
     grid-template-columns: 1fr;
   }
 
-  .enhanced-add-to-macros-modal .action-buttons {
+  .enhanced-add-to-macros-modal .action-buttons,
+  .enhanced-meal-template-modal .action-buttons {
     flex-direction: column-reverse;
   }
 
   .enhanced-add-to-macros-modal .cancel-button,
-  .enhanced-add-to-macros-modal .confirm-button {
+  .enhanced-add-to-macros-modal .confirm-button,
+  .enhanced-meal-template-modal .cancel-button,
+  .enhanced-meal-template-modal .save-button,
+  .enhanced-meal-template-modal .create-button {
     width: 100%;
   }
 
@@ -3158,40 +3470,246 @@ body:not(.theme-obsidian) .api-credentials-success {
   .enhanced-add-to-macros-modal .tab-button.active {
     border-bottom-color: var(--interactive-accent);
   }
+
+  .enhanced-meal-template-modal .button-container {
+    flex-direction: column;
+  }
+
+  .nutrition-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .button-container {
+    flex-direction: column-reverse;
+  }
+
+  .button-container .mod-button {
+    width: 100%;
+  }
 }
 
-/* Dark theme support */
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.calories {
-  background: rgba(232, 150, 43, 0.2);
-  color: #ffb74d;
+@media (max-width: 480px) {
+  .macros-table td,
+  .macros-table th,
+  .macros-table .column-header {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+  }
+  
+  .header-text-mobile {
+    font-size: 0.8rem;
+  }
+  
+  .macro-percentage {
+    font-size: 0.65rem !important;
+  }
+  
+  .macro-dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .macro-metric-card {
+    min-width: auto;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 70px;
+  }
+  
+  .macro-metric-card .macro-metric-label {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+  
+  .macro-metric-card .macro-metric-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .macro-metric-card .macro-metric-percentage {
+    font-size: 0.75rem;
+  }
+  
+  .macro-metric-card .macro-metric-progress-container {
+    height: 6px;
+    margin-top: 4px;
+  }
+  
+  .macro-dashboard-flex-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .macro-pie-chart-container {
+    width: 200px;
+    height: 200px;
+    margin-left: 0;
+  }
+  
+  .macro-pie-chart-summary-container {
+    min-height: auto;
+    max-width: none;
+    width: 100%;
+  }
+  
+  .macros-table-header {
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+  
+  .macros-table-controls {
+    gap: 6px;
+  }
+  
+  .meal-header-content {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .header-calorie-summary {
+    font-size: 0.85rem;
+    margin-left: 6px;
+  }
+  
+  .macroscalc-details-table {
+    font-size: 0.8rem;
+  }
+  
+  .macroscalc-details-table th,
+  .macroscalc-details-table td {
+    padding: 3px 4px;
+  }
+  
+  .macroscalc-meal-header {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+  }
+  
+  .macroscalc-header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .macroscalc-sort-icon {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  .macroscalc-detail-row td {
+    padding: 4px 6px;
+  }
+  
+  .macroscalc-chart-section {
+    margin-top: 0.5rem;
+  }
+  
+  .macroscalc-chart-wrapper {
+    height: 250px;
+  }
+  
+  .macroscalc-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+  
+  .macroscalc-sort-icon {
+    margin-left: 2px;
+    align-self: center;
+    font-size: 0.7rem;
+  }
+  
+  .macroscalc-id-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .macroscalc-id-text {
+    text-align: center;
+  }
+
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    min-width: 160px !important;
+    max-width: calc(100vw - 20px) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  .delete-warning-icon {
+    font-size: 2.5rem;
+  }
+  
+  .delete-confirmation-message {
+    font-size: 0.95rem;
+    max-width: 250px;
+  }
+  
+  .delete-context-message {
+    font-size: 0.85rem;
+    max-width: 220px;
+  }
 }
 
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.protein {
-  background: rgba(76, 175, 80, 0.2);
-  color: #81c784;
+@media (hover: none) and (pointer: coarse) {
+  .macros-table tr {
+    min-height: 48px;
+  }
+  
+  .macro-food-name-container {
+    min-height: 40px !important;
+    padding: 6px 0 !important;
+  }
+  
+  .macros-table tr.long-press-active {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .macros-table tr.long-press-ready {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+  }
+  
+  .modal-button-container button {
+    min-height: 48px;
+    font-size: 1.1rem;
+  }
 }
 
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.fat {
-  background: rgba(244, 67, 54, 0.2);
-  color: #e57373;
+/* ==============================
+ * 21. ANIMATIONS AND EFFECTS
+ * ============================== */
+
+@keyframes long-press-pulse {
+  from { 
+    background-color: var(--text-error, #e74c3c); 
+    transform: scale(1);
+  }
+  to { 
+    background-color: var(--text-error, #c0392b); 
+    transform: scale(1.02);
+  }
 }
 
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.carbs {
-  background: rgba(33, 150, 243, 0.2);
-  color: #64b5f6;
-}
-
-/* Loading states */
-.enhanced-add-to-macros-modal .loading-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -3203,13 +3721,176 @@ body:not(.theme-obsidian) .api-credentials-success {
   }
 }
 
-.enhanced-add-to-macros-modal .meal-card,
-.enhanced-add-to-macros-modal .food-card {
-  animation: fadeInUp 0.3s ease forwards;
+/* ==============================
+ * 22. THEME SUPPORT
+ * ============================== */
+
+body:not(.theme-obsidian) .api-credentials-warning {
+	color: #e74c3c;
+	background-color: rgba(231, 76, 60, 0.1);
+	border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
-/* Custom scrollbar for better UX */
-.enhanced-add-to-macros-modal .items-container {
-  scrollbar-width: thin;
-  scrollbar-color: var(--background-modifier-border) transparent;
+body:not(.theme-obsidian) .api-credentials-success {
+	color: #27ae60;
+	background-color: rgba(39, 174, 96, 0.1);
+	border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.theme-dark .api-credentials-warning {
+	color: #ff6b6b;
+	background-color: rgba(255, 107, 107, 0.15);
+	border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.theme-dark .api-credentials-success {
+	color: #51cf66;
+	background-color: rgba(81, 207, 102, 0.15);
+	border: 1px solid rgba(81, 207, 102, 0.3);
+}
+
+.theme-dark .status-indicator.status-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .status-indicator.status-warning {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .api-error-message {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #ff8a80;
+}
+
+.theme-dark .validation-errors {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+.theme-dark .validation-errors .error-message {
+  color: #ff8a80;
+}
+
+.theme-dark .form-input {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-dark .form-input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.calories,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.calories {
+  background: rgba(232, 150, 43, 0.2);
+  color: #ffb74d;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.protein,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.protein {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.fat,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.fat {
+  background: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+.theme-dark .enhanced-add-to-macros-modal .nutrition-item.carbs,
+.theme-dark .enhanced-meal-template-modal .nutrition-item.carbs {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+}
+
+.theme-dark .macros-table tr.long-press-active {
+  background-color: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.theme-dark .macros-table tr.long-press-ready {
+  background-color: var(--text-error, #e74c3c);
+  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.3);
+}
+
+.theme-dark .delete-confirmation-content {
+  background-color: var(--background-primary);
+}
+
+.theme-dark .macro-tooltip-mobile {
+  background-color: rgba(25, 25, 25, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: var(--text-normal) !important;
+}
+
+.theme-light .macros-table tr.long-press-active {
+  background-color: var(--interactive-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.theme-light .macros-table tr.long-press-ready {
+  background-color: #e74c3c;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+}
+
+.theme-light .macro-tooltip,
+.theme-light .macro-tooltip-mobile {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ==============================
+ * 23. ACCESSIBILITY AND PREFERENCES
+ * ============================== */
+
+@media (prefers-contrast: high) {
+  .macros-table tr.long-press-active {
+    background-color: var(--interactive-accent) !important;
+    border: 2px solid var(--text-normal) !important;
+  }
+  
+  .macros-table tr.long-press-ready {
+    background-color: #800000 !important;
+    border: 3px solid #ffffff !important;
+  }
+  
+  .delete-confirmation-title {
+    color: var(--text-error, #800000) !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .modal-button-container .mod-warning {
+    background-color: #800000 !important;
+    border: 2px solid #ffffff !important;
+  }
+  
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    background-color: black !important;
+    color: white !important;
+    border: 2px solid white !important;
+    font-weight: 500 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macros-table tr,
+  .modal-button-container button,
+  .macro-tooltip,
+  .macro-tooltip-mobile {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .macros-table tr.long-press-active,
+  .macros-table tr.long-press-ready,
+  .modal-button-container button:hover {
+    transform: none !important;
+  }
+  
+  .macros-table tr.long-press-ready {
+    background-color: var(--text-error, #c0392b) !important;
+  }
 }
