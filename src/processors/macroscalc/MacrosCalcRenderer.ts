@@ -10,12 +10,15 @@ import {
   MacroTotals,
   ProgressBarFactory,
   MacrosState,
+  getCurrentEnergyUnitString,
 } from '../../utils';
 import { CalcBreakdown } from './calculator';
 import { parseGrams } from '../../utils/parsingUtils';
 import { findMatchingFoodFile } from '../../utils/fileUtils';
 import { processNutritionalData } from '../../utils/nutritionUtils';
 import { processNutritionalDataFromLines } from './calculator';
+import { t } from '../../lang/I18nManager';
+import { convertEnergyUnit } from '../../utils/energyUtils';
 
 // Define the chart reference type for proper TypeScript support
 interface ChartReference {
@@ -141,11 +144,11 @@ export class MacrosCalcRenderer {
     // Create header row with mobile-responsive headers
     const headerRow = table.insertRow();
     const headerData = [
-      { text: 'Table ID', mobileText: 'ID' },
-      { text: 'Calories', mobileText: 'Cal' },
-      { text: 'Protein', mobileText: 'Pro' },
-      { text: 'Fat', mobileText: 'Fat' },
-      { text: 'Carbs', mobileText: 'Carb' },
+      { text: t('calculator.tableHeaders.id'), mobileText: 'ID' },
+      { text: t('table.headers.calories'), mobileText: 'Cal' },
+      { text: t('table.headers.protein'), mobileText: 'Pro' },
+      { text: t('table.headers.fat'), mobileText: 'Fat' },
+      { text: t('table.headers.carbs'), mobileText: 'Carb' },
     ];
 
     headerData.forEach((headerInfo, index) => {
@@ -185,10 +188,14 @@ export class MacrosCalcRenderer {
       cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
 
       // Add specific macro styling for appropriate columns
-      if (headerInfo.text === 'Protein') cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
-      if (headerInfo.text === 'Fat') cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
-      if (headerInfo.text === 'Carbs') cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
-      if (headerInfo.text === 'Calories') cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
+      if (headerInfo.text === t('table.headers.protein'))
+        cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
+      if (headerInfo.text === t('table.headers.fat'))
+        cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
+      if (headerInfo.text === t('table.headers.carbs'))
+        cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
+      if (headerInfo.text === t('table.headers.calories'))
+        cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
     });
 
     // Render each breakdown row - use the FRESH breakdown data
@@ -209,21 +216,35 @@ export class MacrosCalcRenderer {
     // Create responsive text for "Combined Totals" vs "Totals"
     const desktopLabel = aggLabelCell.createSpan({
       cls: 'header-text-desktop',
-      text: 'Combined Totals',
+      text: t('calculator.combinedTotals'),
     });
 
     const mobileLabel = aggLabelCell.createSpan({
       cls: 'header-text-mobile',
-      text: 'Totals',
+      text: t('table.summary.totals'),
     });
 
     // Calculate total macros for percentages
     const totalMacros = finalAggregate.protein + finalAggregate.fat + finalAggregate.carbs;
 
-    // Calories
+    // Enhanced calories cell with kJ support
     const aggCaloriesCell = aggregateRow.insertCell();
     aggCaloriesCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CALORIES_CELL);
-    aggCaloriesCell.innerText = formatCalories(finalAggregate.calories);
+
+    // Display calories with proper energy unit
+    const currentEnergyUnit = this.plugin.settings.energyUnit;
+    if (currentEnergyUnit === 'kJ') {
+      const kjValue = convertEnergyUnit(finalAggregate.calories, 'kcal', 'kJ');
+      aggCaloriesCell.innerText = `${kjValue.toFixed(1)} kJ`;
+      // Add tooltip showing both units
+      safeAttachTooltip(
+        aggCaloriesCell,
+        `${finalAggregate.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`,
+        this.plugin
+      );
+    } else {
+      aggCaloriesCell.innerText = formatCalories(finalAggregate.calories);
+    }
 
     // Protein
     const aggProteinCell = aggregateRow.insertCell();
@@ -331,31 +352,40 @@ export class MacrosCalcRenderer {
     const fatPercentage = totalMacros > 0 ? Math.round((totals.fat / totalMacros) * 100) : 0;
     const carbsPercentage = totalMacros > 0 ? Math.round((totals.carbs / totalMacros) * 100) : 0;
 
-    // Create color-coded metric cards using consistent formatting
+    // Enhanced calories metric card with kJ support
+    const currentEnergyUnit = this.plugin.settings.energyUnit;
+    let calorieDisplayValue: string;
+    if (currentEnergyUnit === 'kJ') {
+      const kjValue = convertEnergyUnit(totals.calories, 'kcal', 'kJ');
+      calorieDisplayValue = `${kjValue.toFixed(1)} kJ`;
+    } else {
+      calorieDisplayValue = formatCalories(totals.calories);
+    }
+
     this.createMetricCard(
       dashboardContent,
-      'Calories',
-      formatCalories(totals.calories),
+      t('table.headers.calories'),
+      calorieDisplayValue,
       MACRO_TYPES.CALORIES
     );
 
     this.createMetricCard(
       dashboardContent,
-      'Protein',
+      t('table.headers.protein'),
       `${formatGrams(totals.protein)} (${proteinPercentage}%)`,
       MACRO_TYPES.PROTEIN
     );
 
     this.createMetricCard(
       dashboardContent,
-      'Fat',
+      t('table.headers.fat'),
       `${formatGrams(totals.fat)} (${fatPercentage}%)`,
       MACRO_TYPES.FAT
     );
 
     this.createMetricCard(
       dashboardContent,
-      'Carbs',
+      t('table.headers.carbs'),
       `${formatGrams(totals.carbs)} (${carbsPercentage}%)`,
       MACRO_TYPES.CARBS
     );
@@ -398,9 +428,15 @@ export class MacrosCalcRenderer {
   private getSummaryLabel(): string {
     const allDates = this.ids.every((id) => /^\d{4}-\d{2}-\d{2}$/.test(id));
     if (allDates) {
-      return `Calculation Summary (last ${this.ids.length} day${this.ids.length === 1 ? '' : 's'})`;
+      return t('calculator.summaryDays', {
+        count: this.ids.length,
+        days: this.ids.length === 1 ? '' : 's',
+      });
     } else {
-      return `Calculation Summary (${this.ids.length} table${this.ids.length === 1 ? '' : 's'})`;
+      return t('calculator.summaryTables', {
+        count: this.ids.length,
+        tables: this.ids.length === 1 ? '' : 's',
+      });
     }
   }
 
@@ -511,10 +547,18 @@ export class MacrosCalcRenderer {
     // Calculate total macros for percentages
     const totalMacros = item.totals.protein + item.totals.fat + item.totals.carbs;
 
-    // Calories cell
+    // Enhanced calories cell with kJ support
     const caloriesCell = row.insertCell();
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CALORIES_CELL);
-    caloriesCell.textContent = formatCalories(item.totals.calories);
+
+    // Display calories with proper energy unit
+    const currentEnergyUnit = this.plugin.settings.energyUnit;
+    if (currentEnergyUnit === 'kJ') {
+      const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
+      caloriesCell.textContent = `${kjValue.toFixed(1)} kJ`;
+    } else {
+      caloriesCell.textContent = formatCalories(item.totals.calories);
+    }
 
     // Conditional formatting for high values
     const caloriePercentage = (item.totals.calories / aggregate.calories) * 100;
@@ -526,12 +570,24 @@ export class MacrosCalcRenderer {
       MACRO_TYPES.CALORIES
     );
 
-    // Add tooltip
-    safeAttachTooltip(
-      caloriesCell,
-      `${item.totals.calories.toFixed(1)} calories from ${item.id} (${caloriePercentage.toFixed(0)}% of total)`,
-      this.plugin
-    );
+    // Enhanced tooltip with energy unit support
+    let calorieTooltip: string;
+    if (currentEnergyUnit === 'kJ') {
+      const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
+      calorieTooltip = t('calculator.tooltips.calories', {
+        value: kjValue.toFixed(1) + ' kJ',
+        id: item.id,
+        percentage: caloriePercentage.toFixed(0),
+      });
+    } else {
+      calorieTooltip = t('calculator.tooltips.calories', {
+        value: item.totals.calories.toFixed(1),
+        id: item.id,
+        percentage: caloriePercentage.toFixed(0),
+      });
+    }
+
+    safeAttachTooltip(caloriesCell, calorieTooltip, this.plugin);
 
     // Protein cell
     const proteinCell = row.insertCell();
@@ -554,7 +610,11 @@ export class MacrosCalcRenderer {
     // Add tooltip
     safeAttachTooltip(
       proteinCell,
-      `${formatGrams(item.totals.protein)} protein (${Math.round(proteinPercentage)}% of total macros)`,
+      t('calculator.tooltips.macro', {
+        value: formatGrams(item.totals.protein),
+        macro: t('table.headers.protein').toLowerCase(),
+        percentage: Math.round(proteinPercentage),
+      }),
       this.plugin
     );
 
@@ -579,7 +639,11 @@ export class MacrosCalcRenderer {
     // Add tooltip
     safeAttachTooltip(
       fatCell,
-      `${formatGrams(item.totals.fat)} fat (${Math.round(fatPercentage)}% of total macros)`,
+      t('calculator.tooltips.macro', {
+        value: formatGrams(item.totals.fat),
+        macro: t('table.headers.fat').toLowerCase(),
+        percentage: Math.round(fatPercentage),
+      }),
       this.plugin
     );
 
@@ -604,7 +668,11 @@ export class MacrosCalcRenderer {
     // Add tooltip
     safeAttachTooltip(
       carbsCell,
-      `${formatGrams(item.totals.carbs)} carbs (${Math.round(carbsPercentage)}% of total macros)`,
+      t('calculator.tooltips.macro', {
+        value: formatGrams(item.totals.carbs),
+        macro: t('table.headers.carbs').toLowerCase(),
+        percentage: Math.round(carbsPercentage),
+      }),
       this.plugin
     );
   }
@@ -626,7 +694,7 @@ export class MacrosCalcRenderer {
     detailCell.colSpan = 5;
 
     // Attach a progress indicator until data loads
-    const loadingMessage = detailCell.createEl('p', { text: 'Loading details...' });
+    const loadingMessage = detailCell.createEl('p', { text: t('general.loading') });
 
     // Use a Promise to handle async document loading
     (async () => {
@@ -643,7 +711,7 @@ export class MacrosCalcRenderer {
         }
 
         if (!context || context.allLines.length === 0) {
-          detailContent.createEl('p', { text: 'No detailed data available.' });
+          detailContent.createEl('p', { text: t('calculator.noDetailData') });
           return;
         }
 
@@ -653,12 +721,12 @@ export class MacrosCalcRenderer {
         // Add header with mobile-responsive text
         const foodHeader = foodList.createTHead().insertRow();
         const detailHeaderData = [
-          { text: 'Food Item', mobileText: 'Food' },
-          { text: 'Quantity', mobileText: 'Qty' },
-          { text: 'Calories', mobileText: 'Cal' },
-          { text: 'Protein', mobileText: 'Pro' },
-          { text: 'Fat', mobileText: 'Fat' },
-          { text: 'Carbs', mobileText: 'Carb' },
+          { text: t('table.headers.food'), mobileText: t('table.headers.food') },
+          { text: t('calculator.quantity'), mobileText: 'Qty' },
+          { text: t('table.headers.calories'), mobileText: 'Cal' },
+          { text: t('table.headers.protein'), mobileText: 'Pro' },
+          { text: t('table.headers.fat'), mobileText: 'Fat' },
+          { text: t('table.headers.carbs'), mobileText: 'Carb' },
         ];
 
         detailHeaderData.forEach((headerInfo) => {
@@ -716,13 +784,13 @@ export class MacrosCalcRenderer {
 
             // Process this bullet point item
             let foodName = bulletContent;
-            let quantity = 'Standard';
+            let quantity = t('calculator.standardQuantity');
             let specifiedQuantity: number | null = null;
 
             if (bulletContent.includes(':')) {
               const parts = bulletContent.split(':');
               foodName = parts[0].trim();
-              quantity = parts.length > 1 ? parts[1].trim() : 'Standard';
+              quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
               specifiedQuantity = parseGrams(quantity);
             }
 
@@ -730,7 +798,7 @@ export class MacrosCalcRenderer {
             this.renderFoodItemRow(foodBody, foodName, quantity, specifiedQuantity);
           } else if (!line.startsWith('-')) {
             // Regular food item (not part of a meal template)
-            this.renderFoodItemRow(foodBody, line, 'Standard');
+            this.renderFoodItemRow(foodBody, line, t('calculator.standardQuantity'));
           }
         });
       } catch (error) {
@@ -738,13 +806,15 @@ export class MacrosCalcRenderer {
 
         // Update loading message to show error
         if (loadingMessage && loadingMessage.parentNode) {
-          loadingMessage.textContent = 'Error loading data: ' + (error as Error).message;
+          loadingMessage.textContent = t('calculator.errorLoadingData', {
+            error: (error as Error).message,
+          });
         }
       }
     })();
   }
 
-  // Helper method to render a food item row
+  // Helper method to render a food item row with kJ support
   private renderFoodItemRow(
     foodBody: HTMLTableSectionElement,
     itemLine: string,
@@ -756,7 +826,7 @@ export class MacrosCalcRenderer {
     if (itemLine.includes(':') && specifiedQuantity === null) {
       const parts = itemLine.split(':');
       foodName = parts[0].trim();
-      quantity = parts.length > 1 ? parts[1].trim() : 'Standard';
+      quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
       specifiedQuantity = parseGrams(quantity);
     }
 
@@ -787,8 +857,15 @@ export class MacrosCalcRenderer {
     const quantityCell = foodRow.insertCell();
     quantityCell.textContent = quantity;
 
+    // Enhanced calories cell with kJ support
     const caloriesCell = foodRow.insertCell();
-    caloriesCell.textContent = formatCalories(nutritionData.calories);
+    const currentEnergyUnit = this.plugin.settings.energyUnit;
+    if (currentEnergyUnit === 'kJ') {
+      const kjValue = convertEnergyUnit(nutritionData.calories, 'kcal', 'kJ');
+      caloriesCell.textContent = `${kjValue.toFixed(1)} kJ`;
+    } else {
+      caloriesCell.textContent = formatCalories(nutritionData.calories);
+    }
 
     const proteinCell = foodRow.insertCell();
     proteinCell.textContent = formatGrams(nutritionData.protein);
@@ -859,11 +936,11 @@ export class MacrosCalcRenderer {
 
   private sortTable(table: HTMLTableElement, column: string): void {
     const headers: Record<string, number> = {
-      'Table ID': 0,
-      Calories: 1,
-      Protein: 2,
-      Fat: 3,
-      Carbs: 4,
+      [t('calculator.tableHeaders.id')]: 0,
+      [t('table.headers.calories')]: 1,
+      [t('table.headers.protein')]: 2,
+      [t('table.headers.fat')]: 3,
+      [t('table.headers.carbs')]: 4,
     };
 
     const columnIndex = headers[column];
@@ -917,19 +994,43 @@ export class MacrosCalcRenderer {
       }
     });
 
-    // Sort the row groups
+    // Enhanced sorting with energy unit support
     rowGroups.sort((a, b) => {
       const aValue = a.mainRow.cells[columnIndex].textContent || '';
       const bValue = b.mainRow.cells[columnIndex].textContent || '';
 
       // For numeric columns, extract numbers and sort
       if (columnIndex > 0) {
-        // Extract just the numbers, ignoring the (%) parts
-        const aNumMatch = aValue.match(/^([\d.]+)/);
-        const bNumMatch = bValue.match(/^([\d.]+)/);
+        let aNum = 0;
+        let bNum = 0;
 
-        const aNum = aNumMatch ? parseFloat(aNumMatch[1]) : 0;
-        const bNum = bNumMatch ? parseFloat(bNumMatch[1]) : 0;
+        // Enhanced parsing for energy units
+        if (columnIndex === 1 && (aValue.includes('kJ') || bValue.includes('kJ'))) {
+          // Handle kJ values - convert to kcal for consistent sorting
+          const aKjMatch = aValue.match(/^([\d.]+)\s*kJ/);
+          const bKjMatch = bValue.match(/^([\d.]+)\s*kJ/);
+
+          if (aKjMatch) {
+            aNum = convertEnergyUnit(parseFloat(aKjMatch[1]), 'kJ', 'kcal');
+          } else {
+            const aKcalMatch = aValue.match(/^([\d.]+)/);
+            aNum = aKcalMatch ? parseFloat(aKcalMatch[1]) : 0;
+          }
+
+          if (bKjMatch) {
+            bNum = convertEnergyUnit(parseFloat(bKjMatch[1]), 'kJ', 'kcal');
+          } else {
+            const bKcalMatch = bValue.match(/^([\d.]+)/);
+            bNum = bKcalMatch ? parseFloat(bKcalMatch[1]) : 0;
+          }
+        } else {
+          // Extract just the numbers, ignoring the (%) parts
+          const aNumMatch = aValue.match(/^([\d.]+)/);
+          const bNumMatch = bValue.match(/^([\d.]+)/);
+
+          aNum = aNumMatch ? parseFloat(aNumMatch[1]) : 0;
+          bNum = bNumMatch ? parseFloat(bNumMatch[1]) : 0;
+        }
 
         if (ascending) {
           return aNum - bNum;
@@ -1023,7 +1124,7 @@ export class MacrosCalcRenderer {
 
     headerContent.createSpan({
       cls: 'macroscalc-header-title',
-      text: 'Macro Trends Over Time',
+      text: t('calculator.chartTitle'),
     });
 
     const chartContent = chartSection.createDiv({
@@ -1033,7 +1134,7 @@ export class MacrosCalcRenderer {
     // Check if we have enough data for a chart
     if (breakdown.length < 2) {
       chartContent.createEl('p', {
-        text: `Need at least 2 data points to show trends (currently have ${breakdown.length})`,
+        text: t('calculator.notEnoughData', { count: breakdown.length }),
         cls: 'macroscalc-chart-info',
       });
       this.plugin.logger.debug('Not enough data points for chart');
@@ -1092,6 +1193,18 @@ export class MacrosCalcRenderer {
         caloriesData: breakdown.map((item) => item.totals.calories),
       });
 
+      // Enhanced chart configuration with energy unit support
+      const currentEnergyUnit = getCurrentEnergyUnitString();
+      const isKjUnit = currentEnergyUnit === 'kJ';
+
+      // Convert calorie data if needed for display
+      const calorieData = breakdown.map((item) => {
+        if (isKjUnit) {
+          return convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
+        }
+        return item.totals.calories;
+      });
+
       // Properly typed chart configuration
       const chartConfig: import('chart.js').ChartConfiguration<'line', number[], string> = {
         type: 'line',
@@ -1099,7 +1212,7 @@ export class MacrosCalcRenderer {
           labels: breakdown.map((item) => item.id),
           datasets: [
             {
-              label: 'Protein (g)',
+              label: t('table.headers.protein') + ' (g)',
               data: breakdown.map((item) => item.totals.protein),
               borderColor: this.plugin.settings.proteinColor || '#4caf50',
               backgroundColor: (this.plugin.settings.proteinColor || '#4caf50') + '20',
@@ -1109,7 +1222,7 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: 'Fat (g)',
+              label: t('table.headers.fat') + ' (g)',
               data: breakdown.map((item) => item.totals.fat),
               borderColor: this.plugin.settings.fatColor || '#f44336',
               backgroundColor: (this.plugin.settings.fatColor || '#f44336') + '20',
@@ -1119,7 +1232,7 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: 'Carbs (g)',
+              label: t('table.headers.carbs') + ' (g)',
               data: breakdown.map((item) => item.totals.carbs),
               borderColor: this.plugin.settings.carbsColor || '#2196f3',
               backgroundColor: (this.plugin.settings.carbsColor || '#2196f3') + '20',
@@ -1129,8 +1242,8 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: 'Calories',
-              data: breakdown.map((item) => item.totals.calories),
+              label: t('table.headers.calories') + ` (${currentEnergyUnit})`,
+              data: calorieData,
               borderColor: '#ff9800',
               backgroundColor: '#ff980020',
               tension: 0.2,
@@ -1154,7 +1267,21 @@ export class MacrosCalcRenderer {
             tooltip: {
               callbacks: {
                 label: function (context: any) {
-                  return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
+                  let value = context.parsed.y.toFixed(1);
+                  let unit = '';
+
+                  if (context.dataset.label?.includes('calories')) {
+                    unit = ` ${currentEnergyUnit}`;
+                    // Add conversion info in tooltip if showing kJ
+                    if (isKjUnit) {
+                      const originalKcal = breakdown[context.dataIndex].totals.calories;
+                      return `${context.dataset.label}: ${value}${unit} (${originalKcal.toFixed(1)} kcal)`;
+                    }
+                  } else {
+                    unit = 'g';
+                  }
+
+                  return `${context.dataset.label}: ${value}${unit}`;
                 },
               },
             },
@@ -1163,14 +1290,14 @@ export class MacrosCalcRenderer {
             x: {
               title: {
                 display: true,
-                text: 'Date/ID',
+                text: t('calculator.chartAxisDate'),
               },
             },
             y: {
               beginAtZero: true,
               title: {
                 display: true,
-                text: 'Grams',
+                text: t('calculator.chartAxisGrams'),
               },
               position: 'left',
             },
@@ -1180,7 +1307,7 @@ export class MacrosCalcRenderer {
               position: 'right',
               title: {
                 display: true,
-                text: 'Calories',
+                text: `${t('table.headers.calories')} (${currentEnergyUnit})`,
               },
               grid: {
                 drawOnChartArea: false,
@@ -1216,7 +1343,7 @@ export class MacrosCalcRenderer {
       // Show error message in UI
       const errorDiv = chartContent.createDiv({ cls: 'macroscalc-chart-error' });
       errorDiv.createEl('p', {
-        text: `Chart Error: ${(error as Error).message}`,
+        text: t('calculator.chartError', { error: (error as Error).message }),
         cls: 'error-message',
       });
 
@@ -1228,12 +1355,20 @@ export class MacrosCalcRenderer {
   private renderFallbackTable(container: HTMLElement, breakdown: CalcBreakdown[]): void {
     const fallbackDiv = container.createDiv({ cls: 'chart-fallback' });
 
-    fallbackDiv.createEl('h4', { text: 'Data Summary:' });
+    fallbackDiv.createEl('h4', { text: t('calculator.dataSummary') });
 
     const table = fallbackDiv.createEl('table', { cls: 'fallback-data-table' });
     const headerRow = table.insertRow();
 
-    ['Date/ID', 'Calories', 'Protein', 'Fat', 'Carbs'].forEach((header) => {
+    // Use localized headers with energy unit support
+    const currentEnergyUnit = getCurrentEnergyUnitString();
+    [
+      t('calculator.tableHeaders.id'),
+      `${t('table.headers.calories')} (${currentEnergyUnit})`,
+      t('table.headers.protein'),
+      t('table.headers.fat'),
+      t('table.headers.carbs'),
+    ].forEach((header) => {
       const th = document.createElement('th');
       th.textContent = header;
       headerRow.appendChild(th);
@@ -1242,7 +1377,16 @@ export class MacrosCalcRenderer {
     breakdown.forEach((item) => {
       const row = table.insertRow();
       row.insertCell().textContent = item.id;
-      row.insertCell().textContent = item.totals.calories.toFixed(1);
+
+      // Enhanced calorie display with kJ support
+      const calorieCell = row.insertCell();
+      if (currentEnergyUnit === 'kJ') {
+        const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
+        calorieCell.textContent = kjValue.toFixed(1);
+      } else {
+        calorieCell.textContent = item.totals.calories.toFixed(1);
+      }
+
       row.insertCell().textContent = item.totals.protein.toFixed(1) + 'g';
       row.insertCell().textContent = item.totals.fat.toFixed(1) + 'g';
       row.insertCell().textContent = item.totals.carbs.toFixed(1) + 'g';

@@ -2,6 +2,7 @@ import { App, Modal, Notice, Component } from 'obsidian';
 import { extractServingSize } from '../../utils/nutritionUtils';
 import { fetchFoodData, FoodItem } from '../../core/api';
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export class LiveFoodSearchModal extends Modal {
   private searchInput: HTMLInputElement;
@@ -29,25 +30,25 @@ export class LiveFoodSearchModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.addClass('live-food-search-modal');
-    contentEl.createEl('h2', { text: 'Search for food', cls: 'mod-header' });
+    contentEl.createEl('h2', { text: t('food.search.title'), cls: 'mod-header' });
 
     const searchContainer = contentEl.createDiv({ cls: 'search-container' });
     this.searchInput = searchContainer.createEl('input', {
       type: 'text',
-      placeholder: 'Start typing to search (e.g., Apple)',
+      placeholder: t('food.search.placeholder'),
       cls: 'live-search-input',
     });
 
     this.loadingIndicator = contentEl.createDiv({
       cls: 'loading-indicator is-hidden',
-      text: 'Searching...',
+      text: t('food.search.searching'),
     });
 
     this.resultsContainer = contentEl.createDiv({ cls: 'results-container' });
 
     this.noResultsMessage = contentEl.createDiv({
       cls: 'no-results-message is-hidden',
-      text: 'No results found. Try a different search term.',
+      text: t('food.search.noResults'),
     });
 
     this.searchInput.focus();
@@ -147,7 +148,7 @@ export class LiveFoodSearchModal extends Modal {
         console.error('Error fetching food data:', error);
       }
       this.loadingIndicator.classList.add('is-hidden');
-      new Notice('Error searching for food items. Please try again.');
+      new Notice(t('errors.apiConnectionFailed'));
     } finally {
       this.isSearching = false;
     }

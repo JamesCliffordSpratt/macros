@@ -14,9 +14,10 @@ import {
 } from '../../../utils';
 import { parseGrams } from '../../../utils/parsingUtils';
 import { Notice, Modal, ButtonComponent } from 'obsidian';
+import { t } from '../../../lang/I18nManager';
 
 /**
- * Confirmation Modal for Delete Actions
+ * Confirmation Modal for Delete Actions - FIXED LOCALIZATION
  */
 class DeleteConfirmationModal extends Modal {
   private itemName: string;
@@ -48,7 +49,7 @@ class DeleteConfirmationModal extends Modal {
     // Modal header
     const header = contentEl.createEl('div', { cls: 'modal-header delete-confirmation-header' });
     header.createEl('h2', {
-      text: 'Remove Item',
+      text: t('table.actions.removeItem'),
       cls: 'delete-confirmation-title',
     });
 
@@ -62,9 +63,10 @@ class DeleteConfirmationModal extends Modal {
       text: '⚠️',
     });
 
+    // Fixed: Use proper interpolation for the message
     const message = this.isMealItem
-      ? `Are you sure you want to remove "${this.itemName}" from "${this.mealName}"?`
-      : `Are you sure you want to remove "${this.itemName}" from the table?`;
+      ? t('table.confirmDelete.mealitem')
+      : t('table.confirmDelete.item', { itemName: this.itemName });
 
     messageContainer.createEl('p', {
       text: message,
@@ -73,8 +75,8 @@ class DeleteConfirmationModal extends Modal {
 
     // Additional context
     const contextText = this.isMealItem
-      ? 'This will only remove the item from this meal template instance, not from your food database.'
-      : 'This will remove the item from your macro tracking table.';
+      ? t('table.confirmDelete.mealitemContext')
+      : t('table.confirmDelete.itemContext');
 
     content.createEl('p', {
       text: contextText,
@@ -86,7 +88,7 @@ class DeleteConfirmationModal extends Modal {
 
     // Cancel button
     const cancelBtn = new ButtonComponent(buttonContainer)
-      .setButtonText('Cancel')
+      .setButtonText(t('general.cancel'))
       .setClass('mod-muted')
       .onClick(() => {
         this.onCancel();
@@ -95,7 +97,7 @@ class DeleteConfirmationModal extends Modal {
 
     // Delete button
     const deleteBtn = new ButtonComponent(buttonContainer)
-      .setButtonText('Remove')
+      .setButtonText(t('general.remove'))
       .setClass('mod-warning')
       .onClick(async () => {
         try {
@@ -103,7 +105,7 @@ class DeleteConfirmationModal extends Modal {
           this.close();
         } catch (error) {
           console.error('Error during delete:', error);
-          new Notice(`Failed to remove item: ${(error as Error).message}`);
+          new Notice(t('notifications.itemRemoveError', { error: (error as Error).message }));
         }
       });
 
@@ -169,7 +171,17 @@ export class RowRenderer {
     row: MacroRow,
     macroPercent: number
   ): string {
-    return `${this.capitalize(macro)}: ${value}g (${macroPercent}% of total macros)`;
+    const macroLabel =
+      macro === 'protein'
+        ? t('table.headers.protein')
+        : macro === 'fat'
+          ? t('table.headers.fat')
+          : t('table.headers.carbs');
+    return t('tooltips.macroComposition', {
+      macro: macroLabel,
+      value: value.toString(),
+      percent: macroPercent.toString(),
+    });
   }
 
   private capitalize(str: string): string {
@@ -205,21 +217,6 @@ export class RowRenderer {
 
     const longPressDuration = 800; // 800ms for long press
     const movementThreshold = 10; // 10px movement tolerance
-
-    // Visual feedback element
-    const createLongPressIndicator = (): HTMLElement => {
-      const indicator = document.createElement('div');
-      indicator.className = 'long-press-indicator';
-      indicator.innerHTML = `
-        <div class="long-press-content">
-          <div class="long-press-circle">
-            <div class="long-press-progress"></div>
-          </div>
-          <div class="long-press-text">Hold to delete</div>
-        </div>
-      `;
-      return indicator;
-    };
 
     // Touch start handler
     const handleTouchStart = (e: TouchEvent) => {
@@ -333,16 +330,18 @@ export class RowRenderer {
             await this.onRemove(row.macroLine);
           }
 
-          const itemDescription = isMealItem ? `${row.name} from ${mealName}` : row.name;
-          new Notice(`Removed ${itemDescription}`);
+          const itemDescription = isMealItem
+            ? `${row.name} ${t('general.from')} ${mealName}`
+            : row.name;
+          new Notice(t('notifications.itemRemoved', { item: itemDescription }));
         } catch (error) {
           this.plugin.logger.error('Error removing item:', error);
-          new Notice(`Failed to remove item: ${(error as Error).message}`);
+          new Notice(t('notifications.itemRemoveError', { error: (error as Error).message }));
         }
       },
       () => {
         // Cancel action
-        new Notice('Removal cancelled');
+        new Notice(t('notifications.removalCancelled'));
       }
     );
 
@@ -367,7 +366,9 @@ export class RowRenderer {
       text: '–',
     });
 
-    const tooltipText = isMealItem ? `Remove ${row.name} from ${mealName}` : 'Remove this item';
+    const tooltipText = isMealItem
+      ? t('table.actions.removeFromMeal', { itemName: row.name, mealName: mealName })
+      : t('table.actions.removeItem');
 
     safeAttachTooltip(removeBtn, tooltipText, this.plugin);
 
@@ -412,7 +413,7 @@ export class RowRenderer {
    */
   async onRemoveMealItem(mealName: string, foodName: string, macroLine: string): Promise<void> {
     if (!this.plugin.dataManager.getActiveFile()) {
-      new Notice('No active file to modify');
+      new Notice(t('errors.noActiveFile'));
       return;
     }
 
@@ -428,7 +429,7 @@ export class RowRenderer {
         // Look for the ID in the page content
         const activeFile = this.plugin.dataManager.getActiveFile();
         if (!activeFile) {
-          throw new Error('No active file available');
+          throw new Error(t('errors.noActiveFile'));
         }
 
         const content = await this.plugin.dataManager.readFileContent(activeFile, true);
@@ -448,7 +449,7 @@ export class RowRenderer {
         }
 
         if (!foundId) {
-          throw new Error(`Could not find macros block containing meal: ${mealName}`);
+          throw new Error(t('errors.macrosBlockNotFound', { mealName: mealName }));
         }
 
         await this.removeMealItemFromBlock(foundId, mealName, foodName);
@@ -474,7 +475,7 @@ export class RowRenderer {
     const context = await this.plugin.dataManager.getDocumentContext(macrosId);
 
     if (!context || context.allLines.length === 0) {
-      throw new Error('No macros data found');
+      throw new Error(t('errors.noMacrosData'));
     }
 
     // Find the meal line
@@ -491,7 +492,7 @@ export class RowRenderer {
     });
 
     if (mealLineIndex === -1) {
-      throw new Error(`Meal '${mealName}' not found in macros block`);
+      throw new Error(t('errors.mealNotFound', { mealName: mealName }));
     }
 
     // Create a new array of lines with the food item removed
@@ -517,14 +518,14 @@ export class RowRenderer {
     }
 
     if (!itemRemoved) {
-      throw new Error(`Food item '${foodName}' not found under meal '${mealName}'`);
+      throw new Error(t('errors.foodItemNotFound', { foodName: foodName, mealName: mealName }));
     }
 
     // Update the macros block
     const success = await this.plugin.dataManager.updateMacrosBlock(macrosId, updatedLines);
 
     if (!success) {
-      throw new Error('Failed to update macros block');
+      throw new Error(t('errors.updateMacrosBlockFailed'));
     }
   }
 
@@ -578,12 +579,12 @@ export class RowRenderer {
 
     // Add mobile instruction tooltip
     if (this.isMobileDevice() && (!group.macroLine || isMealItem)) {
-      safeAttachTooltip(nameCell, 'Long press to delete this item', this.plugin);
+      safeAttachTooltip(nameCell, t('table.actions.longPressToDelete'), this.plugin);
     }
 
     const quantityCell = r.insertCell();
     quantityCell.classList.add('editable-quantity');
-    safeAttachTooltip(quantityCell, 'Click to edit quantity', this.plugin);
+    safeAttachTooltip(quantityCell, t('table.actions.clickToEdit'), this.plugin);
     quantityCell.textContent = row.serving;
 
     const servingValue = parseGrams(row.serving);
@@ -609,7 +610,7 @@ export class RowRenderer {
         if (!isNaN(newValue) && newValue >= 0) {
           try {
             quantityCell.classList.add('quantity-updating');
-            quantityCell.textContent = `${newValue}g (updating...)`;
+            quantityCell.textContent = `${newValue}g (${t('general.updating')}...)`;
             await this.onUpdateQuantity(
               row.macroLine,
               newValue,
@@ -621,12 +622,16 @@ export class RowRenderer {
             this.plugin.logger.error('Error updating quantity:', error);
             quantityCell.classList.remove('quantity-updating');
             quantityCell.classList.add('quantity-error');
-            quantityCell.textContent = `${servingValue}g (error)`;
+            quantityCell.textContent = `${servingValue}g (${t('general.error').toLowerCase()})`;
             setTimeout(() => {
               quantityCell.classList.remove('quantity-error');
               quantityCell.textContent = row.serving;
             }, 2000);
-            new Notice(`Failed to update quantity: ${(error as Error).message || 'Unknown error'}`);
+            new Notice(
+              t('notifications.quantityUpdateError', {
+                error: (error as Error).message || t('errors.unknownError'),
+              })
+            );
           }
         } else {
           quantityCell.textContent = row.serving;
@@ -655,11 +660,22 @@ export class RowRenderer {
     const caloriesCell = r.insertCell();
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CALORIES_CELL);
     caloriesCell.textContent = formatCalories(row.calories);
-    safeAttachTooltip(
-      caloriesCell,
-      `${formatPercentage((row.calories / dailyTargets.calories) * 100)}% of daily calorie target`,
-      this.plugin
-    );
+
+    // Create custom tooltip for calories with proper energy unit handling
+    let calorieTooltipMessage: string;
+    const currentUnit = this.plugin.settings.energyUnit;
+    const caloriePercentage = (row.calories / dailyTargets.calories) * 100;
+
+    if (currentUnit === 'kJ') {
+      // Convert kcal to kJ for tooltip
+      const caloriesInKj = row.calories * 4.184;
+      calorieTooltipMessage = `${caloriesInKj.toFixed(1)} kJ • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
+    } else {
+      // Use kcal values directly
+      calorieTooltipMessage = `${row.calories.toFixed(1)} kcal • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
+    }
+
+    safeAttachTooltip(caloriesCell, calorieTooltipMessage, this.plugin);
 
     this.renderMacroCell(r, row.protein, row, MACRO_TYPES.PROTEIN, dailyTargets);
     this.renderMacroCell(r, row.fat, row, MACRO_TYPES.FAT, dailyTargets);
@@ -699,15 +715,15 @@ export class RowRenderer {
     let macroType2: 'protein' | 'fat' | 'carbs' = 'protein';
 
     if (macroType === MACRO_TYPES.PROTEIN) {
-      macroLabel = 'Protein';
+      macroLabel = t('table.headers.protein');
       target = dailyTargets.protein;
       macroType2 = 'protein';
     } else if (macroType === MACRO_TYPES.FAT) {
-      macroLabel = 'Fat';
+      macroLabel = t('table.headers.fat');
       target = dailyTargets.fat;
       macroType2 = 'fat';
     } else if (macroType === MACRO_TYPES.CARBS) {
-      macroLabel = 'Carbs';
+      macroLabel = t('table.headers.carbs');
       target = dailyTargets.carbs;
       macroType2 = 'carbs';
     }
@@ -764,12 +780,15 @@ export class RowRenderer {
   renderTargetCells(row: HTMLTableRowElement, totals: MacroTotals, targets: DailyTargets): void {
     const caloriesCell = row.insertCell();
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL);
-    caloriesCell.textContent = targets.calories.toString();
+    caloriesCell.textContent = formatCalories(targets.calories);
+
+    // Calculate percentage based on original kcal values for consistency
+    const caloriePercentage = (totals.calories / targets.calories) * 100;
+
     if (this.plugin.settings.showCellPercentages) {
-      const caloriePercentage = formatPercentage((totals.calories / targets.calories) * 100);
       caloriesCell.createSpan({
         cls: CLASS_NAMES.MACRO.PERCENTAGE,
-        text: `(${caloriePercentage}%)`,
+        text: `(${formatPercentage(caloriePercentage)}%)`,
       });
     }
     ProgressBarFactory.createEnhancedTargetBar(
@@ -836,7 +855,7 @@ export class RowRenderer {
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL);
     if (remainingCalories < 0) {
       caloriesCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
-      caloriesCell.textContent = `${formatCalories(remainingCalories)} (over)`;
+      caloriesCell.textContent = `${formatCalories(remainingCalories)} (${t('table.summary.over')})`;
     } else if (remainingCalories === 0) {
       caloriesCell.textContent = '0';
     } else {
@@ -847,7 +866,7 @@ export class RowRenderer {
     proteinCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.PROTEIN_CELL);
     if (remainingProtein < 0) {
       proteinCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
-      proteinCell.textContent = `${formatGrams(remainingProtein)} (over)`;
+      proteinCell.textContent = `${formatGrams(remainingProtein)} (${t('table.summary.over')})`;
     } else if (remainingProtein === 0) {
       proteinCell.textContent = '0.0g';
     } else {
@@ -858,7 +877,7 @@ export class RowRenderer {
     fatCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.FAT_CELL);
     if (remainingFat < 0) {
       fatCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
-      fatCell.textContent = `${formatGrams(remainingFat)} (over)`;
+      fatCell.textContent = `${formatGrams(remainingFat)} (${t('table.summary.over')})`;
     } else if (remainingFat === 0) {
       fatCell.textContent = '0.0g';
     } else {
@@ -869,7 +888,7 @@ export class RowRenderer {
     carbsCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CARBS_CELL);
     if (remainingCarbs < 0) {
       carbsCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
-      carbsCell.textContent = `${formatGrams(remainingCarbs)} (over)`;
+      carbsCell.textContent = `${formatGrams(remainingCarbs)} (${t('table.summary.over')})`;
     } else if (remainingCarbs === 0) {
       carbsCell.textContent = '0.0g';
     } else {

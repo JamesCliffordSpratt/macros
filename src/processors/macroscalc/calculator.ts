@@ -1,4 +1,4 @@
-import { parseGrams, processNutritionalData } from '../../utils';
+import { processNutritionalData } from '../../utils';
 import MacrosPlugin from '@/main';
 import { NutritionData, MacroTotals } from '../../utils';
 
@@ -22,24 +22,10 @@ export async function processNutritionalDataFromLines(
   // Add debug logging
   plugin.logger.debug(`Processing nutrition data for ${ids.length} IDs: ${ids.join(', ')}`);
 
-  // Helper function for processing food items
-  function processFoodItem(foodQuery: string, specifiedQuantity: number | null): NutritionData {
-    // Use centralized method from DataManager
-    const matchingFile = plugin.dataManager.findFoodFile(foodQuery);
-
-    if (!matchingFile) {
-      plugin.logger.debug(`No matching food file found for: ${foodQuery}`);
-      return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-    }
-
-    const nutrition = processNutritionalData(plugin.app, matchingFile, specifiedQuantity);
-    return nutrition || { calories: 0, protein: 0, fat: 0, carbs: 0 };
-  }
-
   for (const id of ids) {
     const total: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
-    // Get the raw data from the cache
+    // Get the raw data from the cache (should include bullet points)
     const tableLines = plugin.macroService.macroTables.get(id);
     if (!tableLines) {
       plugin.logger.debug(`No table lines found for ID: ${id}`);

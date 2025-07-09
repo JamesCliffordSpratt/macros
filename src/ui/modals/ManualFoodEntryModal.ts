@@ -1,8 +1,10 @@
 import { App, Modal, Notice, Component, normalizePath } from 'obsidian';
 import MacrosPlugin from '../../main';
+import { convertEnergyUnit } from '../../utils/energyUtils';
+import { t } from '../../lang/I18nManager';
 
 /**
- * Modal for manually entering food nutritional data
+ * Modal for manually entering food nutritional data - Updated with I18n and kJ support
  */
 export class ManualFoodEntryModal extends Modal {
   private plugin: MacrosPlugin;
@@ -13,6 +15,7 @@ export class ManualFoodEntryModal extends Modal {
   private foodNameInput: HTMLInputElement;
   private servingSizeInput: HTMLInputElement;
   private caloriesInput: HTMLInputElement;
+  private kjInput: HTMLInputElement;
   private proteinInput: HTMLInputElement;
   private fatInput: HTMLInputElement;
   private carbsInput: HTMLInputElement;
@@ -28,14 +31,14 @@ export class ManualFoodEntryModal extends Modal {
     const { contentEl } = this;
     contentEl.addClass('manual-food-entry-modal');
 
-    // Create header
+    // Create header with translated text
     contentEl.createEl('h2', {
-      text: 'Manual Food Entry',
+      text: t('food.manual.title'),
       cls: 'modal-title',
     });
 
     contentEl.createEl('p', {
-      text: 'Enter the nutritional information for your food item:',
+      text: t('food.manual.description'),
       cls: 'modal-description',
     });
 
@@ -45,7 +48,7 @@ export class ManualFoodEntryModal extends Modal {
     // Food Name Field
     const nameGroup = formContainer.createDiv({ cls: 'form-group' });
     nameGroup.createEl('label', {
-      text: 'Food Name',
+      text: t('food.manual.foodName'),
       cls: 'form-label required',
     });
     this.foodNameInput = nameGroup.createEl('input', {
@@ -60,7 +63,7 @@ export class ManualFoodEntryModal extends Modal {
     // Serving Size Field
     const servingGroup = formContainer.createDiv({ cls: 'form-group' });
     servingGroup.createEl('label', {
-      text: 'Serving Size (grams)',
+      text: t('food.manual.servingSize'),
       cls: 'form-label required',
     });
     this.servingSizeInput = servingGroup.createEl('input', {
@@ -77,10 +80,13 @@ export class ManualFoodEntryModal extends Modal {
     // Nutrition Fields Container
     const nutritionContainer = formContainer.createDiv({ cls: 'nutrition-fields' });
 
+    // Energy Fields Container (kcal and kJ side by side)
+    const energyContainer = nutritionContainer.createDiv({ cls: 'energy-fields-container' });
+
     // Calories Field
-    const caloriesGroup = nutritionContainer.createDiv({ cls: 'form-group' });
+    const caloriesGroup = energyContainer.createDiv({ cls: 'form-group energy-field' });
     caloriesGroup.createEl('label', {
-      text: 'Calories',
+      text: t('food.manual.calories'),
       cls: 'form-label required',
     });
     this.caloriesInput = caloriesGroup.createEl('input', {
@@ -94,10 +100,29 @@ export class ManualFoodEntryModal extends Modal {
       },
     });
 
+    // kJ Field
+    const kjGroup = energyContainer.createDiv({ cls: 'form-group energy-field' });
+    kjGroup.createEl('label', {
+      text: 'Kilojoules (kJ)',
+      cls: 'form-label',
+    });
+    this.kjInput = kjGroup.createEl('input', {
+      type: 'number',
+      cls: 'form-input',
+      attr: {
+        placeholder: '0',
+        min: '0',
+        step: '0.1',
+      },
+    });
+
+    // Set up bidirectional energy conversion
+    this.setupEnergyConversion();
+
     // Protein Field
     const proteinGroup = nutritionContainer.createDiv({ cls: 'form-group' });
     proteinGroup.createEl('label', {
-      text: 'Protein (g)',
+      text: t('food.manual.protein'),
       cls: 'form-label required',
     });
     this.proteinInput = proteinGroup.createEl('input', {
@@ -114,7 +139,7 @@ export class ManualFoodEntryModal extends Modal {
     // Fat Field
     const fatGroup = nutritionContainer.createDiv({ cls: 'form-group' });
     fatGroup.createEl('label', {
-      text: 'Fat (g)',
+      text: t('food.manual.fat'),
       cls: 'form-label required',
     });
     this.fatInput = fatGroup.createEl('input', {
@@ -131,7 +156,7 @@ export class ManualFoodEntryModal extends Modal {
     // Carbs Field
     const carbsGroup = nutritionContainer.createDiv({ cls: 'form-group' });
     carbsGroup.createEl('label', {
-      text: 'Carbohydrates (g)',
+      text: t('food.manual.carbs'),
       cls: 'form-label required',
     });
     this.carbsInput = carbsGroup.createEl('input', {
@@ -148,20 +173,27 @@ export class ManualFoodEntryModal extends Modal {
     // Add validation info
     const validationInfo = formContainer.createDiv({ cls: 'validation-info' });
     validationInfo.createEl('p', {
-      text: '* Required fields',
+      text: t('food.manual.required'),
       cls: 'required-note',
+    });
+
+    // Add energy conversion info
+    const energyInfo = formContainer.createDiv({ cls: 'energy-info' });
+    energyInfo.createEl('p', {
+      text: t('settings.display.energyConversionNote'),
+      cls: 'energy-note',
     });
 
     // Button container
     const buttonContainer = formContainer.createDiv({ cls: 'button-container' });
 
     const cancelBtn = buttonContainer.createEl('button', {
-      text: 'Cancel',
+      text: t('general.cancel'),
       cls: 'mod-button',
     });
 
     const saveBtn = buttonContainer.createEl('button', {
-      text: 'Save Food Item',
+      text: t('food.manual.save'),
       cls: 'mod-button mod-cta',
     });
 
@@ -187,6 +219,7 @@ export class ManualFoodEntryModal extends Modal {
       this.foodNameInput,
       this.servingSizeInput,
       this.caloriesInput,
+      this.kjInput,
       this.proteinInput,
       this.fatInput,
       this.carbsInput,
@@ -198,53 +231,75 @@ export class ManualFoodEntryModal extends Modal {
     this.foodNameInput.focus();
   }
 
+  private setupEnergyConversion(): void {
+    // Convert from kcal to kJ
+    this.component.registerDomEvent(this.caloriesInput, 'input', () => {
+      const kcalValue = parseFloat(this.caloriesInput.value);
+      if (!isNaN(kcalValue) && kcalValue >= 0) {
+        const kjValue = convertEnergyUnit(kcalValue, 'kcal', 'kJ');
+        this.kjInput.value = kjValue.toFixed(1);
+      } else if (this.caloriesInput.value === '') {
+        this.kjInput.value = '';
+      }
+    });
+
+    // Convert from kJ to kcal
+    this.component.registerDomEvent(this.kjInput, 'input', () => {
+      const kjValue = parseFloat(this.kjInput.value);
+      if (!isNaN(kjValue) && kjValue >= 0) {
+        const kcalValue = convertEnergyUnit(kjValue, 'kJ', 'kcal');
+        this.caloriesInput.value = kcalValue.toFixed(1);
+      } else if (this.kjInput.value === '') {
+        this.caloriesInput.value = '';
+      }
+    });
+  }
+
   private async validateForm(): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
-    // Check required fields
+    // Check required fields with translated error messages
     if (!this.foodNameInput.value.trim()) {
-      errors.push('Food name is required');
+      errors.push(t('validation.required'));
     }
 
     const servingSize = parseFloat(this.servingSizeInput.value);
     if (isNaN(servingSize) || servingSize <= 0) {
-      errors.push('Valid serving size is required');
+      errors.push(t('validation.invalidServing'));
     }
 
     const calories = parseFloat(this.caloriesInput.value);
     if (isNaN(calories) || calories < 0) {
-      errors.push('Valid calories value is required');
+      errors.push(t('validation.invalidNumber'));
     }
 
     const protein = parseFloat(this.proteinInput.value);
     if (isNaN(protein) || protein < 0) {
-      errors.push('Valid protein value is required');
+      errors.push(t('validation.invalidNumber'));
     }
 
     const fat = parseFloat(this.fatInput.value);
     if (isNaN(fat) || fat < 0) {
-      errors.push('Valid fat value is required');
+      errors.push(t('validation.invalidNumber'));
     }
 
     const carbs = parseFloat(this.carbsInput.value);
     if (isNaN(carbs) || carbs < 0) {
-      errors.push('Valid carbohydrates value is required');
+      errors.push(t('validation.invalidNumber'));
     }
 
-    // Check if food name already exists by checking the vault directly
+    // Check if food name already exists
     const foodName = this.foodNameInput.value.trim();
     const folderPath = normalizePath(this.plugin.settings.storageFolder);
     const fileName = `${foodName}.md`;
     const filePath = normalizePath(`${folderPath}/${fileName}`);
 
     try {
-      // Check if the file already exists in the vault
       const existingFile = this.plugin.app.vault.getAbstractFileByPath(filePath);
       if (existingFile) {
-        errors.push(`A food item named "${foodName}" already exists`);
+        errors.push(t('validation.duplicateName', { name: foodName }));
       }
     } catch (error) {
-      // File doesn't exist, which is what we want
       this.plugin.logger.debug(`File ${filePath} doesn't exist yet, which is expected`);
     }
 
@@ -277,14 +332,16 @@ export class ManualFoodEntryModal extends Modal {
       const foodName = this.foodNameInput.value.trim();
       const servingSize = parseFloat(this.servingSizeInput.value);
       const calories = parseFloat(this.caloriesInput.value);
+      const kj = parseFloat(this.kjInput.value);
       const protein = parseFloat(this.proteinInput.value);
       const fat = parseFloat(this.fatInput.value);
       const carbs = parseFloat(this.carbsInput.value);
 
-      // Create the food file
+      // Create the food file with translated content
       const fileName = `${foodName}.md`;
       const frontmatter = `---
 calories: ${calories}
+kj: ${kj}
 protein: ${protein}
 fat: ${fat}
 carbs: ${carbs}
@@ -296,10 +353,11 @@ created: ${new Date().toISOString()}
 # ${foodName}
 
 ## Nutritional Information (per ${servingSize}g)
-- **Calories:** ${calories}
-- **Protein:** ${protein}g
-- **Fat:** ${fat}g
-- **Carbohydrates:** ${carbs}g
+- **${t('food.manual.calories')}:** ${calories} kcal
+- **Kilojoules:** ${kj} kJ
+- **${t('food.manual.protein')}:** ${protein}g
+- **${t('food.manual.fat')}:** ${fat}g
+- **${t('food.manual.carbs')}:** ${carbs}g
 `;
 
       // Normalize the path for folder and create if needed
@@ -318,11 +376,15 @@ created: ${new Date().toISOString()}
       // Invalidate the DataManager file cache so it picks up the new file
       this.plugin.dataManager.invalidateFileCache();
 
-      new Notice(`Successfully saved "${foodName}" to your food database`);
+      new Notice(t('notifications.foodSaved', { fileName: foodName }));
       this.close();
     } catch (error) {
       this.plugin.logger.error('Error saving manual food entry:', error);
-      new Notice(`Error saving food item: ${(error as Error).message || 'Unknown error'}`);
+      new Notice(
+        t('notifications.foodSaveError', {
+          error: (error as Error).message || t('errors.unknownError'),
+        })
+      );
     }
   }
 

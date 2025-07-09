@@ -1,5 +1,6 @@
 import { App, Modal, Component } from 'obsidian';
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export class FoodSearchModal extends Modal {
   onSubmit: (searchTerm: string) => void;
@@ -13,9 +14,9 @@ export class FoodSearchModal extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl('h2', { text: 'Enter food search term', cls: 'mod-header' });
+    contentEl.createEl('h2', { text: t('food.search.title'), cls: 'mod-header' });
     const inputEl = contentEl.createEl('input', { type: 'text' });
-    inputEl.placeholder = 'e.g. Apple';
+    inputEl.placeholder = t('food.search.placeholder');
 
     this.component.registerDomEvent(inputEl, 'keydown', (event: KeyboardEvent) => {
       if (event.key === 'Enter') {

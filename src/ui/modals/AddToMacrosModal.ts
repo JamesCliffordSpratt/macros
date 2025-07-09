@@ -1,8 +1,10 @@
 import { App, Modal, Notice, TFile, normalizePath, Component } from 'obsidian';
-import { parseGrams, processNutritionalData, findMatchingFoodFile } from '../../utils';
+import { parseGrams, processNutritionalData } from '../../utils';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
+import { t } from '../../lang/I18nManager';
+import { convertEnergyUnit } from '../../utils/energyUtils';
 
 interface FoodItemData {
   name: string;
@@ -110,9 +112,9 @@ export class AddToMacrosModal extends Modal {
 
   private createHeader(): void {
     const header = this.contentEl.createDiv({ cls: 'modal-header' });
-    header.createEl('h2', { text: 'Add Items to Macros', cls: 'modal-title' });
+    header.createEl('h2', { text: t('meals.addTo.title'), cls: 'modal-title' });
     header.createEl('p', {
-      text: 'Search and select meal templates or individual food items to add to your macros table.',
+      text: t('meals.addTo.description'),
       cls: 'modal-description',
     });
   }
@@ -126,7 +128,7 @@ export class AddToMacrosModal extends Modal {
     this.searchInput = searchWrapper.createEl('input', {
       type: 'text',
       cls: 'search-input',
-      attr: { placeholder: 'Search meals and foods...' },
+      attr: { placeholder: t('meals.addTo.searchPlaceholder') },
     });
 
     // Add search functionality
@@ -142,11 +144,11 @@ export class AddToMacrosModal extends Modal {
     // Create tabs
     const tabsContainer = contentContainer.createDiv({ cls: 'tabs-container' });
     const mealsTab = tabsContainer.createEl('button', {
-      text: '🍽️ Meal Templates',
+      text: t('meals.addTo.mealTemplates'),
       cls: 'tab-button active',
     });
     const foodsTab = tabsContainer.createEl('button', {
-      text: '🥗 Individual Foods',
+      text: t('meals.addTo.individualFoods'),
       cls: 'tab-button',
     });
 
@@ -205,7 +207,7 @@ export class AddToMacrosModal extends Modal {
     if (this.filteredMeals.length === 0) {
       this.mealsContainer.createDiv({
         cls: 'no-results',
-        text: 'No meal templates found',
+        text: t('meals.create.noResults'),
       });
       return;
     }
@@ -217,7 +219,7 @@ export class AddToMacrosModal extends Modal {
       const mealHeader = mealCard.createDiv({ cls: 'meal-header' });
       mealHeader.createEl('h3', { text: meal.name, cls: 'meal-name' });
       mealHeader.createEl('span', {
-        text: `${meal.items.length} items`,
+        text: t('table.meal.items', { count: meal.items.length.toString() }),
         cls: 'meal-count',
       });
 
@@ -230,14 +232,14 @@ export class AddToMacrosModal extends Modal {
 
       if (meal.items.length > 3) {
         itemsPreview.createEl('span', {
-          text: `+${meal.items.length - 3} more`,
+          text: `+${meal.items.length - 3} ${t('general.more')}`,
           cls: 'preview-more',
         });
       }
 
       // Add button
       const addButton = mealCard.createEl('button', {
-        text: '+ Add Meal',
+        text: t('meals.addTo.addMeal'),
         cls: 'add-button meal-add-button',
       });
 
@@ -249,7 +251,7 @@ export class AddToMacrosModal extends Modal {
       const mealValue = `interactive:meal:${meal.name}`;
       if (this.selectedItems.includes(mealValue)) {
         mealCard.addClass('selected');
-        addButton.textContent = '✓ Added';
+        addButton.textContent = t('meals.addTo.added');
         addButton.addClass('selected');
       }
     });
@@ -261,7 +263,7 @@ export class AddToMacrosModal extends Modal {
     if (this.filteredFoods.length === 0) {
       this.foodsContainer.createDiv({
         cls: 'no-results',
-        text: 'No food items found',
+        text: t('meals.create.noResults'),
       });
       return;
     }
@@ -273,23 +275,38 @@ export class AddToMacrosModal extends Modal {
       const foodHeader = foodCard.createDiv({ cls: 'food-header' });
       foodHeader.createEl('h3', { text: food.name, cls: 'food-name' });
 
-      // Nutrition info (if available)
+      // Enhanced nutrition info with kJ support
       if (food.nutrition) {
         const nutritionInfo = foodCard.createDiv({ cls: 'nutrition-info' });
-        nutritionInfo.createEl('span', {
-          text: `${food.nutrition.calories} cal`,
+
+        // Enhanced calorie display with kJ support
+        const currentEnergyUnit = this.plugin.settings.energyUnit;
+        const calorieSpan = nutritionInfo.createEl('span', {
           cls: 'nutrition-item calories',
         });
+
+        if (currentEnergyUnit === 'kJ') {
+          const kjValue = convertEnergyUnit(food.nutrition.calories, 'kcal', 'kJ');
+          calorieSpan.textContent = `${kjValue.toFixed(1)} kJ`;
+          // Add tooltip showing both units
+          calorieSpan.setAttribute(
+            'title',
+            `${food.nutrition.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`
+          );
+        } else {
+          calorieSpan.textContent = `${food.nutrition.calories.toFixed(1)} kcal`;
+        }
+
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.protein}g protein`,
+          text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item protein',
         });
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.fat}g fat`,
+          text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item fat',
         });
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.carbs}g carbs`,
+          text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item carbs',
         });
 
@@ -303,7 +320,7 @@ export class AddToMacrosModal extends Modal {
 
       // Add button
       const addButton = foodCard.createEl('button', {
-        text: '+ Add Food',
+        text: t('meals.addTo.addFood'),
         cls: 'add-button food-add-button',
       });
 
@@ -318,7 +335,7 @@ export class AddToMacrosModal extends Modal {
 
       if (isSelected) {
         foodCard.addClass('selected');
-        addButton.textContent = '✓ Added';
+        addButton.textContent = t('meals.addTo.added');
         addButton.addClass('selected');
       }
     });
@@ -340,7 +357,7 @@ export class AddToMacrosModal extends Modal {
 
   private async addFood(food: FoodItemData): Promise<void> {
     if (!food.nutrition) {
-      new Notice('Could not process nutrition data for this food.');
+      new Notice(t('validation.noNutritionData'));
       return;
     }
 
@@ -376,7 +393,7 @@ export class AddToMacrosModal extends Modal {
     const selectedSection = this.contentEl.createDiv({ cls: 'selected-items-section' });
 
     const header = selectedSection.createDiv({ cls: 'selected-header' });
-    header.createEl('h3', { text: 'Selected Items', cls: 'selected-title' });
+    header.createEl('h3', { text: t('meals.addTo.selectedItems'), cls: 'selected-title' });
 
     this.selectedItemsContainer = selectedSection.createDiv({ cls: 'selected-items-container' });
   }
@@ -387,7 +404,7 @@ export class AddToMacrosModal extends Modal {
     if (this.selectedItems.length === 0) {
       this.selectedItemsContainer.createDiv({
         cls: 'no-selected-items',
-        text: 'No items selected yet',
+        text: t('meals.addTo.noSelectedItems'),
       });
     } else {
       this.selectedItems.forEach((item, index) => {
@@ -427,12 +444,12 @@ export class AddToMacrosModal extends Modal {
     const buttonContainer = this.contentEl.createDiv({ cls: 'action-buttons' });
 
     const cancelButton = buttonContainer.createEl('button', {
-      text: 'Cancel',
+      text: t('general.cancel'),
       cls: 'cancel-button',
     });
 
     this.confirmButton = buttonContainer.createEl('button', {
-      text: 'Add Selected Items',
+      text: t('meals.addTo.addSelectedItems'),
       cls: 'confirm-button disabled',
     });
 
@@ -468,11 +485,15 @@ export class AddToMacrosModal extends Modal {
         // Update the macros code block
         await this.onDone();
 
-        new Notice(`Added ${this.selectedItems.length} items to your macros table.`);
+        new Notice(t('notifications.itemsAdded', { count: this.selectedItems.length.toString() }));
         this.close();
       } catch (error) {
         this.plugin.logger.error('Error adding items to macros:', error);
-        new Notice(`Error adding items: ${(error as Error).message || 'Unknown error'}`);
+        new Notice(
+          t('notifications.itemsAddError', {
+            error: (error as Error).message || t('errors.unknownError'),
+          })
+        );
       }
     });
   }

@@ -28,6 +28,7 @@ export * from './types';
 export * from './formatters';
 export * from './MacrosState';
 export * from './progress-bars';
+export * from './energyUtils'; // Add energy utils export
 export {
   TooltipManager,
   attachTooltip,

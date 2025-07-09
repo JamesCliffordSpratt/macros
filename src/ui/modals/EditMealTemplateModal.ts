@@ -1,8 +1,10 @@
 import { Modal, Notice, normalizePath, Component } from 'obsidian';
-import { parseGrams, processNutritionalData, findMatchingFoodFile } from '../../utils';
+import { parseGrams, processNutritionalData } from '../../utils';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
+import { t } from '../../lang/I18nManager';
+import { convertEnergyUnit } from '../../utils/energyUtils';
 
 interface FoodItemData {
   name: string;
@@ -111,11 +113,11 @@ export class EditMealTemplateModal extends Modal {
   private createHeader(): void {
     const header = this.contentEl.createDiv({ cls: 'modal-header' });
     header.createEl('h2', {
-      text: `Edit Meal Template: "${this.meal.name}"`,
+      text: t('meals.edit.title', { mealName: this.meal.name }),
       cls: 'modal-title',
     });
     header.createEl('p', {
-      text: 'Search and select food items to include in this meal template. You can customize serving sizes for each item.',
+      text: t('meals.edit.description'),
       cls: 'modal-description',
     });
   }
@@ -129,7 +131,7 @@ export class EditMealTemplateModal extends Modal {
     this.searchInput = searchWrapper.createEl('input', {
       type: 'text',
       cls: 'search-input',
-      attr: { placeholder: 'Search food items...' },
+      attr: { placeholder: t('meals.create.searchPlaceholder') },
     });
 
     // Add search functionality
@@ -143,7 +145,7 @@ export class EditMealTemplateModal extends Modal {
     const sectionContainer = this.contentEl.createDiv({ cls: 'foods-section' });
 
     const sectionHeader = sectionContainer.createDiv({ cls: 'section-header' });
-    sectionHeader.createEl('h3', { text: '🥗 Available Food Items', cls: 'section-title' });
+    sectionHeader.createEl('h3', { text: t('meals.create.availableFoods'), cls: 'section-title' });
 
     this.foodsContainer = sectionContainer.createDiv({ cls: 'foods-container' });
   }
@@ -166,7 +168,7 @@ export class EditMealTemplateModal extends Modal {
     if (this.filteredFoods.length === 0) {
       this.foodsContainer.createDiv({
         cls: 'no-results',
-        text: 'No food items found',
+        text: t('meals.create.noResults'),
       });
       return;
     }
@@ -178,31 +180,46 @@ export class EditMealTemplateModal extends Modal {
       const foodHeader = foodCard.createDiv({ cls: 'food-header' });
       foodHeader.createEl('h3', { text: food.name, cls: 'food-name' });
 
-      // Nutrition info (if available)
+      // Enhanced nutrition info with kJ support
       if (food.nutrition) {
         const nutritionInfo = foodCard.createDiv({ cls: 'nutrition-info' });
-        nutritionInfo.createEl('span', {
-          text: `${food.nutrition.calories} cal`,
+
+        // Enhanced calorie display with kJ support
+        const currentEnergyUnit = this.plugin.settings.energyUnit;
+        const calorieSpan = nutritionInfo.createEl('span', {
           cls: 'nutrition-item calories',
         });
+
+        if (currentEnergyUnit === 'kJ') {
+          const kjValue = convertEnergyUnit(food.nutrition.calories, 'kcal', 'kJ');
+          calorieSpan.textContent = `${kjValue.toFixed(1)} kJ`;
+          // Add tooltip showing both units
+          calorieSpan.setAttribute(
+            'title',
+            `${food.nutrition.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`
+          );
+        } else {
+          calorieSpan.textContent = `${food.nutrition.calories.toFixed(1)} kcal`;
+        }
+
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.protein}g protein`,
+          text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item protein',
         });
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.fat}g fat`,
+          text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item fat',
         });
         nutritionInfo.createEl('span', {
-          text: `${food.nutrition.carbs}g carbs`,
+          text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item carbs',
         });
 
         // Serving size
         const servingInfo = foodCard.createDiv({ cls: 'serving-info' });
         const servingText = food.customServing
-          ? `Custom: ${food.customServing}g`
-          : `Default: ${food.nutrition.serving}`;
+          ? t('meals.create.customServing', { serving: food.customServing.toString() })
+          : t('meals.create.defaultServing', { serving: food.nutrition.serving });
         servingInfo.createEl('span', {
           text: servingText,
           cls: 'serving-size',
@@ -215,14 +232,14 @@ export class EditMealTemplateModal extends Modal {
       if (food.isSelected) {
         // Remove button
         const removeButton = buttonContainer.createEl('button', {
-          text: '− Remove',
+          text: t('meals.create.remove'),
           cls: 'remove-button',
         });
 
         // Edit serving button (if nutrition data available)
         if (food.nutrition) {
           const editButton = buttonContainer.createEl('button', {
-            text: '✎ Edit Serving',
+            text: t('meals.create.editServing'),
             cls: 'edit-button',
           });
 
@@ -239,7 +256,7 @@ export class EditMealTemplateModal extends Modal {
       } else {
         // Add button
         const addButton = buttonContainer.createEl('button', {
-          text: '+ Add to Meal',
+          text: t('meals.create.addToMeal'),
           cls: 'add-button',
         });
 
@@ -252,7 +269,7 @@ export class EditMealTemplateModal extends Modal {
 
   private async addFood(food: FoodItemData): Promise<void> {
     if (!food.nutrition) {
-      new Notice('Could not process nutrition data for this food.');
+      new Notice(t('validation.noNutritionData'));
       return;
     }
 
@@ -274,7 +291,7 @@ export class EditMealTemplateModal extends Modal {
         await this.plugin.saveSettings();
         this.updateUI();
 
-        new Notice(`Added ${food.name} (${customServing}g) to ${this.meal.name}`);
+        new Notice(t('notifications.itemsAdded', { count: '1' }));
       },
       this.plugin
     ).open();
@@ -294,7 +311,7 @@ export class EditMealTemplateModal extends Modal {
     await this.plugin.saveSettings();
     this.updateUI();
 
-    new Notice(`Removed ${food.name} from ${this.meal.name}`);
+    new Notice(`${t('general.remove')} ${food.name}`);
   }
 
   private async editFoodServing(food: FoodItemData): Promise<void> {
@@ -321,7 +338,7 @@ export class EditMealTemplateModal extends Modal {
         await this.plugin.saveSettings();
         this.updateUI();
 
-        new Notice(`Updated ${food.name} serving to ${newServing}g`);
+        new Notice(t('general.success'));
       },
       this.plugin
     ).open();
@@ -336,7 +353,7 @@ export class EditMealTemplateModal extends Modal {
     const selectedSection = this.contentEl.createDiv({ cls: 'selected-items-section' });
 
     const header = selectedSection.createDiv({ cls: 'selected-header' });
-    header.createEl('h3', { text: 'Selected Items', cls: 'selected-title' });
+    header.createEl('h3', { text: t('meals.create.selectedItems'), cls: 'selected-title' });
 
     this.selectedItemsContainer = selectedSection.createDiv({ cls: 'selected-items-container' });
   }
@@ -349,7 +366,7 @@ export class EditMealTemplateModal extends Modal {
     if (selectedFoods.length === 0) {
       this.selectedItemsContainer.createDiv({
         cls: 'no-selected-items',
-        text: 'No items selected yet',
+        text: t('meals.create.noSelectedItems'),
       });
     } else {
       selectedFoods.forEach((food) => {
@@ -387,12 +404,12 @@ export class EditMealTemplateModal extends Modal {
     const buttonContainer = this.contentEl.createDiv({ cls: 'action-buttons' });
 
     const cancelButton = buttonContainer.createEl('button', {
-      text: 'Cancel',
+      text: t('general.cancel'),
       cls: 'cancel-button',
     });
 
     this.saveButton = buttonContainer.createEl('button', {
-      text: 'Save Changes',
+      text: t('meals.edit.saveChanges'),
       cls: 'save-button',
     });
 
@@ -402,7 +419,7 @@ export class EditMealTemplateModal extends Modal {
 
     this.component.registerDomEvent(this.saveButton, 'click', async () => {
       await this.plugin.saveSettings();
-      new Notice(`Meal template "${this.meal.name}" updated successfully`);
+      new Notice(t('notifications.mealTemplateUpdated', { name: this.meal.name }));
       this.close();
 
       // Refresh the settings display

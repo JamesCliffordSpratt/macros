@@ -20,4 +20,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   showCellPercentages: false,
   developerModeEnabled: false,
   uiCollapseStates: {},
+  energyUnit: 'kcal', // New setting for energy unit
 };

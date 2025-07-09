@@ -3,6 +3,7 @@ import { parseGrams, processNutritionalData, findMatchingFoodFile } from '../../
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
+import { t } from '../../lang/I18nManager';
 
 export class AddFoodToMealModal extends Modal {
   plugin: MacrosPlugin;
@@ -20,7 +21,7 @@ export class AddFoodToMealModal extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl('h2', { text: `Add food items to "${this.meal.name}"` });
+    contentEl.createEl('h2', { text: t('meals.addTo.title') + ` "${this.meal.name}"` });
 
     const row = contentEl.createDiv({ cls: 'add-food-row' });
     const folder = normalizePath(this.plugin.settings.storageFolder);
@@ -28,32 +29,34 @@ export class AddFoodToMealModal extends Modal {
     this.files = fileList.map((f) => f.name.replace(/\.md$/, ''));
 
     const dropdown = row.createEl('select');
-    dropdown.createEl('option', { text: '-- Select food --', value: '' });
+    dropdown.createEl('option', { text: `-- ${t('food.search.placeholder')} --`, value: '' });
     this.files.forEach((fname) => {
       const option = dropdown.createEl('option');
       option.value = fname;
       option.text = fname;
     });
 
-    const addBtn = row.createEl('button', { text: '+ Add selected item' });
+    const addBtn = row.createEl('button', {
+      text: t('general.add') + ' ' + t('food.search.title').toLowerCase(),
+    });
     this.component.registerDomEvent(addBtn, 'click', async () => {
       const selected = dropdown.value;
       if (selected && !this.meal.items.some((item) => item.startsWith(selected))) {
         const matchingFile = findMatchingFoodFile(fileList, selected);
         if (!matchingFile) {
-          new Notice('Selected food item not found.');
+          new Notice(t('errors.fileNotFound'));
           return;
         }
 
         const nutrition = processNutritionalData(this.app, matchingFile);
         if (!nutrition || !nutrition.serving) {
-          new Notice('No nutritional data available for this item.');
+          new Notice(t('errors.noNutritionData'));
           return;
         }
 
         const defaultServing = parseGrams(nutrition.serving);
         if (isNaN(defaultServing)) {
-          new Notice('Invalid default serving size.');
+          new Notice(t('errors.invalidServing'));
           return;
         }
 
@@ -65,12 +68,12 @@ export class AddFoodToMealModal extends Modal {
             this.meal.items.push(`${selected}:${customServing}g`);
             await this.plugin.saveSettings();
             this.refreshItemList();
-            new Notice(`${selected} (${customServing}g) added to ${this.meal.name}`);
+            new Notice(t('notifications.itemsAdded', { count: '1' }));
           },
           this.plugin
         ).open();
       } else {
-        new Notice('Item is already in the meal or not selected.');
+        new Notice(t('validation.selectAtLeastOne'));
       }
     });
 
@@ -78,7 +81,7 @@ export class AddFoodToMealModal extends Modal {
     this.itemListEl.classList.add('meal-item-list');
     this.refreshItemList();
 
-    const finishBtn = contentEl.createEl('button', { text: 'Finish' });
+    const finishBtn = contentEl.createEl('button', { text: t('general.close') });
     this.component.registerDomEvent(finishBtn, 'click', () => {
       this.close();
       this.plugin.nutritionalSettingTab.display();
@@ -101,7 +104,7 @@ export class AddFoodToMealModal extends Modal {
         this.meal.items.splice(index, 1);
         await this.plugin.saveSettings();
         this.refreshItemList();
-        new Notice(`Removed "${item}" from ${this.meal.name}`);
+        new Notice(t('general.remove') + ` "${item}" ${t('general.from')} ${this.meal.name}`);
       });
     });
   }

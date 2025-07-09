@@ -1,6 +1,16 @@
-import MacrosPlugin from '../main';
+import MacrosPlugin from './../../main';
 import { Chart, ChartConfiguration, ChartDataset, TooltipItem, registerables } from 'chart.js';
 import { ChartLoader, MacrosState, DOMUtils } from '../utils';
+import {
+  formatDashboardTooltip,
+  getSummaryHeader,
+  formatCalories,
+  formatGrams,
+  formatChartTitle,
+  getCurrentEnergyUnitString,
+} from '../utils/formatters';
+import { t } from '../lang/I18nManager';
+import { convertEnergyUnit } from '../utils/energyUtils';
 
 interface ExtendedWindow extends Window {
   Chart?: typeof Chart;
@@ -12,6 +22,7 @@ interface ExtendedWindow extends Window {
  * ------------
  * Manages chart creation, rendering, and cleanup operations
  * for all charts in the Macros plugin.
+ * Enhanced with kJ support for energy unit display.
  */
 export class ChartManager {
   private plugin: MacrosPlugin;
@@ -30,6 +41,7 @@ export class ChartManager {
 
   /**
    * Draws a macros pie chart with nutrition data
+   * Enhanced with kJ support
    */
   async drawMacrospc(id: string | string[], el: HTMLElement, width = 300, height = 300) {
     try {
@@ -55,7 +67,7 @@ export class ChartManager {
       ids = ids.filter((i) => i && i.trim() !== '');
       if (ids.length === 0) {
         this.plugin.logger.error(`No valid IDs found in: ${id}`);
-        el.createEl('div', { text: 'Error: No valid IDs provided' });
+        el.createEl('div', { text: t('charts.errors.noIdsProvided') });
         return;
       }
 
@@ -67,7 +79,7 @@ export class ChartManager {
       // Show loading state
       const loadingEl = dashboardContainer.createEl('div', {
         cls: 'macrospc-loading',
-        text: 'Loading chart data...',
+        text: t('charts.loading'),
       });
 
       // Data loading phase - with better error handling
@@ -109,7 +121,7 @@ export class ChartManager {
         (result): result is DataLoadResult => result.success
       );
       if (successfulLoads.length === 0) {
-        loadingEl.textContent = `No data found for IDs: ${ids.join(', ')}`;
+        loadingEl.textContent = t('charts.noData', { ids: ids.join(', ') });
         return;
       }
 
@@ -133,8 +145,8 @@ export class ChartManager {
         cls: 'macroscalc-header-content',
       });
 
-      // Dynamic header text with better logic
-      const dynamicHeaderText = this.generateHeaderText(allDates, ids);
+      // Use the localized chart title formatter
+      const dynamicHeaderText = formatChartTitle(undefined, ids);
 
       headerContent.createSpan({
         cls: 'macroscalc-header-title',
@@ -180,7 +192,7 @@ export class ChartManager {
       // Get canvas context with error handling
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        el.createEl('div', { text: 'Error: Unable to get canvas context.' });
+        el.createEl('div', { text: t('charts.error') });
         return;
       }
 
@@ -236,32 +248,55 @@ export class ChartManager {
       const totalMacros = totalProtein + totalFat + totalCarbs;
 
       if (totalMacros <= 0) {
-        el.createEl('div', { text: `No macros found for IDs: ${ids.join(', ')}` });
+        el.createEl('div', { text: t('charts.noMacros', { ids: ids.join(', ') }) });
         return;
       }
 
-      // Create summary
+      // Create summary with energy unit support
       const calorieDiv = summaryContainer.createDiv({ cls: 'macro-summary-item' });
-      calorieDiv.createSpan({ cls: 'macro-summary-label', text: 'Calories:' });
-      calorieDiv.createSpan({ cls: 'macro-summary-value', text: `${totalCalories}` });
+
+      // Enhanced calories display with kJ support
+      const currentEnergyUnit = this.plugin.settings.energyUnit;
+      let calorieDisplayValue: string;
+      let calorieTooltip: string;
+
+      if (currentEnergyUnit === 'kJ') {
+        const kjValue = convertEnergyUnit(totalCalories, 'kcal', 'kJ');
+        calorieDisplayValue = `${kjValue.toFixed(1)} kJ`;
+        calorieTooltip = `${totalCalories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`;
+      } else {
+        calorieDisplayValue = `${totalCalories.toFixed(1)} kcal`;
+        calorieTooltip = `${totalCalories.toFixed(1)} kcal`;
+      }
+
+      calorieDiv.createSpan({ cls: 'macro-summary-label', text: t('charts.calories') });
+      const calorieValueSpan = calorieDiv.createSpan({
+        cls: 'macro-summary-value',
+        text: calorieDisplayValue,
+      });
+
+      // Add tooltip to show both units
+      if (currentEnergyUnit === 'kJ') {
+        calorieValueSpan.setAttribute('title', calorieTooltip);
+      }
 
       this.createMetricCard(
         summaryContainer,
-        'Protein',
+        t('table.headers.protein'),
         totalProtein,
         totalMacros,
         this.plugin.settings.proteinColor
       );
       this.createMetricCard(
         summaryContainer,
-        'Fat',
+        t('table.headers.fat'),
         totalFat,
         totalMacros,
         this.plugin.settings.fatColor
       );
       this.createMetricCard(
         summaryContainer,
-        'Carbs',
+        t('table.headers.carbs'),
         totalCarbs,
         totalMacros,
         this.plugin.settings.carbsColor
@@ -277,7 +312,7 @@ export class ChartManager {
       // Verify Chart.js is still available
       if (!window.Chart) {
         this.plugin.logger.error('Chart.js not available when creating pie chart');
-        el.createEl('div', { text: 'Chart library not available' });
+        el.createEl('div', { text: t('charts.error') });
         return;
       }
 
@@ -287,7 +322,7 @@ export class ChartManager {
           ctx,
           chartId,
           [totalProtein, totalFat, totalCarbs],
-          ['Protein', 'Fat', 'Carbs'],
+          [t('table.headers.protein'), t('table.headers.fat'), t('table.headers.carbs')],
           [
             this.plugin.settings.proteinColor,
             this.plugin.settings.fatColor,
@@ -303,7 +338,7 @@ export class ChartManager {
         this.plugin.logger.debug(`Successfully created pie chart with ID: ${chartId}`);
       } catch (chartError) {
         this.plugin.logger.error('Error creating pie chart:', chartError);
-        el.createEl('div', { text: 'Error creating chart visualization' });
+        el.createEl('div', { text: t('charts.error') });
         return;
       }
 
@@ -352,40 +387,9 @@ export class ChartManager {
       this.plugin.logger.error('drawMacrospc error', err);
       el.empty();
       el.createEl('div', {
-        text: 'Unable to render macro chart. Please reload the page.',
+        text: t('charts.error'),
         cls: 'macrospc-error',
       });
-    }
-  }
-
-  // Helper method to generate header text
-  private generateHeaderText(allDates: { id: string; date: Date }[], ids: string[]): string {
-    if (allDates.length === ids.length) {
-      if (ids.length === 1) {
-        const onlyDate = allDates[0].date;
-        const today = new Date();
-        const isToday =
-          onlyDate.getFullYear() === today.getFullYear() &&
-          onlyDate.getMonth() === today.getMonth() &&
-          onlyDate.getDate() === today.getDate();
-
-        return isToday
-          ? "Today's Macros"
-          : `Macros for ${onlyDate.toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}`;
-      } else {
-        const newest = allDates[0].date;
-        const oldest = allDates[allDates.length - 1].date;
-        const diffInMs = newest.getTime() - oldest.getTime();
-        const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1;
-        return `Combined Macros (last ${days} days)`;
-      }
-    } else {
-      return ids.length === 1 ? `Macros for ${ids[0]}` : `Combined Macros: ${ids.join(', ')}`;
     }
   }
 
@@ -570,6 +574,10 @@ export class ChartManager {
 
     this.chartLoader.destroyChart(chartId);
 
+    // Enhanced line chart configuration with energy unit support
+    const currentEnergyUnit = getCurrentEnergyUnitString();
+    const isKjUnit = currentEnergyUnit === 'kJ';
+
     const config: ChartConfiguration = {
       type: 'line',
       data: {
@@ -595,7 +603,21 @@ export class ChartManager {
           tooltip: {
             callbacks: {
               label: function (context: TooltipItem<'line'>) {
-                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
+                let value = context.parsed.y.toFixed(1);
+                let unit = '';
+
+                // Check if this is a calorie dataset and convert if needed
+                if (context.dataset.label?.toLowerCase().includes('calorie') && isKjUnit) {
+                  const kjValue = convertEnergyUnit(context.parsed.y, 'kcal', 'kJ');
+                  value = kjValue.toFixed(1);
+                  unit = ' kJ';
+                } else if (context.dataset.label?.toLowerCase().includes('calorie')) {
+                  unit = ' kcal';
+                } else {
+                  unit = 'g';
+                }
+
+                return `${context.dataset.label}: ${value}${unit}`;
               },
             },
           },
@@ -611,7 +633,7 @@ export class ChartManager {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Grams / Calories',
+              text: `Grams / ${currentEnergyUnit}`,
             },
           },
         },

@@ -4,11 +4,22 @@ import { FoodItem } from '../core/api';
 import {
   extractServingSize,
   extractNutritionalData,
-  mergeMacroLines,
+  processNutritionalData,
 } from '../utils/nutritionUtils';
 
 // Constant used for interactive lines in macros blocks.
 const INTERACTIVE_PREFIX = 'interactive:';
+
+// Type definitions for the structured data
+interface MacrosStructure {
+  meals: Map<string, Map<string, number>>; // mealName -> (foodName -> quantity)
+  individualItems: Map<string, number>; // foodName -> quantity
+}
+
+interface NewItemsStructure {
+  meals: Map<string, Map<string, number>>;
+  individualItems: Map<string, number>;
+}
 
 /**
  * DataManager
@@ -402,7 +413,7 @@ serving_size: ${servingSize}
 
   /**
    * Updates the macros code block in the active file by merging static and interactive lines.
-   * FIXED VERSION: Preserves manual changes to meal templates
+   * SIMPLIFIED VERSION: No multipliers, direct quantity merging under meal headers
    */
   async updateMacrosCodeBlock() {
     await this.queueUpdate(async () => {
@@ -424,7 +435,6 @@ serving_size: ${servingSize}
           const blockContent = match[2];
           processedIds.add(id);
 
-          // Debug logging for each matched block
           this.plugin.logger.debug(`Found macros block with ID: ${id}`);
 
           // Check if we have additional macros for this ID
@@ -437,188 +447,20 @@ serving_size: ${servingSize}
             this.plugin.logger.debug(`Processing additional macros for ID: ${id}`);
             this.plugin.logger.debug(`Additional items: ${additionalMacrosForId.length}`);
 
-            // Get all lines, including existing ones
-            let allLines: string[] = [];
+            // Parse existing content into structured format
+            const existingStructure = this.parseExistingMacrosContent(blockContent);
 
-            // Process existing content in the block (excluding interactive prefixes)
-            const staticLines = blockContent
-              .split('\n')
-              .map((l: string) => l.trim())
-              .filter(
-                (l: string) => l !== '' && !l.startsWith(INTERACTIVE_PREFIX) && !l.startsWith('-')
-              );
+            // Process new items from additionalMacros
+            const newItems = this.processNewInteractiveItems(additionalMacrosForId);
 
-            allLines = [...staticLines];
+            // Merge new items with existing structure
+            const mergedStructure = this.mergeIntoExistingStructure(existingStructure, newItems);
 
-            // Get interactive lines from the map and remove the prefix
-            const interactiveLines = (this.additionalMacros.get(id) || []).map((line: string) =>
-              line.startsWith(INTERACTIVE_PREFIX) ? line.substring(INTERACTIVE_PREFIX.length) : line
-            );
+            // Convert back to text format
+            const updatedContent = this.generateMacrosBlockContent(mergedStructure);
 
-            // Add them to the collection
-            allLines = [...allLines, ...interactiveLines];
-
-            // Merge duplicate meal entries and food items
-            const mergedLines = mergeMacroLines(allLines);
-
-            // FIXED: Preserve existing bullet points while expanding meal templates
-            let expandedContent = '';
-
-            // First pass: collect existing bullet point quantities for each meal
-            const existingBulletPoints = new Map<string, Map<string, string>>();
-            const existingBulletOrder = new Map<string, string[]>(); // Track order of items
-
-            // Parse existing content to find bullet points under meals
-            const existingLines = blockContent
-              .split('\n')
-              .map((l) => l.trim())
-              .filter((l) => l !== '');
-            let currentMeal = '';
-
-            for (const line of existingLines) {
-              if (line.toLowerCase().startsWith('meal:')) {
-                const fullMealText = line.substring(5).trim();
-                let mealName = fullMealText;
-                const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-                if (countMatch) {
-                  mealName = countMatch[1];
-                }
-                currentMeal = mealName.toLowerCase();
-
-                if (!existingBulletPoints.has(currentMeal)) {
-                  existingBulletPoints.set(currentMeal, new Map());
-                  existingBulletOrder.set(currentMeal, []);
-                }
-              } else if (line.startsWith('-') && currentMeal) {
-                const itemText = line.substring(1).trim();
-                const foodName = itemText.includes(':')
-                  ? itemText.split(':')[0].trim().toLowerCase()
-                  : itemText.toLowerCase();
-
-                existingBulletPoints.get(currentMeal)?.set(foodName, itemText);
-                existingBulletOrder.get(currentMeal)?.push(foodName);
-              }
-            }
-
-            // Second pass: expand meals while preserving existing bullet points
-            // CRITICAL FIX: Only expand meal templates if new meal items are being added
-            const newMealLines = interactiveLines.filter((line) =>
-              line.toLowerCase().startsWith('meal:')
-            );
-            const shouldExpandMealTemplates = newMealLines.length > 0;
-
-            mergedLines.forEach((line: string) => {
-              if (line.toLowerCase().startsWith('meal:')) {
-                // Extract meal name and potential multiplier
-                const fullMealText = line.substring(5).trim();
-                let mealName = fullMealText;
-                let count = 1;
-
-                // Check if there's a count indicator
-                const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-                if (countMatch) {
-                  mealName = countMatch[1];
-                  count = parseInt(countMatch[2]);
-                }
-
-                const meal = this.plugin.settings.mealTemplates.find(
-                  (m) => m.name.toLowerCase() === mealName.toLowerCase()
-                );
-
-                // Check if this specific meal is being newly added
-                const isMealBeingAdded = newMealLines.some((newLine) => {
-                  const newMealText = newLine.substring(5).trim();
-                  let newMealName = newMealText;
-                  const newCountMatch = newMealText.match(/^(.*)\s+×\s+(\d+)$/);
-                  if (newCountMatch) {
-                    newMealName = newCountMatch[1];
-                  }
-                  return newMealName.toLowerCase() === mealName.toLowerCase();
-                });
-
-                if (
-                  meal &&
-                  meal.items.length > 0 &&
-                  (shouldExpandMealTemplates || isMealBeingAdded)
-                ) {
-                  expandedContent += line + '\n';
-
-                  // Get existing bullet points for this meal
-                  const existingBullets =
-                    existingBulletPoints.get(mealName.toLowerCase()) || new Map();
-                  const existingOrder = existingBulletOrder.get(mealName.toLowerCase()) || [];
-
-                  // Create a set of template items for easy lookup
-                  const templateItems = new Set(
-                    meal.items.map((item) => {
-                      const foodName = item.includes(':') ? item.split(':')[0].trim() : item;
-                      return foodName.toLowerCase();
-                    })
-                  );
-
-                  // First, add all existing custom bullet points (preserving user modifications)
-                  for (const foodName of existingOrder) {
-                    const itemText = existingBullets.get(foodName);
-                    if (itemText) {
-                      // Check if this item exists in the template
-                      if (templateItems.has(foodName)) {
-                        // This is a template item with custom quantity - use the custom version
-                        expandedContent += `- ${itemText}\n`;
-                        templateItems.delete(foodName); // Remove from template items to avoid duplication
-                      } else {
-                        // This is a custom item not in the template - preserve it
-                        expandedContent += `- ${itemText}\n`;
-                      }
-                    }
-                  }
-
-                  // Then, add any remaining template items that weren't customized (only if meal is being added/modified)
-                  if (isMealBeingAdded) {
-                    meal.items.forEach((item) => {
-                      const foodName = item.includes(':') ? item.split(':')[0].trim() : item;
-                      const foodNameLower = foodName.toLowerCase();
-
-                      if (templateItems.has(foodNameLower)) {
-                        // This template item wasn't customized, so add it with multiplier
-                        if (item.includes(':') && item.includes('g')) {
-                          const parts = item.split(':');
-                          const servingMatch = parts[1].match(/^([\d.]+)g/);
-                          if (servingMatch) {
-                            const serving = parseFloat(servingMatch[1]);
-                            const multipliedServing = serving * count;
-                            expandedContent += `- ${foodName}:${multipliedServing}g\n`;
-                          } else {
-                            expandedContent += `- ${item}\n`;
-                          }
-                        } else {
-                          expandedContent += `- ${item}\n`;
-                        }
-                      }
-                    });
-                  }
-                } else {
-                  // If not expanding templates or no meal template found, just preserve existing structure
-                  expandedContent += line + '\n';
-
-                  // Preserve existing bullet points exactly as they are
-                  const existingBullets =
-                    existingBulletPoints.get(mealName.toLowerCase()) || new Map();
-                  const existingOrder = existingBulletOrder.get(mealName.toLowerCase()) || [];
-
-                  for (const foodName of existingOrder) {
-                    const itemText = existingBullets.get(foodName);
-                    if (itemText) {
-                      expandedContent += `- ${itemText}\n`;
-                    }
-                  }
-                }
-              } else {
-                expandedContent += line + '\n';
-              }
-            });
-
-            // Create the updated block content
-            const updatedBlock = '```macros\nid: ' + id + '\n' + expandedContent + '\n```';
+            // Create the updated block
+            const updatedBlock = '```macros\nid: ' + id + '\n' + updatedContent + '\n```';
 
             // Replace the old block with the updated one
             newContent = newContent.replace(match[0], updatedBlock);
@@ -652,9 +494,199 @@ serving_size: ${servingSize}
         }
       } catch (error) {
         this.plugin.logger.error('Error updating macros code block:', error);
-        throw error; // Rethrow for the caller to handle
+        throw error;
       }
     });
+  }
+
+  /**
+   * Parse existing macros block content into a structured format
+   */
+  private parseExistingMacrosContent(blockContent: string): MacrosStructure {
+    const lines = blockContent
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l !== '' && !l.startsWith(INTERACTIVE_PREFIX));
+
+    const structure: MacrosStructure = {
+      meals: new Map(),
+      individualItems: new Map(),
+    };
+
+    let currentMealName: string | null = null;
+
+    for (const line of lines) {
+      if (line.toLowerCase().startsWith('meal:')) {
+        // Extract meal name (no more multiplier parsing)
+        currentMealName = line.substring(5).trim();
+
+        if (!structure.meals.has(currentMealName)) {
+          structure.meals.set(currentMealName, new Map());
+        }
+      } else if (line.startsWith('-') && currentMealName) {
+        // Parse bullet point under a meal
+        const itemText = line.substring(1).trim();
+        const { foodName, quantity } = this.parseItemText(itemText);
+
+        if (foodName) {
+          const mealItems = structure.meals.get(currentMealName)!;
+          const existingQuantity = mealItems.get(foodName) || 0;
+          mealItems.set(foodName, existingQuantity + quantity);
+        }
+      } else if (!line.startsWith('-') && !line.toLowerCase().startsWith('meal:')) {
+        // Individual food item (not under a meal)
+        currentMealName = null;
+        const { foodName, quantity } = this.parseItemText(line);
+
+        if (foodName) {
+          const existingQuantity = structure.individualItems.get(foodName) || 0;
+          structure.individualItems.set(foodName, existingQuantity + quantity);
+        }
+      }
+    }
+
+    return structure;
+  }
+
+  /**
+   * Process new interactive items into structured format
+   */
+  private processNewInteractiveItems(interactiveItems: string[]): NewItemsStructure {
+    const newItems: NewItemsStructure = {
+      meals: new Map(),
+      individualItems: new Map(),
+    };
+
+    for (const item of interactiveItems) {
+      const cleanItem = item.startsWith(INTERACTIVE_PREFIX)
+        ? item.substring(INTERACTIVE_PREFIX.length)
+        : item;
+
+      if (cleanItem.toLowerCase().startsWith('meal:')) {
+        // New meal to add
+        const mealName = cleanItem.substring(5).trim();
+
+        // Find meal template
+        const mealTemplate = this.plugin.settings.mealTemplates.find(
+          (m) => m.name.toLowerCase() === mealName.toLowerCase()
+        );
+
+        if (mealTemplate) {
+          const mealItems = new Map<string, number>();
+
+          for (const templateItem of mealTemplate.items) {
+            const { foodName, quantity } = this.parseItemText(templateItem);
+            if (foodName) {
+              const existingQuantity = mealItems.get(foodName) || 0;
+              mealItems.set(foodName, existingQuantity + quantity);
+            }
+          }
+
+          newItems.meals.set(mealName, mealItems);
+        }
+      } else {
+        // Individual food item
+        const { foodName, quantity } = this.parseItemText(cleanItem);
+        if (foodName) {
+          const existingQuantity = newItems.individualItems.get(foodName) || 0;
+          newItems.individualItems.set(foodName, existingQuantity + quantity);
+        }
+      }
+    }
+
+    return newItems;
+  }
+
+  /**
+   * Merge new items into existing structure
+   */
+  private mergeIntoExistingStructure(
+    existing: MacrosStructure,
+    newItems: NewItemsStructure
+  ): MacrosStructure {
+    const merged: MacrosStructure = {
+      meals: new Map(existing.meals),
+      individualItems: new Map(existing.individualItems),
+    };
+
+    // Merge new meals
+    for (const [mealName, newMealItems] of newItems.meals) {
+      if (!merged.meals.has(mealName)) {
+        // New meal - add it directly
+        merged.meals.set(mealName, new Map(newMealItems));
+      } else {
+        // Existing meal - merge quantities
+        const existingMealItems = merged.meals.get(mealName)!;
+
+        for (const [foodName, quantity] of newMealItems) {
+          const existingQuantity = existingMealItems.get(foodName) || 0;
+          existingMealItems.set(foodName, existingQuantity + quantity);
+        }
+      }
+    }
+
+    // Merge individual items
+    for (const [foodName, quantity] of newItems.individualItems) {
+      const existingQuantity = merged.individualItems.get(foodName) || 0;
+      merged.individualItems.set(foodName, existingQuantity + quantity);
+    }
+
+    return merged;
+  }
+
+  /**
+   * Generate macros block content from structured data
+   */
+  private generateMacrosBlockContent(structure: MacrosStructure): string {
+    const lines: string[] = [];
+
+    // Add meals first
+    for (const [mealName, mealItems] of structure.meals) {
+      lines.push(`meal:${mealName}`);
+
+      for (const [foodName, quantity] of mealItems) {
+        lines.push(`- ${foodName}:${quantity}g`);
+      }
+    }
+
+    // Add individual items
+    for (const [foodName, quantity] of structure.individualItems) {
+      lines.push(`${foodName}:${quantity}g`);
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Parse item text to extract food name and quantity
+   */
+  private parseItemText(itemText: string): { foodName: string; quantity: number } {
+    if (itemText.includes(':')) {
+      const parts = itemText.split(':').map((s) => s.trim());
+      const foodName = parts[0];
+      const quantityStr = parts[1];
+
+      // Parse quantity (remove 'g' suffix if present)
+      const quantity = parseFloat(quantityStr.replace(/g$/i, '')) || 0;
+
+      return { foodName, quantity };
+    } else {
+      // No quantity specified, assume default serving size from food file
+      const foodName = itemText.trim();
+
+      // Try to get default serving from food file
+      const matchingFile = this.findFoodFile(foodName);
+      if (matchingFile) {
+        const nutrition = processNutritionalData(this.plugin.app, matchingFile);
+        if (nutrition && nutrition.serving) {
+          const defaultQuantity = parseFloat(nutrition.serving.replace(/g$/i, '')) || 100;
+          return { foodName, quantity: defaultQuantity };
+        }
+      }
+
+      // Fallback to 100g
+      return { foodName, quantity: 100 };
+    }
   }
 
   /**

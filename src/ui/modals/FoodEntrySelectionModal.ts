@@ -2,6 +2,7 @@ import { App, Modal, Component } from 'obsidian';
 import MacrosPlugin from '../../main';
 import { LiveFoodSearchModal } from '../live-search/LiveSearchModal';
 import { ManualFoodEntryModal } from './ManualFoodEntryModal';
+import { t } from '../../lang/I18nManager';
 
 /**
  * Modal that presents the user with options to either use FatSecret live search
@@ -25,12 +26,12 @@ export class FoodEntrySelectionModal extends Modal {
 
     // Create header
     contentEl.createEl('h2', {
-      text: 'Add Food Item',
+      text: t('food.entry.title'),
       cls: 'modal-title',
     });
 
     contentEl.createEl('p', {
-      text: 'Choose how you would like to add your food item:',
+      text: t('food.entry.description'),
       cls: 'modal-description',
     });
 
@@ -46,9 +47,9 @@ export class FoodEntrySelectionModal extends Modal {
     liveSearchIcon.innerHTML = '🔍'; // Search icon
 
     const liveSearchContent = liveSearchOption.createDiv({ cls: 'option-content' });
-    liveSearchContent.createEl('h3', { text: 'Live Search' });
+    liveSearchContent.createEl('h3', { text: t('food.entry.liveSearch') });
     liveSearchContent.createEl('p', {
-      text: 'Search FatSecret database for nutritional information',
+      text: t('food.entry.liveSearchDesc'),
     });
 
     const liveSearchFooter = liveSearchOption.createDiv({ cls: 'option-footer' });
@@ -58,12 +59,12 @@ export class FoodEntrySelectionModal extends Modal {
 
     if (hasCredentials) {
       liveSearchFooter.createEl('span', {
-        text: '✓ API configured',
+        text: t('food.entry.apiConfigured'),
         cls: 'status-indicator status-success',
       });
     } else {
       liveSearchFooter.createEl('span', {
-        text: '⚠ API not configured',
+        text: t('food.entry.apiNotConfigured'),
         cls: 'status-indicator status-warning',
       });
     }
@@ -77,14 +78,14 @@ export class FoodEntrySelectionModal extends Modal {
     manualEntryIcon.innerHTML = '✏️'; // Edit icon
 
     const manualEntryContent = manualEntryOption.createDiv({ cls: 'option-content' });
-    manualEntryContent.createEl('h3', { text: 'Manual Entry' });
+    manualEntryContent.createEl('h3', { text: t('food.entry.manualEntry') });
     manualEntryContent.createEl('p', {
-      text: 'Manually enter nutritional information for your food item',
+      text: t('food.entry.manualEntryDesc'),
     });
 
     const manualEntryFooter = manualEntryOption.createDiv({ cls: 'option-footer' });
     manualEntryFooter.createEl('span', {
-      text: '✓ Always available',
+      text: t('food.entry.alwaysAvailable'),
       cls: 'status-indicator status-success',
     });
 
@@ -131,7 +132,7 @@ export class FoodEntrySelectionModal extends Modal {
         // Show error and keep modal open
         const errorEl = this.contentEl.createDiv({
           cls: 'api-error-message',
-          text: 'API credentials not configured. Please add your FatSecret API credentials in the plugin settings to use live search.',
+          text: t('notifications.apiCredentialsRequired'),
         });
 
         // Remove error message after 5 seconds
@@ -158,7 +159,7 @@ export class FoodEntrySelectionModal extends Modal {
 
       const errorEl = this.contentEl.createDiv({
         cls: 'api-error-message',
-        text: 'Unable to open live search. Please check your API credentials in settings.',
+        text: t('errors.apiConnectionFailed'),
       });
 
       setTimeout(() => {

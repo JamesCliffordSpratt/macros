@@ -1,6 +1,7 @@
 import { CLASS_NAMES, MacrosState } from '../../utils';
 import { AddToMacrosModal } from '../../ui';
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export class TableHeader {
   private toggleButton: HTMLElement | null = null;
@@ -35,7 +36,7 @@ export class TableHeader {
     const controls = headerContainer.createDiv({ cls: CLASS_NAMES.TABLE.CONTROLS });
 
     this.toggleButton = controls.createEl('span', {
-      attr: { 'aria-label': 'Collapse all sections' },
+      attr: { 'aria-label': t('table.actions.collapseAll') },
       cls: 'toggle-icon',
     });
 
@@ -106,7 +107,7 @@ export class TableHeader {
 
     const addBtn = controls.createEl('span', {
       cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.ADD}`,
-      attr: { 'aria-label': 'Add a section' },
+      attr: { 'aria-label': t('table.actions.addItems') },
       text: '+',
     });
 
@@ -198,7 +199,7 @@ export class TableHeader {
     if (!this.toggleButton) return;
     try {
       this.toggleButton.classList.add('collapsed');
-      this.toggleButton.setAttribute('aria-label', 'Expand all sections');
+      this.toggleButton.setAttribute('aria-label', t('table.actions.expandAll'));
       this.toggleButton.removeClass(CLASS_NAMES.ICONS.COLLAPSE_ALL);
       this.toggleButton.addClass(CLASS_NAMES.ICONS.EXPAND_ALL);
     } catch (error) {
@@ -210,7 +211,7 @@ export class TableHeader {
     if (!this.toggleButton) return;
     try {
       this.toggleButton.classList.remove('collapsed');
-      this.toggleButton.setAttribute('aria-label', 'Collapse all sections');
+      this.toggleButton.setAttribute('aria-label', t('table.actions.collapseAll'));
       this.toggleButton.removeClass(CLASS_NAMES.ICONS.EXPAND_ALL);
       this.toggleButton.addClass(CLASS_NAMES.ICONS.COLLAPSE_ALL);
     } catch (error) {

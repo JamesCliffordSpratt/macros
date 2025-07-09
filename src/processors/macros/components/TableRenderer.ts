@@ -21,16 +21,6 @@ function calculateConsistentCaloriesForGroup(group: any): number {
   return totalCalories;
 }
 
-/**
- * Represents file modification data needed for updating macros
- */
-interface MacroFileModification {
-  activeFile: TFile;
-  originalContent: string;
-  macrosBlockMatch: RegExpMatchArray;
-  blockLines: string[];
-}
-
 export class MacrosTableRenderer {
   private plugin: MacrosPlugin;
   private el: HTMLElement;
@@ -244,6 +234,7 @@ export class MacrosTableRenderer {
 
   /**
    * Updates the quantity of a meal item directly in the file
+   * SIMPLIFIED: No multiplier handling
    */
   private async updateLocalMealItem(
     mealName: string,
@@ -255,24 +246,21 @@ export class MacrosTableRenderer {
     }
 
     try {
-      // Use the centralized document context method
       const context = await this.plugin.dataManager.getDocumentContext(this.id);
 
       if (!context || context.allLines.length === 0) {
         throw new Error('No macros data found');
       }
 
-      // Debug logs to help diagnose
       this.plugin.logger.debug(`Searching for meal: "${mealName}" in block with id: "${this.id}"`);
-      this.plugin.logger.debug(`Block has ${context.allLines.length} lines`);
 
-      // Improved meal line finder with more flexible matching
+      // Find meal line - SIMPLIFIED: No multiplier matching
       const mealLineIndex = context.allLines.findIndex((line) => {
         const trimmedLine = line.trim();
         if (!trimmedLine.toLowerCase().startsWith('meal:')) return false;
 
         const extractedMealName = trimmedLine.substring(5).trim();
-        return extractedMealName.toLowerCase().includes(mealName.toLowerCase());
+        return extractedMealName.toLowerCase() === mealName.toLowerCase();
       });
 
       if (mealLineIndex === -1) {
@@ -283,22 +271,19 @@ export class MacrosTableRenderer {
         throw new Error(`Meal '${mealName}' not found in this macros block`);
       }
 
-      // Create a new array of lines for the updated block
       const updatedLines = [...context.allLines];
 
       // Look for the food item in the bullet points following the meal line
       let itemFound = false;
       let i = mealLineIndex + 1;
 
-      // Iterate through bullet points until we hit the end or a non-bullet line
       while (i < context.allLines.length && context.allLines[i].trim().startsWith('-')) {
         const line = context.allLines[i].trim();
-        const itemText = line.substring(1).trim(); // Remove the bullet
+        const itemText = line.substring(1).trim();
         const itemFoodName = this.extractFoodName(itemText);
 
-        // Check if this item matches the food we're looking for
         if (itemFoodName.toLowerCase() === foodName.toLowerCase()) {
-          // Create the new line with updated quantity
+          // Update this item's quantity
           const newLine = `- ${foodName}:${newQuantity}g`;
           updatedLines[i] = newLine;
           itemFound = true;
@@ -312,7 +297,6 @@ export class MacrosTableRenderer {
         throw new Error(`Food item '${foodName}' not found under meal '${mealName}'`);
       }
 
-      // UPDATED: Use centralized DataManager method to update the block
       const success = await this.plugin.dataManager.updateMacrosBlock(this.id, updatedLines);
 
       if (!success) {
@@ -404,10 +388,10 @@ export class MacrosTableRenderer {
 
   /**
    * Removes a macro line from the macros block
+   * SIMPLIFIED: No multiplier logic
    * @param macroLine The line to remove
    */
   private async removeMacroLine(macroLine: string): Promise<void> {
-    // Prevent multiple concurrent updates
     if (this.updateInProgress) {
       new Notice('Update already in progress, please wait...');
       return;
@@ -416,14 +400,12 @@ export class MacrosTableRenderer {
     this.updateInProgress = true;
 
     try {
-      // Extract the food name for more flexible matching
       const foodName = this.extractFoodName(macroLine);
 
       if (!this.id) {
         throw new Error('No macros ID available for operation');
       }
 
-      // Use the centralized document context method
       const context = await this.plugin.dataManager.getDocumentContext(this.id);
 
       if (!context || context.allLines.length === 0) {
@@ -433,19 +415,23 @@ export class MacrosTableRenderer {
       let newLines: string[] = [];
 
       if (macroLine.toLowerCase().startsWith('meal:')) {
-        // For meal lines, we need to handle it differently
-        const index = context.allLines.findIndex(
+        // For meal lines, remove the entire meal section
+        // SIMPLIFIED: Just find meal by name, no multiplier matching
+        const mealName = macroLine.substring(5).trim();
+
+        const mealLineIndex = context.allLines.findIndex(
           (l) =>
             l.toLowerCase().startsWith('meal:') &&
-            l.toLowerCase().includes(macroLine.toLowerCase().substring(5).trim())
+            l.substring(5).trim().toLowerCase() === mealName.toLowerCase()
         );
 
-        if (index === -1) {
+        if (mealLineIndex === -1) {
           throw new Error('Meal not found');
         }
 
-        newLines = context.allLines.slice(0, index);
-        let j = index + 1;
+        // Remove meal line and all its bullet points
+        newLines = context.allLines.slice(0, mealLineIndex);
+        let j = mealLineIndex + 1;
         while (j < context.allLines.length && context.allLines[j].startsWith('-')) {
           j++;
         }
@@ -461,14 +447,12 @@ export class MacrosTableRenderer {
         });
       }
 
-      // UPDATED: Use centralized DataManager method to update the block
       const success = await this.plugin.dataManager.updateMacrosBlock(this.id, newLines);
 
       if (!success) {
         throw new Error(`Failed to update macros block for ID ${this.id}`);
       }
 
-      // Use the centralized force complete refresh method
       await this.plugin.forceCompleteReload();
 
       new Notice('Item removed successfully');

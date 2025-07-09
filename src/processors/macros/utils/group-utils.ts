@@ -5,6 +5,7 @@ import { processFoodItem } from '../macrosUtils';
 
 /**
  * Process lines from the macros code block into structured group data
+ * SIMPLIFIED: No multiplier logic, direct quantity handling
  * @param lines Array of text lines from the macros block
  * @param plugin Reference to the macros plugin
  * @returns Array of Group objects
@@ -39,11 +40,9 @@ export function processLinesIntoGroups(lines: string[], plugin: MacrosPlugin): G
       }
     } else if (!line.startsWith('-')) {
       // Regular food item not part of a meal
-      // Only process if this actually has content (not empty)
       if (line.trim().length > 0) {
         const foodName = extractFoodName(line);
 
-        // Skip processing if the food name is empty
         if (foodName.trim() === '') {
           plugin.logger.debug(`Skipping empty food line: "${line}"`);
           continue;
@@ -87,6 +86,7 @@ function extractFoodName(line: string): string {
 
 /**
  * Process a meal line and its bullet points into a group
+ * SIMPLIFIED: No multiplier logic
  * @param lines All lines from the macros block
  * @param mealLineIndex Index of the meal line
  * @param plugin Reference to the macros plugin
@@ -98,29 +98,13 @@ export function processMealLineWithBullets(
   plugin: MacrosPlugin
 ): Group | null {
   const mealLine = lines[mealLineIndex];
-  const fullMealText = mealLine.substring(5).trim();
-  let mealName = fullMealText;
-  let count = 1;
 
-  // Check for meal multipliers
-  const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-  if (countMatch) {
-    mealName = countMatch[1];
-    count = parseInt(countMatch[2]);
-  }
-
-  // Lookup the meal template to get default items
-  const mealTemplate = plugin.settings.mealTemplates.find(
-    (m) => m.name.toLowerCase() === mealName.toLowerCase()
-  );
-
-  if (!mealTemplate) {
-    return null;
-  }
+  // SIMPLIFIED: Just extract meal name, no multiplier parsing
+  const mealName = mealLine.substring(5).trim();
 
   const group: Group = {
     name: mealName,
-    count: count,
+    count: 1, // Always 1 since we're not using multipliers
     rows: [],
     total: { calories: 0, protein: 0, fat: 0, carbs: 0 },
     macroLine: mealLine,
@@ -178,59 +162,4 @@ export function processItemLine(line: string, plugin: MacrosPlugin): MacroRow | 
     row.macroLine = line;
   }
   return row;
-}
-
-/**
- * Process a meal line into a group with all its food items
- * This is the original function kept for compatibility
- * @param line The meal line text
- * @param plugin Reference to the macros plugin
- * @returns Group object or null if meal not found
- */
-export function processMealLine(line: string, plugin: MacrosPlugin): Group | null {
-  const fullMealText = line.substring(5).trim();
-  let mealName = fullMealText;
-  let count = 1;
-
-  const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-  if (countMatch) {
-    mealName = countMatch[1];
-    count = parseInt(countMatch[2]);
-  }
-
-  const meal = plugin.settings.mealTemplates.find(
-    (m) => m.name.toLowerCase() === mealName.toLowerCase()
-  );
-  if (!meal) return null;
-
-  const group: Group = {
-    name: mealName,
-    count: count,
-    rows: [],
-    total: { calories: 0, protein: 0, fat: 0, carbs: 0 },
-    macroLine: line,
-  };
-
-  meal.items.forEach((item: string) => {
-    let foodQuery = item;
-    let specifiedQuantity: number | null = null;
-
-    if (item.includes(':')) {
-      const parts = item.split(':').map((s) => s.trim());
-      foodQuery = parts[0];
-      specifiedQuantity = parseGrams(parts[1]);
-    }
-
-    const row = processFoodItem(plugin, foodQuery, specifiedQuantity);
-    if (row) {
-      row.macroLine = item;
-      group.rows.push(row);
-      group.total.calories += parseFloat(row.calories.toFixed(1));
-      group.total.protein += parseFloat(row.protein.toFixed(1));
-      group.total.fat += parseFloat(row.fat.toFixed(1));
-      group.total.carbs += parseFloat(row.carbs.toFixed(1));
-    }
-  });
-
-  return group;
 }

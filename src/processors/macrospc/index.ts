@@ -1,4 +1,5 @@
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
   plugin.registerMarkdownCodeBlockProcessor('macrospc', async (source: string, el: HTMLElement) => {
@@ -41,7 +42,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
     el.empty();
 
     if (ids.length === 0) {
-      el.createEl('div', { text: 'No id(s) provided in macrospc block' });
+      el.createEl('div', { text: t('charts.errors.noIdsProvided') });
       return;
     }
 
@@ -53,11 +54,11 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
     // Create a loading indicator while we verify data
     const loadingEl = el.createDiv({
       cls: 'macrospc-loading',
-      text: 'Loading chart data...',
+      text: t('charts.loading'),
     });
 
     try {
-      // Force reload of all IDs from vault every time
+      // CRITICAL FIX: Force reload of all IDs from vault with FULL data including bullet points
       const loadPromises = ids.map(async (id) => {
         plugin.logger.debug(`Loading ID: ${id} for macrospc block`);
         try {
@@ -65,9 +66,11 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
           const fullData = await plugin.dataManager.getFullMacrosData(id);
 
           if (fullData && fullData.length > 0) {
-            // Store in the macroTables cache
+            // Store in the macroTables cache with FULL data
             plugin.dataManager.macroTables.set(id, fullData);
-            plugin.logger.debug(`Successfully loaded ${fullData.length} lines for ID: ${id}`);
+            plugin.logger.debug(
+              `Successfully loaded ${fullData.length} lines for ID: ${id} (including bullet points)`
+            );
             return true;
           } else {
             plugin.logger.warn(`Could not load data for ID: ${id}`);
@@ -85,7 +88,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
       // Check if we have any successful loads
       if (!loadResults.some((result) => result)) {
         el.empty(); // Remove loading indicator
-        el.createEl('div', { text: `No data found for IDs: ${ids.join(', ')}` });
+        el.createEl('div', { text: t('charts.noData', { ids: ids.join(', ') }) });
         return;
       }
 
@@ -126,7 +129,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
       el.empty();
       console.error(`Error rendering chart:`, error);
       el.createEl('div', {
-        text: `Error rendering chart: ${error.message}`,
+        text: t('charts.errors.renderError', { error: (error as Error).message }),
         cls: 'macrospc-error',
       });
     }

@@ -13,8 +13,8 @@ export async function initializePlugin(plugin: MacrosPlugin): Promise<void> {
   // First load settings
   await plugin.loadSettings();
 
-  // Initialize all managers through registry
-  ManagerRegistry.initAll(plugin);
+  // Initialize all managers through registry (including I18n)
+  await ManagerRegistry.initAll(plugin);
 
   // Make sure the logger respects the developer mode setting
   plugin.logger.setDebugMode(plugin.settings.developerModeEnabled);

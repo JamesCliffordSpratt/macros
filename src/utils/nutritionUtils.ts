@@ -123,75 +123,81 @@ export function processNutritionalData(
 
 /**
  * Merges macro lines into unique entries
+ * SIMPLIFIED: No multiplier logic, direct quantity merging
  * @param lines Array of macro lines
  * @returns Merged array of lines
  */
 export function mergeMacroLines(lines: string[]): string[] {
-  const mergedFood: Record<string, { foodName: string; totalServing: number; firstIndex: number }> =
-    {};
-  const mergedMeals: Record<string, { mealName: string; count: number; firstIndex: number }> = {};
+  // Group items by meal and individual items
+  const mealStructure = new Map<string, Map<string, number>>();
+  const individualItems = new Map<string, number>();
 
-  lines.forEach((line, index) => {
+  let currentMeal: string | null = null;
+
+  lines.forEach((line) => {
     if (line.toLowerCase().startsWith('meal:')) {
-      const fullMealText = line.substring(5).trim();
-      let mealName = fullMealText;
-      let existingCount = 1;
-      const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-      if (countMatch) {
-        mealName = countMatch[1];
-        existingCount = parseInt(countMatch[2]);
+      // SIMPLIFIED: Just extract meal name, no multiplier parsing
+      currentMeal = line.substring(5).trim();
+
+      if (!mealStructure.has(currentMeal)) {
+        mealStructure.set(currentMeal, new Map());
       }
-      const key = mealName.toLowerCase();
-      if (!mergedMeals[key]) {
-        mergedMeals[key] = { mealName, count: existingCount, firstIndex: index };
-      } else {
-        mergedMeals[key].count += existingCount;
+    } else if (line.startsWith('-') && currentMeal) {
+      // Bullet point under a meal
+      const itemText = line.substring(1).trim();
+      const { foodName, quantity } = parseItemText(itemText);
+
+      if (foodName) {
+        const mealItems = mealStructure.get(currentMeal)!;
+        const existingQuantity = mealItems.get(foodName) || 0;
+        mealItems.set(foodName, existingQuantity + quantity);
       }
-    } else if (!line.toLowerCase().startsWith('-') && line.includes(':')) {
-      const match = line.match(/^([^:]+):\s*([\d.]+)g$/i);
-      if (match) {
-        const foodName = match[1].trim();
-        const serving = parseFloat(match[2]);
-        const key = foodName.toLowerCase();
-        if (isNaN(serving)) return;
-        if (!mergedFood[key]) {
-          mergedFood[key] = { foodName, totalServing: serving, firstIndex: index };
-        } else {
-          mergedFood[key].totalServing += serving;
-        }
+    } else if (!line.startsWith('-')) {
+      // Individual food item (not under a meal)
+      currentMeal = null;
+      const { foodName, quantity } = parseItemText(line);
+
+      if (foodName) {
+        const existingQuantity = individualItems.get(foodName) || 0;
+        individualItems.set(foodName, existingQuantity + quantity);
       }
     }
   });
 
+  // Build output
   const output: string[] = [];
-  lines.forEach((line, index) => {
-    if (line.toLowerCase().startsWith('meal:')) {
-      const fullMealText = line.substring(5).trim();
-      let mealName = fullMealText;
-      const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-      if (countMatch) mealName = countMatch[1];
-      const key = mealName.toLowerCase();
-      if (mergedMeals[key] && mergedMeals[key].firstIndex === index) {
-        output.push(
-          mergedMeals[key].count > 1
-            ? `meal:${mealName} × ${mergedMeals[key].count}`
-            : `meal:${mealName}`
-        );
-      }
-    } else if (!line.toLowerCase().startsWith('-') && line.includes(':')) {
-      const match = line.match(/^([^:]+):\s*([\d.]+)g$/i);
-      if (match) {
-        const key = match[1].trim().toLowerCase();
-        if (mergedFood[key] && mergedFood[key].firstIndex === index) {
-          output.push(`${mergedFood[key].foodName}:${mergedFood[key].totalServing}g`);
-        }
-        return;
-      }
-      output.push(line);
-    } else if (!line.toLowerCase().startsWith('-')) {
-      output.push(line);
+
+  // Add meals
+  for (const [mealName, mealItems] of mealStructure) {
+    output.push(`meal:${mealName}`);
+
+    for (const [foodName, quantity] of mealItems) {
+      output.push(`- ${foodName}:${quantity}g`);
     }
-  });
+  }
+
+  // Add individual items
+  for (const [foodName, quantity] of individualItems) {
+    output.push(`${foodName}:${quantity}g`);
+  }
 
   return output;
+}
+
+/**
+ * Parse item text to extract food name and quantity
+ * HELPER: Common logic for parsing food items
+ */
+function parseItemText(itemText: string): { foodName: string; quantity: number } {
+  if (itemText.includes(':')) {
+    const parts = itemText.split(':').map((s) => s.trim());
+    const foodName = parts[0];
+    const quantityMatch = parts[1].match(/^([\d.]+)g?$/i);
+    const quantity = quantityMatch ? parseFloat(quantityMatch[1]) : 100;
+
+    return { foodName, quantity };
+  } else {
+    // No quantity specified, assume 100g default
+    return { foodName: itemText.trim(), quantity: 100 };
+  }
 }

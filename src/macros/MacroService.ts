@@ -1,6 +1,7 @@
 import MacrosPlugin from '../main';
 import { TFile } from 'obsidian';
 import { parseGrams, processNutritionalData } from '../utils';
+
 /**
  * MacroService
  * ------------
@@ -73,75 +74,36 @@ export class MacroService {
   }
 
   /**
-   * Helper method for processors to get consistent calorie calcs
+   * Helper method for processors to get consistent calorie calculations
+   * SIMPLIFIED: No multiplier logic
    */
   getActualCaloriesFromItems(id: string): number {
     let total = 0;
-    // Use the delegated macroTables property
     const macroLines = this.macroTables.get(id);
     if (!macroLines) return 0;
 
+    let currentMeal = '';
+
     macroLines.forEach((line) => {
       if (line.toLowerCase().startsWith('meal:')) {
-        const fullMealText = line.substring(5).trim();
-        let mealName = fullMealText;
-        let count = 1;
+        // SIMPLIFIED: Just track meal context, no expansion
+        currentMeal = line.substring(5).trim();
+      } else if (line.startsWith('-') && currentMeal) {
+        // Process meal item
+        const itemText = line.substring(1).trim();
+        const macroData = this.processSingleFoodItem(itemText);
 
-        const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-        if (countMatch) {
-          mealName = countMatch[1];
-          count = parseInt(countMatch[2]);
+        if (macroData) {
+          total += macroData.calories;
         }
+      } else if (!line.startsWith('-') && !line.toLowerCase().startsWith('id:')) {
+        // Process individual food item
+        currentMeal = ''; // Reset meal context
+        const macroData = this.processSingleFoodItem(line);
 
-        const meal = this.plugin.settings.mealTemplates.find(
-          (m) => m.name.toLowerCase() === mealName.toLowerCase()
-        );
-        if (!meal) return;
-
-        meal.items.forEach((item: string) => {
-          let foodQuery = item;
-          let specifiedQuantity: number | null = null;
-
-          if (item.includes(':')) {
-            const parts = item.split(':').map((s) => s.trim());
-            foodQuery = parts[0];
-            specifiedQuantity = parseGrams(parts[1]);
-            if (count > 1 && specifiedQuantity !== null) {
-              specifiedQuantity = specifiedQuantity * count;
-            }
-          }
-
-          // Use centralized method from DataManager
-          const matchingFile = this.plugin.dataManager.findFoodFile(foodQuery);
-          if (!matchingFile) return;
-
-          const nutrition = processNutritionalData(
-            this.plugin.app,
-            matchingFile,
-            specifiedQuantity
-          );
-          if (!nutrition) return;
-
-          total += parseFloat(nutrition.calories.toFixed(1));
-        });
-      } else {
-        let foodQuery = line;
-        let specifiedQuantity: number | null = null;
-
-        if (line.includes(':')) {
-          const parts = line.split(':').map((s) => s.trim());
-          foodQuery = parts[0];
-          specifiedQuantity = parseGrams(parts[1]);
+        if (macroData) {
+          total += macroData.calories;
         }
-
-        // Use centralized method from DataManager
-        const matchingFile = this.plugin.dataManager.findFoodFile(foodQuery);
-        if (!matchingFile) return;
-
-        const nutrition = processNutritionalData(this.plugin.app, matchingFile, specifiedQuantity);
-        if (!nutrition) return;
-
-        total += parseFloat(nutrition.calories.toFixed(1));
       }
     });
 
@@ -150,6 +112,7 @@ export class MacroService {
 
   /**
    * Calculate macros from lines with promise-based processing
+   * SIMPLIFIED VERSION: No multiplier logic, direct processing
    */
   async calculateMacrosFromLinesAsync(
     lines: string[]
@@ -159,121 +122,41 @@ export class MacroService {
       totalCarbs = 0,
       totalCalories = 0;
 
-    // CRITICAL FIX: First merge duplicate lines to avoid double counting
-    const mergedLines = this.mergeDuplicateLines(lines);
+    // SIMPLIFIED: No complex merging needed since we handle duplicates at write time
+    this.plugin.logger.debug(`Processing ${lines.length} lines`);
 
-    this.plugin.logger.debug(
-      `Original lines: ${lines.length}, Merged lines: ${mergedLines.length}`
-    );
-    this.plugin.logger.debug('Merged lines:', mergedLines);
-
-    // Process all lines first to identify if we're dealing with just meal headers
-    const onlyMealHeaders = mergedLines.every((line) => line.toLowerCase().startsWith('meal:'));
-    const hasBulletPoints = mergedLines.some((line) => line.startsWith('-'));
-
-    // Handle bullet points more robustly - track the current meal
+    // Track the current meal context
     let currentMeal = '';
-    let mealMultiplier = 1;
 
-    // Process each line
-    for (const line of mergedLines) {
+    for (const line of lines) {
       if (line.toLowerCase().startsWith('meal:')) {
+        // SIMPLIFIED: Just extract meal name, no multiplier
         currentMeal = line.substring(5).trim();
 
-        // Check for multiplier in meal line
-        const countMatch = currentMeal.match(/^(.*)\s+×\s+(\d+)$/);
-        if (countMatch) {
-          currentMeal = countMatch[1];
-          mealMultiplier = parseInt(countMatch[2]);
-        } else {
-          mealMultiplier = 1;
-        }
-
-        // If no bullet points follow, use the template approach
-        if (!hasBulletPoints) {
-          const template = this.plugin.settings.mealTemplates.find(
-            (m) => m.name.toLowerCase() === currentMeal.toLowerCase()
-          );
-
-          if (template) {
-            // Process template items
-            for (const item of template.items) {
-              let foodQuery = item;
-              let grams: number | null = null;
-
-              if (item.includes(':')) {
-                const parts = item.split(':').map((s) => s.trim());
-                foodQuery = parts[0];
-                grams = parseGrams(parts[1]);
-                if (grams !== null && mealMultiplier > 1) {
-                  grams *= mealMultiplier;
-                }
-              }
-
-              // Use centralized method from DataManager
-              const file = this.plugin.dataManager.findFoodFile(foodQuery);
-              if (file) {
-                const data = processNutritionalData(this.plugin.app, file, grams);
-                if (data) {
-                  totalProtein += data.protein;
-                  totalFat += data.fat;
-                  totalCarbs += data.carbs;
-                  totalCalories += parseFloat(data.calories.toFixed(1));
-                }
-              }
-            }
-          }
-        }
+        // We don't expand meal templates here anymore since
+        // the actual items are stored as bullet points
       } else if (line.startsWith('-') && currentMeal) {
-        // This is a bullet point for a meal
+        // Process bullet point (meal item)
         const itemText = line.substring(1).trim();
+        const macroData = this.processSingleFoodItem(itemText);
 
-        let foodQuery = itemText;
-        let grams: number | null = null;
-
-        if (itemText.includes(':')) {
-          const parts = itemText.split(':').map((s) => s.trim());
-          foodQuery = parts[0];
-          grams = parseGrams(parts[1]);
-
-          // Apply multiplier if present
-          if (grams !== null && mealMultiplier > 1) {
-            grams *= mealMultiplier;
-          }
-        }
-
-        // Use centralized method from DataManager
-        const file = this.plugin.dataManager.findFoodFile(foodQuery);
-        if (file) {
-          const data = processNutritionalData(this.plugin.app, file, grams);
-          if (data) {
-            totalProtein += data.protein;
-            totalFat += data.fat;
-            totalCarbs += data.carbs;
-            totalCalories += parseFloat(data.calories.toFixed(1));
-          }
+        if (macroData) {
+          totalProtein += macroData.protein;
+          totalFat += macroData.fat;
+          totalCarbs += macroData.carbs;
+          totalCalories += macroData.calories;
         }
       } else if (!line.startsWith('-') && !line.toLowerCase().startsWith('id:')) {
-        // Regular food item
-        let foodQuery = line;
-        let grams: number | null = null;
+        // Regular food item (not under a meal)
+        currentMeal = ''; // Reset meal context
 
-        if (line.includes(':')) {
-          const parts = line.split(':').map((s) => s.trim());
-          foodQuery = parts[0];
-          grams = parseGrams(parts[1]);
-        }
+        const macroData = this.processSingleFoodItem(line);
 
-        // Use centralized method from DataManager
-        const file = this.plugin.dataManager.findFoodFile(foodQuery);
-        if (file) {
-          const data = processNutritionalData(this.plugin.app, file, grams);
-          if (data) {
-            totalProtein += data.protein;
-            totalFat += data.fat;
-            totalCarbs += data.carbs;
-            totalCalories += parseFloat(data.calories.toFixed(1));
-          }
+        if (macroData) {
+          totalProtein += macroData.protein;
+          totalFat += macroData.fat;
+          totalCarbs += macroData.carbs;
+          totalCalories += macroData.calories;
         }
       }
     }
@@ -282,7 +165,6 @@ export class MacroService {
       `Final totals: protein=${totalProtein.toFixed(1)}g, fat=${totalFat.toFixed(1)}g, carbs=${totalCarbs.toFixed(1)}g, calories=${totalCalories.toFixed(1)}`
     );
 
-    // Round all values to one decimal place for consistency
     return {
       protein: parseFloat(totalProtein.toFixed(1)),
       fat: parseFloat(totalFat.toFixed(1)),
@@ -292,84 +174,47 @@ export class MacroService {
   }
 
   /**
-   * Helper method to merge duplicate lines before calculation
+   * Process a single food item and return its macro data
+   * SIMPLIFIED: Extract common logic for processing individual food items
    */
-  private mergeDuplicateLines(lines: string[]): string[] {
-    const mergedFood: Record<
-      string,
-      { foodName: string; totalServing: number; firstIndex: number }
-    > = {};
-    const mergedMeals: Record<string, { mealName: string; count: number; firstIndex: number }> = {};
-    const output: string[] = [];
+  private processSingleFoodItem(itemText: string): {
+    protein: number;
+    fat: number;
+    carbs: number;
+    calories: number;
+  } | null {
+    let foodQuery = itemText;
+    let grams: number | null = null;
 
-    // First pass: identify and merge duplicates
-    lines.forEach((line, index) => {
-      if (line.toLowerCase().startsWith('meal:')) {
-        const fullMealText = line.substring(5).trim();
-        let mealName = fullMealText;
-        let existingCount = 1;
-        const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-        if (countMatch) {
-          mealName = countMatch[1];
-          existingCount = parseInt(countMatch[2]);
-        }
-        const key = mealName.toLowerCase();
-        if (!mergedMeals[key]) {
-          mergedMeals[key] = { mealName, count: existingCount, firstIndex: index };
-        } else {
-          mergedMeals[key].count += existingCount;
-        }
-      } else if (!line.toLowerCase().startsWith('-') && line.includes(':')) {
-        const match = line.match(/^([^:]+):\s*([\d.]+)g$/i);
-        if (match) {
-          const foodName = match[1].trim();
-          const serving = parseFloat(match[2]);
-          const key = foodName.toLowerCase();
-          if (isNaN(serving)) return;
-          if (!mergedFood[key]) {
-            mergedFood[key] = { foodName, totalServing: serving, firstIndex: index };
-          } else {
-            mergedFood[key].totalServing += serving;
-          }
-        }
-      }
-    });
+    if (itemText.includes(':')) {
+      const parts = itemText.split(':').map((s) => s.trim());
+      foodQuery = parts[0];
+      grams = parseGrams(parts[1]);
+    }
 
-    // Second pass: build output with merged values
-    lines.forEach((line, index) => {
-      if (line.toLowerCase().startsWith('meal:')) {
-        const fullMealText = line.substring(5).trim();
-        let mealName = fullMealText;
-        const countMatch = fullMealText.match(/^(.*)\s+×\s+(\d+)$/);
-        if (countMatch) mealName = countMatch[1];
-        const key = mealName.toLowerCase();
-        if (mergedMeals[key] && mergedMeals[key].firstIndex === index) {
-          output.push(
-            mergedMeals[key].count > 1
-              ? `meal:${mealName} × ${mergedMeals[key].count}`
-              : `meal:${mealName}`
-          );
-        }
-      } else if (!line.toLowerCase().startsWith('-') && line.includes(':')) {
-        const match = line.match(/^([^:]+):\s*([\d.]+)g$/i);
-        if (match) {
-          const key = match[1].trim().toLowerCase();
-          if (mergedFood[key] && mergedFood[key].firstIndex === index) {
-            output.push(`${mergedFood[key].foodName}:${mergedFood[key].totalServing}g`);
-          }
-          return;
-        }
-        output.push(line);
-      } else if (!line.toLowerCase().startsWith('-')) {
-        output.push(line);
-      }
-    });
+    const file = this.plugin.dataManager.findFoodFile(foodQuery);
+    if (!file) {
+      this.plugin.logger.warn(`Food file not found for: ${foodQuery}`);
+      return null;
+    }
 
-    return output;
+    const data = processNutritionalData(this.plugin.app, file, grams);
+    if (!data) {
+      this.plugin.logger.warn(`Could not process nutrition data for: ${foodQuery}`);
+      return null;
+    }
+
+    return {
+      protein: data.protein,
+      fat: data.fat,
+      carbs: data.carbs,
+      calories: parseFloat(data.calories.toFixed(1)),
+    };
   }
 
   /**
    * Process nutritional data from lines
+   * SIMPLIFIED: Remove complex merging logic
    */
   processNutritionalDataFromLines(ids: string[]): {
     aggregate: { calories: number; protein: number; fat: number; carbs: number };
@@ -391,7 +236,6 @@ export class MacroService {
     for (const id of ids) {
       const total = { calories: 0, protein: 0, fat: 0, carbs: 0 };
 
-      // Get lines for this ID using the delegated property
       const tableLines = this.macroTables.get(id);
       if (!tableLines) {
         this.plugin.logger.debug(`No table lines found for ID: ${id}`);
@@ -400,34 +244,33 @@ export class MacroService {
 
       this.plugin.logger.debug(`MacroService processing ${tableLines.length} lines for ID: ${id}`);
 
-      // CRITICAL FIX: Use the same merging logic as calculateMacrosFromLinesAsync
-      const mergedLines = this.mergeDuplicateLines(tableLines);
-      this.plugin.logger.debug(
-        `MacroService after merging: ${mergedLines.length} lines for ID: ${id}`
-      );
+      let currentMeal = '';
 
-      // Process merged lines (simplified version for now)
-      for (const line of mergedLines) {
-        if (!line.startsWith('-') && !line.toLowerCase().startsWith('id:')) {
-          let foodQuery = line;
-          let specifiedQuantity: number | null = null;
+      // SIMPLIFIED: Process lines directly without complex merging
+      for (const line of tableLines) {
+        if (line.toLowerCase().startsWith('meal:')) {
+          currentMeal = line.substring(5).trim();
+        } else if (line.startsWith('-') && currentMeal) {
+          // Process meal item
+          const itemText = line.substring(1).trim();
+          const macroData = this.processSingleFoodItem(itemText);
 
-          if (line.includes(':')) {
-            const parts = line.split(':').map((s) => s.trim());
-            foodQuery = parts[0];
-            specifiedQuantity = parseGrams(parts[1]);
+          if (macroData) {
+            total.protein += macroData.protein;
+            total.fat += macroData.fat;
+            total.carbs += macroData.carbs;
+            total.calories += macroData.calories;
           }
+        } else if (!line.startsWith('-') && !line.toLowerCase().startsWith('id:')) {
+          // Process individual food item
+          currentMeal = '';
+          const macroData = this.processSingleFoodItem(line);
 
-          // Use centralized method from DataManager
-          const file = this.plugin.dataManager.findFoodFile(foodQuery);
-          if (file) {
-            const data = processNutritionalData(this.plugin.app, file, specifiedQuantity);
-            if (data) {
-              total.protein += data.protein;
-              total.fat += data.fat;
-              total.carbs += data.carbs;
-              total.calories += parseFloat(data.calories.toFixed(1));
-            }
+          if (macroData) {
+            total.protein += macroData.protein;
+            total.fat += macroData.fat;
+            total.carbs += macroData.carbs;
+            total.calories += macroData.calories;
           }
         }
       }

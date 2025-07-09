@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Component } from 'obsidian';
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export class CustomServingSizeModal extends Modal {
   foodName: string;
@@ -29,13 +30,13 @@ export class CustomServingSizeModal extends Modal {
 
     // Create header with better mobile spacing
     const headerEl = contentEl.createEl('h2', {
-      text: `Custom serving size for ${this.foodName}`,
+      text: t('food.customServing.title', { foodName: this.foodName }),
       cls: 'custom-serving-modal-title',
     });
 
     // Create description with mobile-friendly text
     const descEl = contentEl.createEl('p', {
-      text: `Default serving is ${this.defaultServing}g. Enter a custom serving size in grams:`,
+      text: t('food.customServing.description', { defaultServing: this.defaultServing.toString() }),
       cls: 'custom-serving-modal-description',
     });
 
@@ -52,7 +53,7 @@ export class CustomServingSizeModal extends Modal {
     const handleSubmit = () => {
       const value = parseFloat(inputEl.value);
       if (isNaN(value) || value <= 0) {
-        new Notice('Please enter a valid serving size.');
+        new Notice(t('validation.invalidServing'));
       } else {
         this.onSubmit(value);
         this.close();
@@ -72,7 +73,7 @@ export class CustomServingSizeModal extends Modal {
     const buttonContainer = contentEl.createDiv({ cls: 'custom-serving-button-container' });
 
     const submitBtn = buttonContainer.createEl('button', {
-      text: 'Submit',
+      text: t('food.customServing.submit'),
       cls: 'custom-serving-submit-btn mod-cta',
     });
 

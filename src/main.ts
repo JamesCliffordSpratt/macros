@@ -2,6 +2,7 @@ import { Plugin, TFile } from 'obsidian';
 import { PluginSettings, DEFAULT_SETTINGS } from './settings/StorageService';
 import { initializePlugin, shutdownPlugin } from './managers/PluginBootstrap';
 import { NutritionalSettingTab } from './settings/StorageService';
+import { setFormatterPlugin } from './utils/formatters';
 import {
   Logger,
   DataManager,
@@ -11,6 +12,7 @@ import {
   MacroService,
   APIService,
 } from './managers';
+import { I18nManager } from './lang/I18nManager';
 
 /**
  * Macros Plugin
@@ -29,6 +31,7 @@ export default class MacrosPlugin extends Plugin {
   uiManager!: UIManager;
   macroService!: MacroService;
   apiService!: APIService;
+  i18nManager!: I18nManager;
 
   // Track DOM event listeners separately
   private domEventListeners: Array<{ unbind: () => void }> = [];
@@ -39,6 +42,9 @@ export default class MacrosPlugin extends Plugin {
   async onload() {
     // Bootstrap all plugin functionality
     await initializePlugin(this);
+
+    // Set the plugin instance for formatters to access settings
+    setFormatterPlugin(this);
   }
 
   /**
@@ -97,6 +103,11 @@ export default class MacrosPlugin extends Plugin {
     // Ensure uiCollapseStates exists after loading
     if (!this.settings.uiCollapseStates) {
       this.settings.uiCollapseStates = {};
+    }
+
+    // Ensure energyUnit exists and has a default value
+    if (!this.settings.energyUnit) {
+      this.settings.energyUnit = 'kcal';
     }
   }
 

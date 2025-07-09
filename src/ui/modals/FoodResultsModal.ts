@@ -2,6 +2,7 @@ import { App, Modal, Component } from 'obsidian';
 import { extractServingSize } from '../../utils/nutritionUtils';
 import { fetchFoodData, FoodItem } from '../../core/api';
 import MacrosPlugin from '../../main';
+import { t } from '../../lang/I18nManager';
 
 export class FoodResultsModal extends Modal {
   currentPage = 0;
@@ -75,12 +76,17 @@ export class FoodResultsModal extends Modal {
   renderContent() {
     const { contentEl } = this;
     contentEl.empty();
+
+    // Create dynamic header with page information
     contentEl.createEl('h2', {
-      text: `Results for "${this.searchTerm}" (Page ${this.currentPage + 1})`,
+      text: t('food.search.results', {
+        searchTerm: this.searchTerm,
+        page: (this.currentPage + 1).toString(),
+      }),
     });
 
     if (this.results.length === 0) {
-      contentEl.createEl('p', { text: 'No results found on this page.' });
+      contentEl.createEl('p', { text: t('food.search.noResults') });
     } else {
       const normalizedQuery = this.searchTerm.toLowerCase();
       const escapedSearchTerm = this.escapeRegExp(this.searchTerm);
@@ -121,16 +127,16 @@ export class FoodResultsModal extends Modal {
     const navDiv = contentEl.createDiv({ cls: 'food-nav' });
 
     if (this.currentPage > 0) {
-      const prevBtn = navDiv.createEl('button', { text: '< Prev' });
+      const prevBtn = navDiv.createEl('button', { text: `< ${t('general.previous')}` });
       prevBtn.addClass('mod-button');
 
       this.component.registerDomEvent(prevBtn, 'click', () => this.loadPage(this.currentPage - 1));
     }
 
-    navDiv.createEl('span', { text: ` Page ${this.currentPage + 1} ` });
+    navDiv.createEl('span', { text: ` ${t('general.page')} ${this.currentPage + 1} ` });
 
     if (this.results.length === this.maxResults) {
-      const nextBtn = navDiv.createEl('button', { text: 'Next >' });
+      const nextBtn = navDiv.createEl('button', { text: `${t('general.next')} >` });
       nextBtn.addClass('mod-button');
 
       this.component.registerDomEvent(nextBtn, 'click', () => this.loadPage(this.currentPage + 1));

@@ -16,3 +16,4 @@ export { UIManager } from './UIManager';
 export { ManagerRegistry } from './ManagerRegistry';
 export { APIService } from '../core/APIService';
 export { MacroService } from '../macros/MacroService';
+export { I18nManager, t } from '../lang/I18nManager';

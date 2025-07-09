@@ -13,6 +13,7 @@ import {
   formatCalories,
   formatGrams,
 } from '../../utils/formatters';
+import { t } from '../../lang/I18nManager';
 
 export class MacrosDashboard {
   private container: HTMLElement;
@@ -67,17 +68,19 @@ export class MacrosDashboard {
       const fatPercentage = (combinedTotals.fat / dailyTargets.fat) * 100;
       const carbsPercentage = (combinedTotals.carbs / dailyTargets.carbs) * 100;
 
+      // FIXED: Pass raw calorie value for accurate tooltip calculation
       this.createMetricCard(
         this.dashboardContent,
-        'Calories',
+        t('table.headers.calories'),
         formatCalories(combinedTotals.calories),
         dailyTargets.calories,
         caloriePercentage,
-        MACRO_TYPES.CALORIES
+        MACRO_TYPES.CALORIES,
+        combinedTotals.calories // Pass the raw kcal value
       );
       this.createMetricCard(
         this.dashboardContent,
-        'Protein',
+        t('table.headers.protein'),
         formatGrams(combinedTotals.protein),
         dailyTargets.protein,
         proteinPercentage,
@@ -85,7 +88,7 @@ export class MacrosDashboard {
       );
       this.createMetricCard(
         this.dashboardContent,
-        'Fat',
+        t('table.headers.fat'),
         formatGrams(combinedTotals.fat),
         dailyTargets.fat,
         fatPercentage,
@@ -93,7 +96,7 @@ export class MacrosDashboard {
       );
       this.createMetricCard(
         this.dashboardContent,
-        'Carbs',
+        t('table.headers.carbs'),
         formatGrams(combinedTotals.carbs),
         dailyTargets.carbs,
         carbsPercentage,
@@ -156,7 +159,8 @@ export class MacrosDashboard {
     value: string,
     target: number,
     percentage: number,
-    macroType: string
+    macroType: string,
+    rawValue?: number // Optional raw value for accurate tooltip calculation
   ): void {
     try {
       const card = container.createDiv({
@@ -175,8 +179,48 @@ export class MacrosDashboard {
         text: value,
       });
 
-      const numericValue = parseFloat(value.replace('g', ''));
-      const tooltipMessage = formatDashboardTooltip(numericValue, target, label);
+      // Create custom tooltip with proper energy unit handling
+      let tooltipMessage: string;
+
+      if (label === t('table.headers.calories')) {
+        const currentUnit = this.plugin.settings.energyUnit;
+
+        if (currentUnit === 'kJ') {
+          // Create custom tooltip for kJ
+          const rawKcalValue = rawValue || 0;
+          const consumedKj = rawKcalValue * 4.184;
+          const targetKj = target * 4.184;
+          const remainingKj = targetKj - consumedKj;
+          const percentage = targetKj > 0 ? (consumedKj / targetKj) * 100 : 0;
+
+          tooltipMessage = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+          if (remainingKj > 0) {
+            tooltipMessage += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+          } else if (remainingKj < 0) {
+            tooltipMessage += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+          }
+        } else {
+          // Use original kcal values for kcal display
+          const consumedKcal = rawValue || parseFloat(value.match(/^([\d.]+)/)?.[1] || '0');
+          const targetKcal = target;
+          const remainingKcal = targetKcal - consumedKcal;
+          const percentage = targetKcal > 0 ? (consumedKcal / targetKcal) * 100 : 0;
+
+          tooltipMessage = `${consumedKcal.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+          if (remainingKcal > 0) {
+            tooltipMessage += ` • ${remainingKcal.toFixed(1)} kcal ${t('general.remaining')}`;
+          } else if (remainingKcal < 0) {
+            tooltipMessage += ` • ${Math.abs(remainingKcal).toFixed(1)} kcal ${t('table.summary.over')}`;
+          }
+        }
+      } else {
+        // Use the standard formatDashboardTooltip for non-calorie metrics
+        const numericValue = parseFloat(value.replace('g', ''));
+        tooltipMessage = formatDashboardTooltip(numericValue, target, label);
+      }
+
       safeAttachTooltip(card, tooltipMessage, this.plugin);
 
       valueContainer.createDiv({
@@ -214,9 +258,32 @@ export class MacrosDashboard {
         cls: `${CLASS_NAMES.DASHBOARD.METRIC_TARGET_INDICATOR} target-indicator-full`,
       });
 
+      // Format target for tooltip with appropriate unit and conversion
+      let targetValueForDisplay: string;
+      let unit: string;
+
+      if (label === t('table.headers.calories')) {
+        const currentUnit = this.plugin.settings.energyUnit;
+        if (currentUnit === 'kJ') {
+          // Convert target from kcal to kJ for display
+          const targetInKj = target * 4.184;
+          targetValueForDisplay = Math.round(targetInKj).toString();
+          unit = ' kJ';
+        } else {
+          targetValueForDisplay = target.toString();
+          unit = ' kcal';
+        }
+      } else {
+        targetValueForDisplay = target.toString();
+        unit = 'g';
+      }
+
       safeAttachTooltip(
         targetIndicator,
-        `Target: ${target}${label === 'Calories' ? '' : 'g'}`,
+        t('tooltips.target', {
+          target: targetValueForDisplay,
+          unit: unit,
+        }),
         this.plugin
       );
     } catch (error) {

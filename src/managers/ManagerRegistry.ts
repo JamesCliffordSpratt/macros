@@ -5,6 +5,7 @@ import { DataManager } from './DataManager';
 import { ChartManager } from './ChartManager';
 import { RefreshManager } from './RefreshManager';
 import { APIService } from '../core/APIService';
+import { I18nManager } from '../lang/I18nManager';
 
 /**
  * ManagerRegistry
@@ -16,12 +17,17 @@ export class ManagerRegistry {
   /**
    * Initialize all managers
    */
-  static initAll(plugin: MacrosPlugin): void {
+  static async initAll(plugin: MacrosPlugin): Promise<void> {
     // Initialize in dependency order
     plugin.logger = Logger.init(plugin);
+
+    // Initialize I18n manager early so other components can use translations
+    plugin.i18nManager = I18nManager.init(plugin);
+    await plugin.i18nManager.initialize();
+
     plugin.uiManager = UIManager.init(plugin);
     plugin.macroService = MacroService.init(plugin);
-    plugin.apiService = APIService.init(plugin); // Add the APIService
+    plugin.apiService = APIService.init(plugin);
     plugin.dataManager = new DataManager(plugin);
     plugin.chartManager = new ChartManager(plugin);
     plugin.refreshManager = new RefreshManager(plugin);
@@ -52,7 +58,8 @@ export class ManagerRegistry {
     plugin.chartManager?.cleanup?.();
     plugin.dataManager?.cleanup?.();
     MacroService.unload();
-    APIService.unload(); // Add APIService cleanup
+    APIService.unload();
+    I18nManager.unload(); // Clean up I18n manager
     UIManager.unload();
     Logger.unload();
 

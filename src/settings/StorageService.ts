@@ -4,6 +4,8 @@ import MacrosPlugin from '../main';
 import { AddMealTemplateModal, EditMealTemplateModal } from '../ui';
 import { fetchFoodData } from '../core/api';
 import { FolderSuggest } from '../utils/FolderSuggest';
+import { I18nManager, t } from '../lang/I18nManager';
+import { convertEnergyUnit } from '../utils/energyUtils';
 import type { Chart } from 'chart.js';
 import { DEFAULT_SETTINGS } from './settingsSchema';
 export { DEFAULT_SETTINGS };
@@ -31,16 +33,20 @@ export interface PluginSettings {
   showCellPercentages: boolean;
   developerModeEnabled: boolean;
   uiCollapseStates?: Record<string, boolean>;
+  energyUnit: 'kcal' | 'kJ'; // New setting for energy unit
+  // Note: locale removed since we follow Obsidian's language settings
 }
 
 export class NutritionalSettingTab extends PluginSettingTab {
   plugin: MacrosPlugin;
   private previewChart: Chart | null = null;
-  private chartId = 'settings-preview-chart'; // Added unique ID for chart tracking
+  private chartId = 'settings-preview-chart';
+  private i18n: I18nManager;
 
   constructor(app: App, plugin: MacrosPlugin) {
     super(app, plugin);
     this.plugin = plugin;
+    this.i18n = I18nManager.getInstance();
   }
 
   display(): void {
@@ -50,12 +56,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
     // =======================================
     // STORAGE
     // =======================================
-    new Setting(containerEl).setName('📁 Storage').setHeading();
+    new Setting(containerEl).setName(`📁 ${t('settings.storage.title')}`).setHeading();
 
     // Storage Folder Setting with FolderSuggest
     const folderSetting = new Setting(containerEl)
-      .setName('Storage folder')
-      .setDesc('Where to save food .md files with nutrition data');
+      .setName(t('settings.storage.folder'))
+      .setDesc(t('settings.storage.folderDesc'));
 
     // Create the input element
     const folderInputEl = folderSetting.controlEl.createEl('input', {
@@ -80,28 +86,99 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     // =======================================
-    // NUTRITION TARGETS
+    // NUTRITION TARGETS (Enhanced with kJ support)
     // =======================================
-    new Setting(containerEl).setName('🎯 Daily nutrition targets').setHeading();
+    new Setting(containerEl).setName(`🎯 ${t('settings.targets.title')}`).setHeading();
 
-    new Setting(containerEl)
-      .setName('Daily calorie target')
-      .setDesc('Your daily calorie goal in kcal')
-      .addText((text) => {
-        text
-          .setValue(this.plugin.settings.dailyCaloriesTarget.toString())
-          .onChange(async (value) => {
-            const numValue = parseInt(value);
-            if (!isNaN(numValue) && numValue > 0) {
-              this.plugin.settings.dailyCaloriesTarget = numValue;
+    // Enhanced Calorie/Energy Target with bidirectional conversion
+    const energyTargetContainer = containerEl.createDiv({ cls: 'energy-target-container' });
+
+    new Setting(energyTargetContainer)
+      .setName(t('settings.targets.calories'))
+      .setDesc(t('settings.targets.caloriesDesc'))
+      .then((setting) => {
+        // Create a custom control element for the dual inputs
+        const controlContainer = setting.controlEl.createDiv({ cls: 'dual-energy-inputs' });
+
+        // kcal input
+        const kcalContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
+        const kcalLabel = kcalContainer.createEl('label', {
+          text: 'kcal',
+          cls: 'energy-input-label',
+        });
+        const kcalInput = kcalContainer.createEl('input', {
+          type: 'number',
+          cls: 'energy-input',
+          attr: {
+            placeholder: '2000',
+            min: '0',
+            step: '1',
+          },
+        });
+        kcalInput.value = this.plugin.settings.dailyCaloriesTarget.toString();
+
+        // kJ input
+        const kjContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
+        const kjLabel = kjContainer.createEl('label', {
+          text: 'kJ',
+          cls: 'energy-input-label',
+        });
+        const kjInput = kjContainer.createEl('input', {
+          type: 'number',
+          cls: 'energy-input',
+          attr: {
+            placeholder: '8368',
+            min: '0',
+            step: '1',
+          },
+        });
+        // Calculate initial kJ value
+        const initialKjValue = convertEnergyUnit(
+          this.plugin.settings.dailyCaloriesTarget,
+          'kcal',
+          'kJ'
+        );
+        kjInput.value = Math.round(initialKjValue).toString();
+
+        // Set up bidirectional conversion
+        const setupEnergyConversion = () => {
+          // Convert from kcal to kJ
+          kcalInput.addEventListener('input', async () => {
+            const kcalValue = parseFloat(kcalInput.value);
+            if (!isNaN(kcalValue) && kcalValue >= 0) {
+              const kjValue = convertEnergyUnit(kcalValue, 'kcal', 'kJ');
+              kjInput.value = Math.round(kjValue).toString();
+
+              // Save the kcal value to settings
+              this.plugin.settings.dailyCaloriesTarget = Math.round(kcalValue);
               await this.plugin.saveSettings();
+            } else if (kcalInput.value === '') {
+              kjInput.value = '';
             }
           });
+
+          // Convert from kJ to kcal
+          kjInput.addEventListener('input', async () => {
+            const kjValue = parseFloat(kjInput.value);
+            if (!isNaN(kjValue) && kjValue >= 0) {
+              const kcalValue = convertEnergyUnit(kjValue, 'kJ', 'kcal');
+              kcalInput.value = Math.round(kcalValue).toString();
+
+              // Save the kcal value to settings (we always store in kcal internally)
+              this.plugin.settings.dailyCaloriesTarget = Math.round(kcalValue);
+              await this.plugin.saveSettings();
+            } else if (kjInput.value === '') {
+              kcalInput.value = '';
+            }
+          });
+        };
+
+        setupEnergyConversion();
       });
 
     new Setting(containerEl)
-      .setName('Daily protein target')
-      .setDesc('Your daily protein goal in grams')
+      .setName(t('settings.targets.protein'))
+      .setDesc(t('settings.targets.proteinDesc'))
       .addText((text) => {
         text
           .setValue(this.plugin.settings.dailyProteinTarget.toString())
@@ -115,8 +192,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Daily fat target')
-      .setDesc('Your daily fat goal in grams')
+      .setName(t('settings.targets.fat'))
+      .setDesc(t('settings.targets.fatDesc'))
       .addText((text) => {
         text.setValue(this.plugin.settings.dailyFatTarget.toString()).onChange(async (value) => {
           const numValue = parseInt(value);
@@ -128,8 +205,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Daily carbs target')
-      .setDesc('Your daily carbohydrates goal in grams')
+      .setName(t('settings.targets.carbs'))
+      .setDesc(t('settings.targets.carbsDesc'))
       .addText((text) => {
         text.setValue(this.plugin.settings.dailyCarbsTarget.toString()).onChange(async (value) => {
           const numValue = parseInt(value);
@@ -143,13 +220,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
     // =======================================
     // DISPLAY
     // =======================================
-    new Setting(containerEl).setName('⚙️ Display').setHeading();
+    new Setting(containerEl).setName(`⚙️ ${t('settings.display.title')}`).setHeading();
 
     new Setting(containerEl)
-      .setName('Show macros summary rows')
-      .setDesc(
-        'Toggle whether to display the totals, targets, and remaining rows in the macros table.'
-      )
+      .setName(t('settings.display.showSummaryRows'))
+      .setDesc(t('settings.display.showSummaryRowsDesc'))
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showSummaryRows).onChange(async (value) => {
           this.plugin.settings.showSummaryRows = value;
@@ -159,8 +234,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Disable tooltips')
-      .setDesc('Turn off all hover tooltips in macros tables for a cleaner interface.')
+      .setName(t('settings.display.disableTooltips'))
+      .setDesc(t('settings.display.disableTooltipsDesc'))
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.disableTooltips).onChange(async (value) => {
           this.plugin.settings.disableTooltips = value;
@@ -170,8 +245,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Show cell percentages')
-      .setDesc('Display percentage values inside macro cells in tables.')
+      .setName(t('settings.display.showCellPercentages'))
+      .setDesc(t('settings.display.showCellPercentagesDesc'))
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showCellPercentages).onChange(async (value) => {
           this.plugin.settings.showCellPercentages = value;
@@ -180,15 +255,31 @@ export class NutritionalSettingTab extends PluginSettingTab {
         })
       );
 
+    // Energy Unit Setting
+    new Setting(containerEl)
+      .setName(t('settings.display.energyUnit'))
+      .setDesc(t('settings.display.energyUnitDesc'))
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption('kcal', t('settings.display.energyUnitKcal'))
+          .addOption('kJ', t('settings.display.energyUnitKj'))
+          .setValue(this.plugin.settings.energyUnit)
+          .onChange(async (value: 'kcal' | 'kJ') => {
+            this.plugin.settings.energyUnit = value;
+            await this.plugin.saveSettings();
+            this.plugin.refreshMacrosTables?.();
+          })
+      );
+
     // =======================================
     // PIE CHART CUSTOMIZATION
     // =======================================
-    new Setting(containerEl).setName('📊 Pie chart customization').setHeading();
+    new Setting(containerEl).setName(`📊 ${t('settings.charts.title')}`).setHeading();
 
     // Protein Color Setting
     new Setting(containerEl)
-      .setName('Protein color')
-      .setDesc('Color for protein slice in the pie chart')
+      .setName(t('settings.charts.proteinColor'))
+      .setDesc(t('settings.charts.proteinColorDesc'))
       .addColorPicker((colorPicker) => {
         colorPicker.setValue(this.plugin.settings.proteinColor).onChange(async (value) => {
           this.plugin.settings.proteinColor = value;
@@ -200,8 +291,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
     // Fat Color Setting
     new Setting(containerEl)
-      .setName('Fat color')
-      .setDesc('Color for fat slice in the pie chart')
+      .setName(t('settings.charts.fatColor'))
+      .setDesc(t('settings.charts.fatColorDesc'))
       .addColorPicker((colorPicker) => {
         colorPicker.setValue(this.plugin.settings.fatColor).onChange(async (value) => {
           this.plugin.settings.fatColor = value;
@@ -213,8 +304,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
     // Carbs Color Setting
     new Setting(containerEl)
-      .setName('Carbs color')
-      .setDesc('Color for carbs slice in the pie chart')
+      .setName(t('settings.charts.carbsColor'))
+      .setDesc(t('settings.charts.carbsColorDesc'))
       .addColorPicker((colorPicker) => {
         colorPicker.setValue(this.plugin.settings.carbsColor).onChange(async (value) => {
           this.plugin.settings.carbsColor = value;
@@ -225,45 +316,42 @@ export class NutritionalSettingTab extends PluginSettingTab {
       });
 
     const previewContainer = containerEl.createDiv({ cls: 'macrospc-preview-container' });
-    new Setting(previewContainer).setName('Pie chart preview').setHeading();
+    new Setting(previewContainer).setName(t('settings.charts.preview')).setHeading();
 
     // Create canvas with explicit dimensions
     const previewCanvas = previewContainer.createEl('canvas');
-    previewCanvas.width = 300; // Set native canvas width (not CSS width)
-    previewCanvas.height = 300; // Set native canvas height
-    previewCanvas.id = this.chartId; // Set ID for Chart.js tracking
+    previewCanvas.width = 300;
+    previewCanvas.height = 300;
+    previewCanvas.id = this.chartId;
 
     setTimeout(() => {
-      // Initialize the chart preview (async)
       this.initChartPreview(previewCanvas);
     }, 50);
 
-    // Initialize the chart preview (async)
     this.initChartPreview(previewCanvas);
 
     // =======================================
     // MEAL TEMPLATES
     // =======================================
-    new Setting(containerEl).setName('🍽️ Meal templates').setHeading();
+    new Setting(containerEl).setName(`🍽️ ${t('settings.meals.title')}`).setHeading();
 
-    // Add brief description of what meal templates are
     containerEl.createEl('p', {
-      text: 'Create reusable meal templates that can be quickly added to your macro tracking.',
+      text: t('settings.meals.description'),
       cls: 'setting-item-description',
     });
 
     new Setting(containerEl)
-      .setName('Create a new meal template')
-      .setDesc('Create a new set of food items that you often eat together')
+      .setName(t('settings.meals.create'))
+      .setDesc(t('settings.meals.createDesc'))
       .addButton((btn) => {
-        btn.setButtonText('+ Add meal template').onClick(() => {
+        btn.setButtonText(t('settings.meals.addButton')).onClick(() => {
           new AddMealTemplateModal(this.plugin).open();
         });
       });
 
     if (this.plugin.settings.mealTemplates.length === 0) {
       containerEl.createEl('div', {
-        text: 'No meal templates yet. Create one using the button above.',
+        text: t('settings.meals.noTemplates'),
         cls: 'no-templates-message',
       });
     } else {
@@ -271,10 +359,10 @@ export class NutritionalSettingTab extends PluginSettingTab {
       this.plugin.settings.mealTemplates.forEach((meal) => {
         new Setting(templateContainer)
           .setName(meal.name)
-          .setDesc(meal.items?.length > 0 ? meal.items.join(', ') : 'No items')
+          .setDesc(meal.items?.length > 0 ? meal.items.join(', ') : t('settings.meals.noTemplates'))
           .addButton((editBtn) => {
             editBtn
-              .setButtonText('Edit')
+              .setButtonText(t('general.edit'))
               .setCta()
               .onClick(() => {
                 new EditMealTemplateModal(this.plugin, meal).open();
@@ -282,7 +370,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
           })
           .addButton((removeBtn) => {
             removeBtn
-              .setButtonText('Remove')
+              .setButtonText(t('general.remove'))
               .setWarning()
               .onClick(async () => {
                 this.plugin.settings.mealTemplates = this.plugin.settings.mealTemplates.filter(
@@ -298,15 +386,15 @@ export class NutritionalSettingTab extends PluginSettingTab {
     // =======================================
     // API (REQUIRED)
     // =======================================
-    new Setting(containerEl).setName('🔌 API configuration (required)').setHeading();
+    new Setting(containerEl).setName(`🔌 ${t('settings.api.title')}`).setHeading();
 
     const apiNotice = containerEl.createDiv({ cls: 'macrospc-api-notice' });
     apiNotice.createEl('p', {
-      text: 'To use the food search functionality, you must sign up for free FatSecret API credentials. This plugin does not include default API keys.',
+      text: t('settings.api.description'),
     });
 
     apiNotice.createEl('p', {
-      text: 'Sign up for free API credentials at:',
+      text: t('settings.api.signupText'),
     });
 
     apiNotice.createEl('a', {
@@ -315,7 +403,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     apiNotice.createEl('p', {
-      text: 'Your API credentials will be stored securely in your vault settings.',
+      text: t('settings.api.securityNote'),
       cls: 'note-text',
     });
 
@@ -327,20 +415,20 @@ export class NutritionalSettingTab extends PluginSettingTab {
         cls: 'setting-item-description api-credentials-warning',
       });
       warningDiv.createEl('p', {
-        text: '⚠️ API credentials not configured. Food search will not work until you add your credentials.',
+        text: t('settings.api.notConfigured'),
       });
     } else {
       const successDiv = containerEl.createDiv({
         cls: 'setting-item-description api-credentials-success',
       });
       successDiv.createEl('p', {
-        text: '✅ API credentials configured successfully.',
+        text: t('settings.api.configured'),
       });
     }
 
     new Setting(containerEl)
-      .setName('FatSecret API key')
-      .setDesc('Your fatSecret API key (required for food search functionality)')
+      .setName(t('settings.api.key'))
+      .setDesc(t('settings.api.keyDesc'))
       .addText((text) => {
         text
           .setPlaceholder('Enter your API key here')
@@ -354,8 +442,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('FatSecret API secret')
-      .setDesc('Your fatsecret API secret (required for food search functionality)')
+      .setName(t('settings.api.secret'))
+      .setDesc(t('settings.api.secretDesc'))
       .addText((text) => {
         text
           .setPlaceholder('Enter your API secret here')
@@ -368,21 +456,21 @@ export class NutritionalSettingTab extends PluginSettingTab {
           });
       });
 
-    // And update the test connection section to handle missing credentials:
+    // Test connection section
     new Setting(containerEl)
-      .setName('Test API connection')
-      .setDesc('Click to test your FatSecret API credentials.')
+      .setName(t('settings.api.testConnection'))
+      .setDesc(t('settings.api.testConnectionDesc'))
       .addButton((button) => {
-        button.setButtonText('Test Connection').onClick(async () => {
+        button.setButtonText(t('settings.api.testConnection')).onClick(async () => {
           try {
             // Check if credentials are configured
             const credentials = this.plugin.apiService.getCredentialsSafe();
             if (!credentials) {
-              new Notice('Please configure your API credentials first.');
+              new Notice(t('notifications.apiCredentialsRequired'));
               return;
             }
 
-            new Notice('Testing connection…');
+            new Notice(t('food.search.searching'));
             const results = await fetchFoodData(
               this.plugin.app,
               'apple',
@@ -392,15 +480,13 @@ export class NutritionalSettingTab extends PluginSettingTab {
               credentials.secret
             );
             if (results.length > 0) {
-              new Notice('Test connection successful!');
+              new Notice(t('notifications.testConnectionSuccess'));
             } else {
-              new Notice(
-                'Test connection failed. No data returned. Please check your API credentials.'
-              );
+              new Notice(t('notifications.testConnectionFailed'));
             }
           } catch (error) {
             this.plugin.logger.error('Error during test connection:', error);
-            new Notice('Test connection failed. Please check your API credentials.');
+            new Notice(t('notifications.testConnectionFailed'));
           }
         });
       });
@@ -408,13 +494,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
     // =======================================
     // DEVELOPER MODE
     // =======================================
-    new Setting(containerEl).setName('🔧 Developer mode').setHeading();
+    new Setting(containerEl).setName(`🔧 ${t('settings.developer.title')}`).setHeading();
 
     new Setting(containerEl)
-      .setName('Enable developer mode')
-      .setDesc(
-        'Enables debug logging and developer commands. Only use if you need to troubleshoot the plugin.'
-      )
+      .setName(t('settings.developer.enable'))
+      .setDesc(t('settings.developer.enableDesc'))
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.developerModeEnabled).onChange(async (value) => {
           this.plugin.settings.developerModeEnabled = value;
@@ -424,17 +508,15 @@ export class NutritionalSettingTab extends PluginSettingTab {
           this.plugin.logger.setDebugMode(value);
 
           // Show a notice informing the user that they need to restart Obsidian
-          // to see the command in the command palette
-          new Notice(
-            `Developer mode ${value ? 'enabled' : 'disabled'}. Restart Obsidian to apply all changes.`
-          );
+          const status = value ? t('general.success') : t('general.warning');
+          new Notice(t('notifications.developerModeChanged', { status }));
         })
       );
 
     // Only show additional developer settings if developer mode is enabled
     if (this.plugin.settings.developerModeEnabled) {
       containerEl.createEl('p', {
-        text: 'Developer mode is active. Additional developer commands are available in the command palette.',
+        text: t('settings.developer.active'),
         cls: 'setting-item-description',
       });
     }
@@ -471,7 +553,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
         ctx.fillStyle = '#333';
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Chart preview unavailable', canvas.width / 2, canvas.height / 2);
+        ctx.fillText(
+          t('notifications.chartPreviewUnavailable'),
+          canvas.width / 2,
+          canvas.height / 2
+        );
       }
     }
   }
@@ -517,7 +603,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         ctx,
         this.chartId,
         [33, 33, 34], // Example data (evenly distributed)
-        ['Protein', 'Fat', 'Carbs'],
+        [t('table.headers.protein'), t('table.headers.fat'), t('table.headers.carbs')],
         [proteinColor, fatColor, carbsColor]
       );
 

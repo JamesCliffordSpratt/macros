@@ -8,6 +8,7 @@ import {
   Group,
 } from '../../../utils';
 import { RowRenderer } from './RowRenderer';
+import { t } from '../../../lang/I18nManager';
 
 export class GroupRenderer {
   private plugin: MacrosPlugin;
@@ -85,15 +86,16 @@ export class GroupRenderer {
 
     const leftContent = createEl('div', { cls: 'header-left' });
 
+    // SIMPLIFIED: No multiplier display since we don't use multipliers anymore
     const nameSpan = createEl('span', {
       cls: 'header-label',
-      text: group.count > 1 ? `${group.name} × ${group.count}` : group.name,
+      text: group.name, // Just show the meal name, no "× 2" suffix
     });
     leftContent.appendChild(nameSpan);
 
     const caloriesSpan = createEl('span', {
       cls: 'header-calorie-summary',
-      text: `(${group.total.calories.toFixed(1)} cal)`,
+      text: `(${group.total.calories.toFixed(1)} ${t('table.headers.calories').toLowerCase()})`,
     });
     leftContent.appendChild(caloriesSpan);
 
@@ -102,7 +104,7 @@ export class GroupRenderer {
         cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE}`,
         text: '–',
       });
-      attachTooltip(removeBtn, 'Remove this meal');
+      attachTooltip(removeBtn, t('table.actions.removeMeal'));
 
       const removeBtnHandler = async (e: MouseEvent) => {
         e.stopPropagation();
@@ -198,12 +200,32 @@ export class GroupRenderer {
 
     // Define the headers with their corresponding CSS classes and mobile truncation
     const headers = [
-      { text: 'Food', class: '', mobileText: 'Food' },
-      { text: 'Quantity', class: '', mobileText: 'Qty' },
-      { text: 'Calories', class: 'calories-cell', mobileText: 'Cal' },
-      { text: 'Protein', class: 'protein-cell', mobileText: 'Pro' },
-      { text: 'Fat', class: 'fat-cell', mobileText: 'Fat' },
-      { text: 'Carbs', class: 'carbs-cell', mobileText: 'Carb' },
+      { text: t('table.headers.food'), class: '', mobileText: t('table.headers.food') },
+      {
+        text: t('table.headers.serving'),
+        class: '',
+        mobileText: t('table.headers.servingShort') || 'Qty',
+      },
+      {
+        text: t('table.headers.calories'),
+        class: 'calories-cell',
+        mobileText: t('table.headers.caloriesShort') || 'Cal',
+      },
+      {
+        text: t('table.headers.protein'),
+        class: 'protein-cell',
+        mobileText: t('table.headers.proteinShort') || 'Pro',
+      },
+      {
+        text: t('table.headers.fat'),
+        class: 'fat-cell',
+        mobileText: t('table.headers.fatShort') || 'Fat',
+      },
+      {
+        text: t('table.headers.carbs'),
+        class: 'carbs-cell',
+        mobileText: t('table.headers.carbsShort') || 'Carb',
+      },
     ];
 
     headers.forEach(({ text, class: cssClass, mobileText }) => {
@@ -242,7 +264,7 @@ export class GroupRenderer {
     totalRow.dataset.parent = parentSection;
 
     const totalLabelCell = totalRow.insertCell();
-    totalLabelCell.innerText = 'Totals';
+    totalLabelCell.innerText = t('table.summary.totals');
     totalLabelCell.colSpan = 2;
 
     this.rowRenderer.renderTotalCells(totalRow, group.total);
@@ -252,7 +274,7 @@ export class GroupRenderer {
     targetsRow.dataset.parent = parentSection;
 
     const targetsLabelCell = targetsRow.insertCell();
-    targetsLabelCell.innerText = 'Targets';
+    targetsLabelCell.innerText = t('table.summary.targets');
     targetsLabelCell.colSpan = 2;
 
     this.rowRenderer.renderTargetCells(targetsRow, group.total, dailyTargets);
@@ -262,7 +284,7 @@ export class GroupRenderer {
     remainingRow.dataset.parent = parentSection;
 
     const remainingLabelCell = remainingRow.insertCell();
-    remainingLabelCell.innerText = 'Remaining';
+    remainingLabelCell.innerText = t('table.summary.remaining');
     remainingLabelCell.colSpan = 2;
 
     this.rowRenderer.renderRemainingCells(remainingRow, group.total, dailyTargets);
@@ -287,7 +309,7 @@ export class GroupRenderer {
     const combinedHeaderContent = createEl('div', { cls: 'header-content' });
     const combinedLabel = createEl('span', {
       cls: 'header-label',
-      text: 'Macros Summary',
+      text: t('table.summary.macrosSummary'),
     });
 
     const combinedToggle = createEl('span', {

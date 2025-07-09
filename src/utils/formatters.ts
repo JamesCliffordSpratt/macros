@@ -1,255 +1,439 @@
-/**
- * Consolidated formatters for Macros Plugin
- * Provides standard formatting functions for all macro components
- */
+import MacrosPlugin from '../main';
+import { convertEnergyUnit } from './energyUtils';
+import { t } from '../lang/I18nManager';
+
+// Store a reference to the plugin instance for accessing settings
+let formatterPlugin: MacrosPlugin | null = null;
 
 /**
- * Formats a numeric value as grams with intelligent decimal handling
- * @param value The numeric value to format
- * @returns Formatted string with 'g' suffix
+ * Set the plugin instance for formatters to access settings
+ * This should be called during plugin initialization
  */
-export function formatGrams(value: number): string {
-  // If the value is a whole number, don't show decimal
-  if (Number.isInteger(value)) {
-    return `${value}g`;
-  }
-  // Otherwise, show one decimal place
-  return `${value.toFixed(1)}g`;
+export function setFormatterPlugin(plugin: MacrosPlugin): void {
+  formatterPlugin = plugin;
 }
 
 /**
- * Formats a numeric value as calories with intelligent decimal handling
- * @param value The numeric value to format
+ * Get the current energy unit setting
+ */
+function getCurrentEnergyUnit(): 'kcal' | 'kJ' {
+  return formatterPlugin?.settings?.energyUnit || 'kcal';
+}
+
+/**
+ * Format calories with proper unit conversion based on settings
+ * @param calories Calorie value in kcal
+ * @returns Formatted string with appropriate unit
+ */
+export function formatCalories(calories: number): string {
+  if (!formatterPlugin) {
+    // Fallback if plugin not set
+    return `${calories.toFixed(1)} kcal`;
+  }
+
+  const currentUnit = getCurrentEnergyUnit();
+
+  if (currentUnit === 'kJ') {
+    const kj = convertEnergyUnit(calories, 'kcal', 'kJ');
+    return `${kj.toFixed(1)} kJ`;
+  } else {
+    return `${calories.toFixed(1)} kcal`;
+  }
+}
+
+/**
+ * Format grams with one decimal place
+ * @param grams Gram value
  * @returns Formatted string
  */
-export function formatCalories(value: number): string {
-  // If the value is a whole number, don't show decimal
-  if (Number.isInteger(value)) {
-    return value.toString();
-  }
-  // Otherwise, show one decimal place
-  return value.toFixed(1);
+export function formatGrams(grams: number): string {
+  return `${grams.toFixed(1)}g`;
 }
 
 /**
- * Formats a percentage value with no decimal places
- * @param value The percentage value to format
- * @returns Formatted string without % symbol
+ * Format percentage with no decimal places
+ * @param percentage Percentage value
+ * @returns Formatted string
  */
-export function formatPercentage(value: number): string {
-  return value.toFixed(0); // returns just "58"
+export function formatPercentage(percentage: number): string {
+  return Math.round(percentage).toString();
 }
 
 /**
- * Formats a percentage value with % symbol
- * @param value The percentage value to format
- * @returns Formatted string with % symbol
- */
-export function formatPercentageWithSymbol(value: number): string {
-  return `${value.toFixed(0)}%`; // returns "58%"
-}
-
-/**
- * Format a tooltip with consistent styling
- * @param value The numeric value
- * @param target The target value
- * @param label The label (e.g., "Protein")
- * @param options Display options
+ * Generate tooltip text for dashboard metric cards
+ * @param currentValue Current consumed value
+ * @param targetValue Target value
+ * @param macroName Name of the macro (for translation)
  * @returns Formatted tooltip string
  */
-export function formatTooltip(
-  value: number,
-  target: number,
-  label: string,
-  options = { showPercentage: true, showTarget: true }
+export function formatDashboardTooltip(
+  currentValue: number,
+  targetValue: number,
+  macroName: string
 ): string {
-  const percentage = target > 0 ? (value / target) * 100 : 0;
-  const suffix = label === 'Calories' ? '' : 'g';
-  const formattedValue = `${value.toFixed(1)}${suffix}`;
-  let tooltip = `${formattedValue} ${label.toLowerCase()}`;
+  const percentage = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+  const remaining = targetValue - currentValue;
 
-  if (options.showPercentage && target > 0) {
-    tooltip += ` • ${Math.round(percentage)}% of daily target`;
+  let tooltipText = `${currentValue.toFixed(1)}g ${macroName.toLowerCase()} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+  if (remaining > 0) {
+    tooltipText += ` • ${remaining.toFixed(1)}g ${t('general.remaining')}`;
+  } else if (remaining < 0) {
+    tooltipText += ` • ${Math.abs(remaining).toFixed(1)}g ${t('table.summary.over')}`;
   }
 
-  if (options.showTarget && target > 0) {
-    const remaining = Math.abs(target - value);
-    const rounded = Number.isInteger(remaining) ? remaining.toFixed(0) : remaining.toFixed(1);
-
-    tooltip += value > target ? ` • ${rounded}${suffix} over` : ` • ${rounded}${suffix} remaining`;
-  }
-
-  if (percentage >= 100) {
-    tooltip += ' (Target exceeded)';
-  } else if (percentage >= 80) {
-    tooltip += ' (Approaching target)';
-  }
-
-  return tooltip.trim();
+  return tooltipText;
 }
 
 /**
- * Formats a tooltip specifically for dashboard elements
- * with consistent styling and full information
- * @param value The numeric value
- * @param target The target value
- * @param label The label (e.g., "Protein")
- * @returns Formatted tooltip string
+ * Get summary header text based on ID
+ * @param id The macro table ID
+ * @returns Localized header text
  */
-export function formatDashboardTooltip(value: number, target: number, label: string): string {
-  const percentage = target > 0 ? (value / target) * 100 : 0;
-  const suffix = label === 'Calories' ? '' : 'g';
-  const formattedValue = `${value}${suffix}`;
-  const lowerLabel = label.toLowerCase();
-  const status =
-    percentage >= 100 ? '(Target exceeded)' : percentage >= 80 ? '(Approaching target)' : '';
+export function getSummaryHeader(id: string): string {
+  if (!id) {
+    return t('table.summary.macrosSummary');
+  }
 
-  let tooltip = `${formattedValue} ${lowerLabel} • ${Math.round(percentage)}% of daily target`;
+  // Check if it's a date format (YYYY-MM-DD)
+  const dateMatch = id.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateMatch) {
+    const [, year, month, day] = dateMatch;
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
 
-  // Calculate remaining or over
-  if (target > 0) {
-    const remaining = Math.abs(target - value);
+    // Compare dates (ignoring time)
+    const isToday =
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate();
 
-    // Round nicely — no .0 if unnecessary
-    const roundedRemaining = Number.isInteger(remaining)
-      ? remaining.toFixed(0)
-      : remaining.toFixed(1);
+    const isYesterday =
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate();
 
-    if (value > target) {
-      tooltip += ` • ${roundedRemaining}${suffix} over`;
-    } else if (value < target) {
-      tooltip += ` • ${roundedRemaining}${suffix} remaining`;
+    if (isToday) {
+      return t('table.summary.today');
+    } else if (isYesterday) {
+      return t('table.summary.yesterday');
+    } else {
+      // Format the date nicely for other dates
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      };
+
+      // Get the user's locale from the plugin if available
+      let locale = 'en-US'; // Default fallback
+      if (formatterPlugin?.i18nManager) {
+        locale = formatterPlugin.i18nManager.getCurrentLocale();
+
+        // Map some common locale codes to full locales for better date formatting
+        const localeMap: Record<string, string> = {
+          en: 'en-US',
+          es: 'es-ES',
+          fr: 'fr-FR',
+          de: 'de-DE',
+          it: 'it-IT',
+          pt: 'pt-PT',
+          ja: 'ja-JP',
+          ko: 'ko-KR',
+          'zh-CN': 'zh-CN',
+          'zh-TW': 'zh-TW',
+          ru: 'ru-RU',
+          ar: 'ar-SA',
+          he: 'he-IL',
+        };
+
+        locale = localeMap[locale] || locale;
+      }
+
+      const formattedDate = date.toLocaleDateString(locale, options);
+      return t('table.summary.date', { date: formattedDate });
     }
   }
 
-  // Add status if any
-  if (status) {
-    tooltip += ` ${status}`;
-  }
-
-  return tooltip.trim();
+  // For non-date IDs, just return a generic summary
+  return t('table.summary.macrosSummary');
 }
 
 /**
- * Format a header for summary based on an ID (typically a date)
- * @param id The ID string (usually a date in YYYY-MM-DD format)
- * @returns Formatted header string
- */
-export function getSummaryHeader(id: string): string {
-  return formatDateHeader(id);
-}
-
-/**
- * Format a date-based header with human-readable text
- * @param id The ID string (usually a date in YYYY-MM-DD format)
- * @returns Formatted date header
- */
-export function formatDateHeader(id: string): string {
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  const todayStr = today.toISOString().split('T')[0];
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
-  const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(id);
-
-  if (!isValidDate) return 'Summary';
-  if (id === todayStr) return "Today's Summary";
-  if (id === yesterdayStr) return "Yesterday's Summary";
-
-  const date = new Date(id);
-  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
-  return `${date.toLocaleDateString(undefined, options)} Summary`;
-}
-
-/**
- * Format a value based on its type (calories, grams, etc.)
- * @param value The numeric value
- * @param type The type of value (calories, protein, fat, carbs)
- * @returns Formatted string
- */
-export function formatValue(value: number, type: string): string {
-  switch (type) {
-    case 'calories':
-      return formatCalories(value);
-    case 'protein':
-    case 'fat':
-    case 'carbs':
-      return formatGrams(value);
-    default:
-      return value.toFixed(1);
-  }
-}
-
-/**
- * Format a macro value based on its type
- * Alias of formatValue for backward compatibility
- * @param value The numeric value
- * @param type The type of macro
- * @returns Formatted string
- */
-export function formatMacroValue(value: number, type: string): string {
-  return formatValue(value, type);
-}
-
-/**
- * Format a tooltip showing item details
- * @param name The food item name
- * @param calories Calorie value
- * @param protein Protein value in grams
- * @param fat Fat value in grams
- * @param carbs Carbs value in grams
+ * Format calories for tooltips with proper unit handling
+ * @param calories Calorie value in kcal
+ * @param target Target calorie value in kcal
+ * @param percentage Percentage of target
  * @returns Formatted tooltip string
  */
-export function formatItemTooltip(
-  name: string,
-  calories: number,
-  protein: number,
-  fat: number,
-  carbs: number
-): string {
-  const total = protein + fat + carbs;
-  const proteinPercent = total > 0 ? (protein / total) * 100 : 0;
-  const fatPercent = total > 0 ? (fat / total) * 100 : 0;
-  const carbsPercent = total > 0 ? (carbs / total) * 100 : 0;
-
-  return `${name}
-Calories: ${formatCalories(calories)}
-Protein: ${formatGrams(protein)} (${formatPercentageWithSymbol(proteinPercent)})
-Fat: ${formatGrams(fat)} (${formatPercentageWithSymbol(fatPercent)})
-Carbs: ${formatGrams(carbs)} (${formatPercentageWithSymbol(carbsPercent)})`;
-}
-
-/**
- * Format a macro cell tooltip
- * @param macroLabel The macro label (e.g., "Protein")
- * @param value The numeric value
- * @param percentage The percentage value
- * @returns Formatted tooltip string
- */
-export function formatMacroTooltip(macroLabel: string, value: number, percentage: number): string {
-  const lowerMacro = macroLabel.toLowerCase();
-
-  if (value === 0) {
-    return `${macroLabel}: ${formatGrams(value)}`;
+export function formatCalorieTooltip(calories: number, target: number, percentage: number): string {
+  if (!formatterPlugin) {
+    // Fallback if plugin not set
+    const remaining = target - calories;
+    if (remaining > 0) {
+      return `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')} • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
+    } else {
+      return `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')} • ${Math.abs(remaining).toFixed(1)} kcal ${t('table.summary.over')}`;
+    }
   }
 
-  return `${macroLabel}: ${formatGrams(value)} • ${formatPercentageWithSymbol(percentage)} of daily ${lowerMacro} target`;
-}
+  const currentUnit = getCurrentEnergyUnit();
 
-/**
- * Format remaining values with appropriate suffix and message
- * @param value The remaining value (can be negative for "over")
- * @param type The type of value (calories, protein, fat, carbs)
- * @returns Formatted string
- */
-export function formatRemainingValue(value: number, type: string): string {
-  const formattedValue = formatValue(value, type);
-  if (value < 0) {
-    return `${formattedValue} (over)`;
-  } else if (value === 0) {
-    return type === 'calories' ? '0' : '0.0g';
+  if (currentUnit === 'kJ') {
+    const consumedKj = convertEnergyUnit(calories, 'kcal', 'kJ');
+    const targetKj = convertEnergyUnit(target, 'kcal', 'kJ');
+    const remainingKj = targetKj - consumedKj;
+
+    let tooltipText = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+    if (remainingKj > 0) {
+      tooltipText += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+    } else if (remainingKj < 0) {
+      tooltipText += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+    }
+
+    return tooltipText;
   } else {
-    return formattedValue;
+    const remaining = target - calories;
+
+    let tooltipText = `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+    if (remaining > 0) {
+      tooltipText += ` • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
+    } else if (remaining < 0) {
+      tooltipText += ` • ${Math.abs(remaining).toFixed(1)} kcal ${t('table.summary.over')}`;
+    }
+
+    return tooltipText;
+  }
+}
+
+/**
+ * Format macro composition tooltip
+ * @param macro Macro name
+ * @param value Macro value in grams
+ * @param percentage Percentage of total macros
+ * @returns Formatted tooltip string
+ */
+export function formatMacroCompositionTooltip(
+  macro: string,
+  value: number,
+  percentage: number
+): string {
+  return t('tooltips.macroComposition', {
+    value: value.toFixed(1),
+    macro: macro.toLowerCase(),
+    percent: Math.round(percentage).toString(),
+  });
+}
+
+/**
+ * Format target tooltip
+ * @param target Target value
+ * @param unit Unit (g, kcal, kJ)
+ * @returns Formatted tooltip string
+ */
+export function formatTargetTooltip(target: number, unit: string): string {
+  return t('tooltips.target', {
+    target: target.toString(),
+    unit: unit,
+  });
+}
+
+/**
+ * Format percentage tooltip for macro cells
+ * @param value Macro value in grams
+ * @param macro Macro name
+ * @param percentage Percentage of daily target
+ * @param target Daily target value
+ * @returns Formatted tooltip string
+ */
+export function formatMacroPercentageTooltip(
+  value: number,
+  macro: string,
+  percentage: number,
+  target: number
+): string {
+  const remaining = target - value;
+
+  let tooltipText = t('tooltips.percentage', {
+    value: value.toFixed(1),
+    macro: macro.toLowerCase(),
+    percent: Math.round(percentage).toString(),
+  });
+
+  if (remaining > 0) {
+    tooltipText += ` • ${remaining.toFixed(1)}g ${t('general.remaining')}`;
+  } else if (remaining < 0) {
+    tooltipText += ` • ${t('tooltips.over', { over: Math.abs(remaining).toFixed(1) })}`;
+  }
+
+  return tooltipText;
+}
+
+/**
+ * Format energy value with automatic unit conversion
+ * @param valueInKcal Energy value in kcal
+ * @param showUnit Whether to include the unit in the output
+ * @returns Formatted energy string
+ */
+export function formatEnergy(valueInKcal: number, showUnit: boolean = true): string {
+  if (!formatterPlugin) {
+    return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1);
+  }
+
+  const currentUnit = getCurrentEnergyUnit();
+
+  if (currentUnit === 'kJ') {
+    const kj = convertEnergyUnit(valueInKcal, 'kcal', 'kJ');
+    return showUnit ? `${kj.toFixed(1)} kJ` : kj.toFixed(1);
+  } else {
+    return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1);
+  }
+}
+
+/**
+ * Get the current energy unit as a string
+ * @returns Current energy unit setting
+ */
+export function getCurrentEnergyUnitString(): string {
+  const unit = getCurrentEnergyUnit();
+  return unit === 'kJ' ? 'kJ' : 'kcal';
+}
+
+/**
+ * Format a number with appropriate decimal places
+ * @param value Numeric value
+ * @param decimals Number of decimal places (default: 1)
+ * @returns Formatted number string
+ */
+export function formatNumber(value: number, decimals: number = 1): string {
+  return value.toFixed(decimals);
+}
+
+/**
+ * Format meal summary text
+ * @param mealName Name of the meal
+ * @param itemCount Number of items in the meal
+ * @param calories Total calories
+ * @returns Formatted meal summary
+ */
+export function formatMealSummary(mealName: string, itemCount: number, calories: number): string {
+  const calorieText = formatCalories(calories);
+  const itemText = t('table.meal.items', { count: itemCount.toString() });
+  return `${mealName} (${itemText}, ${calorieText})`;
+}
+
+/**
+ * Format remaining/over values for summary rows
+ * @param remaining Remaining value (negative if over target)
+ * @param unit Unit string
+ * @returns Formatted remaining/over string
+ */
+export function formatRemaining(remaining: number, unit: string): string {
+  if (remaining < 0) {
+    return `${formatNumber(Math.abs(remaining))}${unit} (${t('table.summary.over')})`;
+  } else if (remaining === 0) {
+    return `0${unit}`;
+  } else {
+    return `${formatNumber(remaining)}${unit}`;
+  }
+}
+
+/**
+ * Format chart title based on IDs
+ * @param title Optional explicit title
+ * @param ids Array of table IDs
+ * @returns Formatted chart title
+ */
+export function formatChartTitle(title?: string, ids?: string[]): string {
+  if (title) {
+    return title;
+  }
+
+  if (!ids || ids.length === 0) {
+    return t('charts.title');
+  }
+
+  if (ids.length === 1) {
+    const id = ids[0];
+
+    // Check if it's a date format (YYYY-MM-DD)
+    const dateMatch = id.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateMatch) {
+      const [, year, month, day] = dateMatch;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      // Compare dates (ignoring time)
+      const isToday =
+        date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth() &&
+        date.getDate() === today.getDate();
+
+      const isYesterday =
+        date.getFullYear() === yesterday.getFullYear() &&
+        date.getMonth() === yesterday.getMonth() &&
+        date.getDate() === yesterday.getDate();
+
+      if (isToday) {
+        return t('charts.title');
+      } else if (isYesterday) {
+        return t('charts.titleDate', { date: t('dates.yesterday') });
+      } else {
+        // Format the date nicely for other dates
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        };
+
+        // Get the user's locale from the plugin if available
+        let locale = 'en-US'; // Default fallback
+        if (formatterPlugin?.i18nManager) {
+          locale = formatterPlugin.i18nManager.getCurrentLocale();
+
+          // Map some common locale codes to full locales for better date formatting
+          const localeMap: Record<string, string> = {
+            en: 'en-US',
+            es: 'es-ES',
+            fr: 'fr-FR',
+            de: 'de-DE',
+            it: 'it-IT',
+            pt: 'pt-PT',
+            ja: 'ja-JP',
+            ko: 'ko-KR',
+            'zh-CN': 'zh-CN',
+            'zh-TW': 'zh-TW',
+            ru: 'ru-RU',
+            ar: 'ar-SA',
+            he: 'he-IL',
+          };
+
+          locale = localeMap[locale] || locale;
+        }
+
+        const formattedDate = date.toLocaleDateString(locale, options);
+        return t('charts.titleDate', { date: formattedDate });
+      }
+    }
+
+    // For non-date single IDs
+    return t('charts.titleDate', { date: id });
+  }
+
+  // Multiple IDs
+  const allDates = ids.every((id) => /^\d{4}-\d{2}-\d{2}$/.test(id));
+
+  if (allDates) {
+    return t('charts.titleCombined', { days: ids.length.toString() });
+  } else {
+    return t('charts.titleMultiple', { ids: ids.join(', ') });
   }
 }

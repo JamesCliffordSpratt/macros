@@ -1,6 +1,7 @@
 import MacrosPlugin from '../../main';
 import { processNutritionalDataFromLines } from './calculator';
 import { MacrosCalcRenderer } from './MacrosCalcRenderer';
+import { t } from '../../lang/I18nManager';
 
 export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
   // Initialize the registry if needed
@@ -34,7 +35,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
         .filter((l) => l !== '');
 
       if (lines.length === 0) {
-        el.createEl('div', { text: 'Error: No content provided in macroscalc block.' });
+        el.createEl('div', { text: t('calculator.errors.noContent') });
         return;
       }
 
@@ -44,7 +45,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
       );
 
       if (!idsLine) {
-        el.createEl('div', { text: 'Error: Please specify table IDs using "id:" or "ids:"' });
+        el.createEl('div', { text: t('calculator.errors.noIds') });
         return;
       }
 
@@ -58,19 +59,19 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
         .filter((s) => s.length > 0);
 
       if (ids.length === 0) {
-        el.createEl('div', { text: 'Error: No table IDs provided.' });
+        el.createEl('div', { text: t('calculator.errors.noTableIds') });
         return;
       }
 
-      // Force full reload of data for each ID, including bullet points
+      // CRITICAL FIX: Force full reload of data for each ID, including bullet points
       for (const id of ids) {
-        // UPDATED: Use centralized DataManager method
+        // Use centralized DataManager method to get FULL data including bullet points
         const linesWithBullets = await plugin.dataManager.getFullMacrosData(id);
 
         if (linesWithBullets.length > 0) {
           plugin.logger.debug(`Loaded ${linesWithBullets.length} lines for ${id} with bullets`);
 
-          // CRITICAL FIX: Store the raw lines and let the calculator handle processing
+          // CRITICAL FIX: Store the raw lines with bullets and let the calculator handle processing
           // This prevents double-processing of multipliers
           plugin.macroService.macroTables.set(id, linesWithBullets);
 
@@ -137,17 +138,16 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
           const ids = idsAttr.split(',').map((id) => id.trim());
           plugin.logger.debug(`Refreshing element with IDs: ${ids.join(',')}`);
 
-          // Force reload of all data for each ID
+          // Force reload of all data for each ID with FULL data including bullet points
           for (const id of ids) {
             try {
-              // UPDATED: Use centralized DataManager method
-              // Get fresh data for this ID directly from the vault
+              // Get fresh data for this ID directly from the vault WITH bullet points
               const allLines = await plugin.dataManager.getFullMacrosData(id);
 
               if (allLines.length > 0) {
-                // Update the cache
+                // Update the cache with FULL data
                 plugin.macroService.macroTables.set(id, allLines);
-                plugin.logger.debug(`Refreshed data for ID ${id}`);
+                plugin.logger.debug(`Refreshed data for ID ${id} with ${allLines.length} lines`);
               } else {
                 plugin.logger.warn(`Could not find data for ID ${id}`);
               }

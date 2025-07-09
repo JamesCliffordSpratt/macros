@@ -3735,8 +3735,6 @@ body:not(.theme-obsidian) .api-credentials-success {
 	color: #27ae60;
 	background-color: rgba(39, 174, 96, 0.1);
 	border: 1px solid rgba(39, 174, 96, 0.3);
-<<<<<<< HEAD
-=======
 }
 
 .theme-dark .api-credentials-warning {
@@ -3895,163 +3893,140 @@ body:not(.theme-obsidian) .api-credentials-success {
   .macros-table tr.long-press-ready {
     background-color: var(--text-error, #c0392b) !important;
   }
->>>>>>> 6bd3e450a42538aee715467f5a134958c3c06160
 }
 
-.theme-dark .api-credentials-warning {
-	color: #ff6b6b;
-	background-color: rgba(255, 107, 107, 0.15);
-	border: 1px solid rgba(255, 107, 107, 0.3);
+/* Energy Fields Styling for Manual Food Entry Modal */
+
+.energy-fields-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.theme-dark .api-credentials-success {
-	color: #51cf66;
-	background-color: rgba(81, 207, 102, 0.15);
-	border: 1px solid rgba(81, 207, 102, 0.3);
+.energy-field {
+  flex: 1;
+  min-width: 0; /* Allows flex items to shrink below their content size */
 }
 
-.theme-dark .status-indicator.status-success {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #81c784;
+.energy-field .form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
-.theme-dark .status-indicator.status-warning {
-  background-color: rgba(255, 152, 0, 0.2);
-  color: #ffb74d;
-}
-
-.theme-dark .api-error-message {
-  background-color: rgba(255, 107, 107, 0.2);
-  color: #ff8a80;
-}
-
-.theme-dark .validation-errors {
-  background-color: rgba(255, 107, 107, 0.2);
-}
-
-.theme-dark .validation-errors .error-message {
-  color: #ff8a80;
-}
-
-.theme-dark .form-input {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.theme-dark .form-input:focus {
-  box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
-}
-
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.calories,
-.theme-dark .enhanced-meal-template-modal .nutrition-item.calories {
-  background: rgba(232, 150, 43, 0.2);
-  color: #ffb74d;
-}
-
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.protein,
-.theme-dark .enhanced-meal-template-modal .nutrition-item.protein {
-  background: rgba(76, 175, 80, 0.2);
-  color: #81c784;
-}
-
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.fat,
-.theme-dark .enhanced-meal-template-modal .nutrition-item.fat {
-  background: rgba(244, 67, 54, 0.2);
-  color: #e57373;
-}
-
-.theme-dark .enhanced-add-to-macros-modal .nutrition-item.carbs,
-.theme-dark .enhanced-meal-template-modal .nutrition-item.carbs {
-  background: rgba(33, 150, 243, 0.2);
-  color: #64b5f6;
-}
-
-.theme-dark .macros-table tr.long-press-active {
-  background-color: var(--interactive-accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.theme-dark .macros-table tr.long-press-ready {
-  background-color: var(--text-error, #e74c3c);
-  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.3);
-}
-
-.theme-dark .delete-confirmation-content {
+.energy-field .form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
   background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9rem;
 }
 
-.theme-dark .macro-tooltip-mobile {
-  background-color: rgba(25, 25, 25, 0.95) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: var(--text-normal) !important;
+.energy-field .form-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-rgb);
 }
 
-.theme-light .macros-table tr.long-press-active {
-  background-color: var(--interactive-accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.energy-info {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--background-secondary);
+  border-radius: 4px;
+  border-left: 3px solid var(--interactive-accent);
 }
 
-.theme-light .macros-table tr.long-press-ready {
-  background-color: #e74c3c;
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+.energy-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
 }
 
-.theme-light .macro-tooltip,
-.theme-light .macro-tooltip-mobile {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.4) !important;
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .energy-fields-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .energy-field {
+    flex: none;
+  }
 }
 
-/* ==============================
- * 23. ACCESSIBILITY AND PREFERENCES
- * ============================== */
-
+/* High contrast mode support */
 @media (prefers-contrast: high) {
-  .macros-table tr.long-press-active {
-    background-color: var(--interactive-accent) !important;
-    border: 2px solid var(--text-normal) !important;
+  .energy-field .form-input {
+    border-width: 2px;
   }
   
-  .macros-table tr.long-press-ready {
-    background-color: #800000 !important;
-    border: 3px solid #ffffff !important;
-  }
-  
-  .delete-confirmation-title {
-    color: var(--text-error, #800000) !important;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
-  }
-  
-  .modal-button-container .mod-warning {
-    background-color: #800000 !important;
-    border: 2px solid #ffffff !important;
-  }
-  
-  .macro-tooltip,
-  .macro-tooltip-mobile {
-    background-color: black !important;
-    color: white !important;
-    border: 2px solid white !important;
-    font-weight: 500 !important;
+  .energy-info {
+    border-left-width: 4px;
   }
 }
 
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .macros-table tr,
-  .modal-button-container button,
-  .macro-tooltip,
-  .macro-tooltip-mobile {
-    transition: none !important;
-    animation: none !important;
+  .energy-field .form-input {
+    transition: none;
+  }
+}
+
+/* Energy Target Input Styling */
+.dual-energy-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.energy-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.energy-input-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0;
+  min-width: 30px;
+  text-align: right;
+}
+
+.energy-input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.875rem;
+}
+
+.energy-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+@media (max-width: 600px) {
+  .dual-energy-inputs {
+    flex-direction: column;
+    gap: 8px;
   }
   
-  .macros-table tr.long-press-active,
-  .macros-table tr.long-press-ready,
-  .modal-button-container button:hover {
-    transform: none !important;
+  .energy-input-group {
+    width: 100%;
   }
   
-  .macros-table tr.long-press-ready {
-    background-color: var(--text-error, #c0392b) !important;
+  .energy-input {
+    width: 100%;
   }
 }
