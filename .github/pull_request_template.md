@@ -102,7 +102,7 @@ Example:
 
 ---
 
-**Estimated Review Time:** [2-5 business days]
+**Estimated Review Time:** [2-5 days]
 
 ---
 
