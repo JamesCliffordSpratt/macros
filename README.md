@@ -1,6 +1,6 @@
 # Macros Plugin for Obsidian
 
-The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault. It integrates with the FatSecret API to search foods, generate nutrition markdown files, and dynamically render macro blocks and pie charts.
+The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault. It integrates with the FatSecret API to search foods, generate nutrition markdown files, and dynamically render interactive macro tables and visualizations.
 
 ---
 
@@ -16,59 +16,85 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ---
 
-## Features
+## ✨ Features
 
-- 🥑 **Food Search** using FatSecret API or manually add your own
-- 📝 **Markdown food entries** with calories, protein, fat, and carbs
-- 📊 **Macros blocks** for organizing food and meals
-- 🥗 **Meal templates** for quick reusable meal groups
-- 🍽️ **Pie charts** (`macrospc`) to visualize macros
-- 📐 **Custom serving sizes** and interactive add/remove
-- 📈 **Aggregate mutiple IDs** (`macroscalc`) to combine multiple macro blocks together
+### 🥑 **Food Management**
+- **Live food search** using FatSecret API with real-time suggestions
+- **Manual food entry** for custom items not in the database
+- **Markdown food files** with comprehensive nutritional data (calories, protein, fat, carbs)
+- **Custom serving sizes** with automatic nutritional scaling
+- **Energy unit flexibility** - display in kcal or kJ with automatic conversion
 
----
+### 🍽️ **Meal & Template System**
+- **Meal templates** for quick reusable meal groups
+- **Meal composition analysis** with nutritional breakdowns
 
-## Installation
+### 📊 **Macro Tracking & Visualization**
+- **Interactive macro tables** (`macros`) with collapsible sections
+- **Pie chart visualizations** (`macrospc`) with customizable colors
+- **Multi-day aggregation** (`macroscalc`) to combine multiple macro blocks
+- **Daily targets tracking** with progress indicators and remaining/exceeded notifications
+- **Dashboard views** with summary cards and progress bars
 
-## Install directly from Community Plugins via Obsidian
-1. Enable community plugins
-2. Search Macros
-3. Install and enable Macros
+### 🌍 **Localization & Accessibility**
+- **Multi-language support** - currently English and Spanish (more coming!)
+- **Automatic language detection** based on your Obsidian interface language
+- **Cultural adaptation** for date formats, number formatting, and dietary terminology
+- **Accessibility features** including tooltips, keyboard navigation
 
-### Manual (from GitHub):
-
-1. Clone or download this repository.
-2. Copy the following files into your Obsidian plugin directory:
-   - `main.js`
-   - `manifest.json`
-   - `styles.css`
-3. Enable the plugin in Obsidian settings under **Community Plugins**.
-
----
-
-## 🎥 Full Video Demo
-
-Watch the full walkthrough on YouTube:
-
-[![Watch the video](https://img.youtube.com/vi/0cOk846lRuc/hqdefault.jpg)](https://youtu.be/0cOk846lRuc)
+### ⚙️ **Advanced Features**
+- **Developer mode** with debug logging and advanced options
+- **Real-time updates** across all macro blocks when data changes
+- **Responsive design** optimized for both desktop and mobile use
 
 ---
 
-## Usage
+## 🌍 Localization
 
-### 📦 Searching for Food:
+The Macros plugin supports multiple languages and welcomes translation contributions!
 
-#### Through the live search feature:
-Use the command palette or ribbon icon (apple icon) to open **Search for Food**.
-Select live search.
-Type a food name (e.g., "banana") and select a result.
-The plugin saves a `.md` file in your configured folder with nutritional info.
-#### Or manually add your own:
-Select manual food entry.
-Enter the nutritional information of that food item.
+- **🇺🇸 English** - Complete ✅
+- **🇪🇸 Spanish** - AI-generated, needs native speaker verification ⚠️
+- **🇫🇷 French, 🇩🇪 German, 🇮🇹 Italian, 🇯🇵 Japanese, 🇰🇷 Korean** and 30+ more languages - Contributors needed 🔍
 
-### 📋 Creating Macros Blocks
-Add a code block like this to your notes:
+**Want to help translate?**
+- 📖 Read our [Localization Guide](LOCALIZATION.md)
+- 🤝 All Obsidian-supported languages are welcome
+- 🏆 Contributors will be credited in the plugin
+
+[**→ Contribute a translation**](LOCALIZATION.md)
+
+---
+
+## 📦 Installation
+
+### Via Obsidian Community Plugins (Recommended)
+1. Open Obsidian Settings → Community Plugins
+2. Disable Safe Mode (if not already disabled)
+3. Click "Browse" and search for "Macros"
+4. Install and enable the Macros plugin
+
+### Manual Installation
+1. Download the latest release from [GitHub](https://github.com/JamesCliffordSpratt/macros/releases)
+2. Extract the files to your vault's plugins folder: `VaultFolder/.obsidian/plugins/macros/`
+3. Reload Obsidian and enable the plugin in Settings → Community Plugins
+
+---
+
+## 🚀 Quick Start
+
+### 1. **Configure API Access** (Optional but Recommended)
+- Register for free [FatSecret API credentials](https://platform.fatsecret.com/platform-api)
+- Add your API key and secret in plugin settings
+- This enables live food search functionality
+
+### 2. **Add Your First Food**
+- Use the ribbon icon (🍎) or command palette
+- Choose "Live Search" (with API) or "Manual Entry"
+- The plugin creates a `.md` file with nutritional data
+
+### 3. **Create a Macro Table**
+Add this code block to any note:
 
 ````markdown
 ```macros
@@ -76,10 +102,10 @@ id: today
 ```
 ````
 
-This renders a table and allows interaction with a `+` button.
+Click the **+** button to add foods and meals to your tracking.
 
-### 📊 Pie Charts
-To visualize macros as a chart:
+### 4. **Visualize with Charts**
+Create beautiful pie charts:
 
 ````markdown
 ```macrospc
@@ -87,57 +113,150 @@ id: today
 ```
 ````
 
-You can also combine multiple blocks:
-
-````markdown
-```macrospc
-ids: today, yesterday
-```
-````
-Agregated totals table for multiple blocks
+### 5. **Aggregate Multiple Days**
+Combine multiple macro blocks:
 
 ````markdown
 ```macroscalc
-ids: today, yesterday
+ids: 2025-01-15, 2025-01-16
 ```
 ````
 
 ---
 
-## Settings
+## 🎥 Full Video Tutorial
 
-- **Storage Folder** – Where food files are saved
-- **Colors** – Customize pie chart colors
-- **Meal Templates** – Define reusable meal groups
-- **Display** - Toggle on/off additional information
-- **FatSecret Credentials** – Add your own API key/secret (optional)
+Watch the complete walkthrough on YouTube:
+
+[![Watch the video](https://img.youtube.com/vi/0cOk846lRuc/hqdefault.jpg)](https://youtu.be/0cOk846lRuc)
 
 ---
 
-## API Credentials (FatSecret)
+## ⚙️ Advanced Usage
 
-To access food search, you must [register](https://platform.fatsecret.com/platform-api) and paste API credentials into plugin settings.
+### Energy Units
+Switch between kilocalories (kcal) and kilojoules (kJ) in settings. All values are automatically converted throughout the interface.
 
----
+### Meal Templates
+Create reusable meal combinations:
+1. Go to Settings → Meal Templates
+2. Click "Add meal template"
+3. Select foods and customize serving sizes
+4. Use the template in any macro table with one click
 
-## Roadmap
+### Multi-Day Tracking
+Use date-based IDs for automatic organization
 
-- [ ] More options to fetch imperial units for serving size (cups, tablesoons, teaspoons etc.)
-- [ ] Daily calorie goals tracking
-- [ ] Add support for fetching micronutrient data (e.g. vitamins and minerals) and compare against user-defined or recommended daily allowances (RDA).
-
----
-
-## License
-[MIT](LICENSE)
-
----
-
-## Feedback / Issues
-
-Please [open an issue](https://github.com/JamesCliffordSpratt/obsidian-macros-plugin/issues) or post in the Obsidian forum thread once it’s live!
+### Custom Serving Sizes
+All foods support custom serving sizes with automatic nutritional scaling. The plugin remembers your preferences and suggests appropriate portions.
 
 ---
 
-Crafted with ❤️ for Obsidian users who love food and data.
+## 🛠️ Settings & Configuration
 
+### **Storage**
+- **Storage Folder** – Where nutritional data files are saved (default: "Nutrition")
+
+### **Daily Targets**
+- Set your daily goals for calories, protein, fat, and carbohydrates
+- Choose between kcal/kJ for energy display
+- Progress bars and indicators show your progress toward goals
+
+### **Display Options**
+- **Summary Rows** – Show/hide totals, targets, and remaining values
+- **Cell Percentages** – Display percentage of daily targets in table cells
+- **Tooltips** – Rich hover information (can be disabled)
+- **Energy Unit** – Switch between kcal and kJ with automatic conversion
+
+### **Charts & Colors**
+- Customize pie chart colors for protein, fat, and carbohydrates
+- Live preview shows changes in real-time
+
+### **Meal Templates**
+- Create, edit, and manage reusable meal combinations
+- Support for custom serving sizes per item
+
+### **API Configuration**
+- **FatSecret API** credentials for live food search
+- Test connection feature to verify credentials
+
+### **Developer Options**
+- **Debug Mode** – Enable detailed logging for troubleshooting
+- **Advanced Commands** – Additional commands for power users
+
+---
+
+## 🗺️ Roadmap
+
+### **Short Term**
+- [ ] **Imperial units support** (cups, tablespoons, ounces) for serving sizes
+- [ ] **Export functionality** (CSV, PDF reports)
+
+### **Long Term**
+- [ ] **Micronutrient tracking** (vitamins, minerals) with RDA comparisons
+- [ ] **Weekly/monthly summaries** with trend analysis
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community!
+
+### **🌍 Translations**
+Help make the plugin accessible worldwide:
+- See our [Localization Guide](LOCALIZATION.md)
+- All Obsidian-supported languages welcome
+- Native speaker verification always needed
+
+### **🐛 Bug Reports & Feature Requests**
+- [Open an issue](https://github.com/JamesCliffordSpratt/macros/issues) on GitHub
+- Include your Obsidian version, plugin version, and steps to reproduce
+- Feature requests are welcome with use case descriptions
+
+### **💻 Code Contributions**
+- Fork the repository and create a feature branch
+- Follow the existing code style and include tests
+- Submit a pull request with a clear description
+
+---
+
+## 📄 License
+
+[MIT License](LICENSE) - feel free to modify and distribute.
+
+---
+
+## 🆘 Support & Community
+
+### **Getting Help**
+- 📖 Check the wiki (coming soon)
+- 🐛 [Report bugs](https://github.com/JamesCliffordSpratt/macros/issues) on GitHub
+- 💬 Join discussions in the [community forum](https://github.com/JamesCliffordSpratt/macros/discussions)
+
+### **API Requirements**
+To use food search functionality, you need free [FatSecret API credentials](https://platform.fatsecret.com/platform-api). The plugin does not include default API keys for privacy and usage limit reasons.
+
+### **Privacy & Data**
+- All data is stored locally in your Obsidian vault
+- API calls to FatSecret only occur during food searches
+- No personal data is transmitted or stored externally
+- Your nutritional data never leaves your device
+
+---
+
+## 🙏 Acknowledgments
+
+### **Contributors**
+- **Translations**: [Contributors welcome!](LOCALIZATION.md)
+- **Code**: [See all contributors](https://github.com/JamesCliffordSpratt/macros/graphs/contributors)
+
+### **Special Thanks**
+- **FatSecret Platform** for providing nutritional data API
+- **Obsidian Team** for the excellent plugin ecosystem
+- **Community** for feedback, testing, and feature suggestions
+
+---
+
+**Crafted with ❤️ for Obsidian users who love food and data.**
+
+*Last updated: 2025-07-09*
