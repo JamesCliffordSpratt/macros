@@ -13,7 +13,6 @@ Thank you for contributing a translation to the Macros plugin! Please fill out t
 
 **Your Name/Username:** [How you'd like to be credited]  
 **Native Speaker:** [ ] Yes [ ] No  
-**Translation Experience:** [Brief description of your translation background, if any]
 
 ## Translation Checklist
 
@@ -102,24 +101,6 @@ Example:
 ```
 
 ---
-
-## For Maintainers
-
-### Review Checklist
-- [ ] Translation file structure matches template
-- [ ] All required keys are present
-- [ ] TypeScript compiles without errors
-- [ ] I18nManager includes new language
-- [ ] Index file exports new translation
-- [ ] Contributor added to credits
-- [ ] Translation tested in development environment
-
-### Quality Assurance
-- [ ] Native speaker review (if available)
-- [ ] UI layout tested with longer text
-- [ ] Pluralization tested
-- [ ] Special characters render correctly
-- [ ] Cultural appropriateness verified
 
 **Estimated Review Time:** [2-5 business days]
 
