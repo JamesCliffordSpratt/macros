@@ -25,6 +25,7 @@ All Obsidian-supported languages are prioritized to ensure maximum user compatib
 ### Completed Translations
 - 🇺🇸 **English** (`en`) - Base language ✅
 - 🇪🇸 **Spanish** (`es`) - AI-generated, needs native speaker verification ⚠️
+- 🇨🇳 **Chinese Simplified** (zh-CN) - Complete ✅ (Thanks to [Moyf](https://github.com/Moyf))
 
 ### High Priority Languages (Obsidian Supported)
 Based on Obsidian's official language support, these translations would have the most impact:
@@ -52,7 +53,6 @@ Based on Obsidian's official language support, these translations would have the
 **Asian Languages:**
 - 🇯🇵 **Japanese** (`ja`) - Contributors needed 🔍
 - 🇰🇷 **Korean** (`ko`) - Contributors needed 🔍
-- 🇨🇳 **Chinese Simplified** (`zh-CN`) - Contributors needed 🔍
 - 🇹🇼 **Chinese Traditional** (`zh-TW`) - Contributors needed 🔍
 - 🇹🇭 **Thai** (`th`) - Contributors needed 🔍
 - 🇻🇳 **Vietnamese** (`vi`) - Contributors needed 🔍
