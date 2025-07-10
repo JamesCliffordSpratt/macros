@@ -2,6 +2,7 @@ import { App } from 'obsidian';
 import MacrosPlugin from '../main';
 import { enTranslations } from './translations/en';
 import { esTranslations } from './translations/es';
+import { zhCNTranslations } from './translations/zh-CN';
 
 export interface LocaleData {
   [key: string]: string | LocaleData;
@@ -318,6 +319,7 @@ export class I18nManager {
     const translationMap: Record<string, LocaleData> = {
       en: enTranslations,
       es: esTranslations,
+      zhCN: zhCNTranslations, // 新增简体中文
       // Add more languages here as they become available
     };
 
