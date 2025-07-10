@@ -215,6 +215,7 @@ export const esTranslations: LocaleData = {
       over: 'excedido',
       macrosSummary: 'Resumen de Macros',
       dailyTarget: 'del objetivo diario',
+      otherItems: 'Otros Elementos',
     },
     actions: {
       addItems: 'Añadir Elementos',

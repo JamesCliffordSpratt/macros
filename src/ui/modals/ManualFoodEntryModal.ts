@@ -103,7 +103,7 @@ export class ManualFoodEntryModal extends Modal {
     // kJ Field
     const kjGroup = energyContainer.createDiv({ cls: 'form-group energy-field' });
     kjGroup.createEl('label', {
-      text: 'Kilojoules (kJ)',
+      text: t('food.manual.energy') + ' (kJ)',
       cls: 'form-label',
     });
     this.kjInput = kjGroup.createEl('input', {

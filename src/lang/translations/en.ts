@@ -209,6 +209,7 @@ export const enTranslations: LocaleData = {
       over: 'over',
       macrosSummary: 'Macros Summary',
       dailyTarget: 'of daily target',
+      otherItems: 'Other Items',
     },
     actions: {
       addItems: 'Add Items',

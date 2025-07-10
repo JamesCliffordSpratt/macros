@@ -2,6 +2,7 @@ import MacrosPlugin from '../../../main';
 import { Group, MacroRow } from '../../../utils';
 import { parseGrams } from '../../../utils';
 import { processFoodItem } from '../macrosUtils';
+import { t } from '../../../lang/I18nManager';
 
 /**
  * Process lines from the macros code block into structured group data
@@ -13,7 +14,7 @@ import { processFoodItem } from '../macrosUtils';
 export function processLinesIntoGroups(lines: string[], plugin: MacrosPlugin): Group[] {
   const groups: Group[] = [];
   const otherGroup: Group = {
-    name: 'Other Items',
+    name: t('table.summary.otherItems'),
     count: 1,
     rows: [],
     total: { calories: 0, protein: 0, fat: 0, carbs: 0 },
