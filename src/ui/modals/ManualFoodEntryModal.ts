@@ -354,7 +354,7 @@ created: ${new Date().toISOString()}
 
 ## Nutritional Information (per ${servingSize}g)
 - **${t('food.manual.calories')}:** ${calories} kcal
-- **Kilojoules:** ${kj} kJ
+- **${t('food.manual.energy')}:** ${kj} kJ
 - **${t('food.manual.protein')}:** ${protein}g
 - **${t('food.manual.fat')}:** ${fat}g
 - **${t('food.manual.carbs')}:** ${carbs}g

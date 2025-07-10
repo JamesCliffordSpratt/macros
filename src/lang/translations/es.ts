@@ -137,6 +137,7 @@ export const esTranslations: LocaleData = {
       foodName: 'Nombre del Alimento',
       servingSize: 'Tamaño de Porción (gramos)',
       calories: 'Calorías',
+      energy: 'Energía',
       protein: 'Proteína (g)',
       fat: 'Grasa (g)',
       carbs: 'Carbohidratos (g)',

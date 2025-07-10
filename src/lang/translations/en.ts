@@ -132,6 +132,7 @@ export const enTranslations: LocaleData = {
       foodName: 'Food Name',
       servingSize: 'Serving Size (grams)',
       calories: 'Calories',
+      energy: 'Energy',
       protein: 'Protein (g)',
       fat: 'Fat (g)',
       carbs: 'Carbohydrates (g)',
