@@ -49,13 +49,16 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 
 ---
 
-## 🌍 Localization
-
+🌍 Localization
 The Macros plugin supports multiple languages and welcomes translation contributions!
 
-- **🇺🇸 English** - Complete ✅
-- **🇪🇸 Spanish** - AI-generated, needs native speaker verification ⚠️
-- **🇫🇷 French, 🇩🇪 German, 🇮🇹 Italian, 🇯🇵 Japanese, 🇰🇷 Korean** and 30+ more languages - Contributors needed 🔍
+🇺🇸 English – Complete ✅
+
+🇪🇸 Spanish – AI-generated, needs native speaker verification ⚠️
+
+🇨🇳 Chinese (zh-CN) – Complete ✅ – Thanks to @Moyf
+
+🇫🇷 French, 🇩🇪 German, 🇮🇹 Italian, 🇯🇵 Japanese, 🇰🇷 Korean and 30+ more languages – Contributors needed 🔍
 
 **Want to help translate?**
 - 📖 Read our [Localization Guide](LOCALIZATION.md)
@@ -248,6 +251,7 @@ To use food search functionality, you need free [FatSecret API credentials](http
 
 ### **Contributors**
 - **Translations**: [Contributors welcome!](LOCALIZATION.md)
+  - Chinese (zh-CN) – @Moyf
 - **Code**: [See all contributors](https://github.com/JamesCliffordSpratt/macros/graphs/contributors)
 
 ### **Special Thanks**
