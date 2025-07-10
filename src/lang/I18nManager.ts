@@ -2,6 +2,7 @@ import { App } from 'obsidian';
 import MacrosPlugin from '../main';
 import { enTranslations } from './translations/en';
 import { esTranslations } from './translations/es';
+import { zhCNTranslations } from './translations/zh-CN';
 
 export interface LocaleData {
   [key: string]: string | LocaleData;
@@ -318,6 +319,7 @@ export class I18nManager {
     const translationMap: Record<string, LocaleData> = {
       en: enTranslations,
       es: esTranslations,
+      'zh-CN': zhCNTranslations,
       // Add more languages here as they become available
     };
 
@@ -459,7 +461,7 @@ export class I18nManager {
    */
   getAvailableLocales(): SupportedLocale[] {
     // Return locales that have external translation files
-    const availableLocaleCodes = ['en', 'es']; // Add more as translations are added
+    const availableLocaleCodes = ['en', 'es', 'zh-CN']; // Add more as translations are added
 
     return availableLocaleCodes
       .map((code) => this.supportedLocales.get(code))

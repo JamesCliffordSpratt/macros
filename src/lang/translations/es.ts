@@ -137,6 +137,7 @@ export const esTranslations: LocaleData = {
       foodName: 'Nombre del Alimento',
       servingSize: 'Tamaño de Porción (gramos)',
       calories: 'Calorías',
+      energy: 'Energía',
       protein: 'Proteína (g)',
       fat: 'Grasa (g)',
       carbs: 'Carbohidratos (g)',
@@ -214,6 +215,7 @@ export const esTranslations: LocaleData = {
       over: 'excedido',
       macrosSummary: 'Resumen de Macros',
       dailyTarget: 'del objetivo diario',
+      otherItems: 'Otros Elementos',
     },
     actions: {
       addItems: 'Añadir Elementos',
