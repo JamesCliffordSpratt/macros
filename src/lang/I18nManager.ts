@@ -319,7 +319,7 @@ export class I18nManager {
     const translationMap: Record<string, LocaleData> = {
       en: enTranslations,
       es: esTranslations,
-      zhCN: zhCNTranslations, // 新增简体中文
+      'zh-CN': zhCNTranslations,
       // Add more languages here as they become available
     };
 
@@ -461,7 +461,7 @@ export class I18nManager {
    */
   getAvailableLocales(): SupportedLocale[] {
     // Return locales that have external translation files
-    const availableLocaleCodes = ['en', 'es']; // Add more as translations are added
+    const availableLocaleCodes = ['en', 'es', 'zh-CN']; // Add more as translations are added
 
     return availableLocaleCodes
       .map((code) => this.supportedLocales.get(code))
