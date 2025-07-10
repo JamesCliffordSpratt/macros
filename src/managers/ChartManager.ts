@@ -1,4 +1,4 @@
-import MacrosPlugin from './../../main';
+import MacrosPlugin from '../main';
 import { Chart, ChartConfiguration, ChartDataset, TooltipItem, registerables } from 'chart.js';
 import { ChartLoader, MacrosState, DOMUtils } from '../utils';
 import {

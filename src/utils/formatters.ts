@@ -21,13 +21,24 @@ function getCurrentEnergyUnit(): 'kcal' | 'kJ' {
 }
 
 /**
+ * Get the current locale from the plugin
+ */
+function getCurrentLocale(): string {
+  try {
+    return formatterPlugin?.i18nManager?.getCurrentLocale() || 'en';
+  } catch {
+    return 'en';
+  }
+}
+
+/**
  * Format calories with proper unit conversion based on settings
  * @param calories Calorie value in kcal
- * @returns Formatted string with appropriate unit
+ * @returns Formatted string with appropriate unit (with proper spacing)
  */
 export function formatCalories(calories: number): string {
   if (!formatterPlugin) {
-    // Fallback if plugin not set
+    // Fallback if plugin not set - with proper spacing
     return `${calories.toFixed(1)} kcal`;
   }
 
@@ -35,19 +46,38 @@ export function formatCalories(calories: number): string {
 
   if (currentUnit === 'kJ') {
     const kj = convertEnergyUnit(calories, 'kcal', 'kJ');
-    return `${kj.toFixed(1)} kJ`;
+    return `${kj.toFixed(1)} kJ`; // Proper spacing (already correct)
   } else {
-    return `${calories.toFixed(1)} kcal`;
+    return `${calories.toFixed(1)} kcal`; // Proper spacing (already correct)
   }
 }
 
 /**
- * Format grams with one decimal place
+ * Format grams with one decimal place and proper spacing
  * @param grams Gram value
- * @returns Formatted string
+ * @returns Formatted string with space between value and unit
  */
 export function formatGrams(grams: number): string {
-  return `${grams.toFixed(1)}g`;
+  return `${grams.toFixed(1)} g`; // Added space for consistency with energy units
+}
+
+/**
+ * Format weight with proper spacing (following NIST standards)
+ * @param weight Weight value in grams
+ * @returns Formatted string with space between value and unit
+ */
+export function formatWeight(weight: number): string {
+  return `${weight.toFixed(1)} g`; // Added space between number and unit
+}
+
+/**
+ * Format macronutrient values with proper spacing
+ * @param value Numeric value
+ * @param unit Unit string (default: 'g')
+ * @returns Formatted string with space between value and unit
+ */
+export function formatMacro(value: number, unit: string = 'g'): string {
+  return `${value.toFixed(1)} ${unit}`; // Added space between number and unit
 }
 
 /**
@@ -60,11 +90,33 @@ export function formatPercentage(percentage: number): string {
 }
 
 /**
+ * Format tooltip text with locale-specific word order and proper spacing
+ * Chinese: 占 7% · 剩余 95.2 g
+ * Others: 7% of target · 95.2 g remaining
+ */
+export function formatTooltipText(
+  percentage: number,
+  remaining: number,
+  unit: string,
+  locale?: string
+): string {
+  const currentLocale = locale || getCurrentLocale();
+
+  if (currentLocale === 'zh-CN') {
+    // Chinese word order with proper spacing: 占 7% · 剩余 95.2 g
+    return `占 ${Math.round(percentage)}% · 剩余 ${remaining.toFixed(1)} ${unit}`;
+  } else {
+    // Default word order with proper spacing: 7% of target · 95.2 g remaining
+    return `${Math.round(percentage)}% ${t('tooltips.dailyTarget')} · ${remaining.toFixed(1)} ${unit} ${t('tooltips.remaining')}`;
+  }
+}
+
+/**
  * Generate tooltip text for dashboard metric cards
  * @param currentValue Current consumed value
  * @param targetValue Target value
  * @param macroName Name of the macro (for translation)
- * @returns Formatted tooltip string
+ * @returns Formatted tooltip string with proper spacing
  */
 export function formatDashboardTooltip(
   currentValue: number,
@@ -73,16 +125,31 @@ export function formatDashboardTooltip(
 ): string {
   const percentage = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
   const remaining = targetValue - currentValue;
+  const currentLocale = getCurrentLocale();
 
-  let tooltipText = `${currentValue.toFixed(1)}g ${macroName.toLowerCase()} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+  if (currentLocale === 'zh-CN') {
+    // Chinese word order: 占 7% · 剩余 95.2 g
+    let tooltipText = `${currentValue.toFixed(1)} g ${macroName.toLowerCase()} • 占 ${Math.round(percentage)}%`;
 
-  if (remaining > 0) {
-    tooltipText += ` • ${remaining.toFixed(1)}g ${t('general.remaining')}`;
-  } else if (remaining < 0) {
-    tooltipText += ` • ${Math.abs(remaining).toFixed(1)}g ${t('table.summary.over')}`;
+    if (remaining > 0) {
+      tooltipText += ` • 剩余 ${remaining.toFixed(1)} g`;
+    } else if (remaining < 0) {
+      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+    }
+
+    return tooltipText;
+  } else {
+    // English word order
+    let tooltipText = `${currentValue.toFixed(1)} g ${macroName.toLowerCase()} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+
+    if (remaining > 0) {
+      tooltipText += ` • ${remaining.toFixed(1)} g ${t('general.remaining')}`;
+    } else if (remaining < 0) {
+      tooltipText += ` • ${Math.abs(remaining).toFixed(1)} g ${t('table.summary.over')}`;
+    }
+
+    return tooltipText;
   }
-
-  return tooltipText;
 }
 
 /**
@@ -163,15 +230,15 @@ export function getSummaryHeader(id: string): string {
 }
 
 /**
- * Format calories for tooltips with proper unit handling
+ * Format calories for tooltips with proper unit handling and spacing
  * @param calories Calorie value in kcal
  * @param target Target calorie value in kcal
  * @param percentage Percentage of target
- * @returns Formatted tooltip string
+ * @returns Formatted tooltip string with proper spacing
  */
 export function formatCalorieTooltip(calories: number, target: number, percentage: number): string {
   if (!formatterPlugin) {
-    // Fallback if plugin not set
+    // Fallback if plugin not set - with proper spacing
     const remaining = target - calories;
     if (remaining > 0) {
       return `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')} • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
@@ -181,33 +248,50 @@ export function formatCalorieTooltip(calories: number, target: number, percentag
   }
 
   const currentUnit = getCurrentEnergyUnit();
+  const currentLocale = getCurrentLocale();
 
   if (currentUnit === 'kJ') {
     const consumedKj = convertEnergyUnit(calories, 'kcal', 'kJ');
     const targetKj = convertEnergyUnit(target, 'kcal', 'kJ');
     const remainingKj = targetKj - consumedKj;
 
-    let tooltipText = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
-
-    if (remainingKj > 0) {
-      tooltipText += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
-    } else if (remainingKj < 0) {
-      tooltipText += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+    if (currentLocale === 'zh-CN') {
+      let tooltipText = `${consumedKj.toFixed(1)} kJ • 占 ${Math.round(percentage)}%`;
+      if (remainingKj > 0) {
+        tooltipText += ` • 剩余 ${remainingKj.toFixed(1)} kJ`;
+      } else if (remainingKj < 0) {
+        tooltipText += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} kJ`;
+      }
+      return tooltipText;
+    } else {
+      let tooltipText = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+      if (remainingKj > 0) {
+        tooltipText += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+      } else if (remainingKj < 0) {
+        tooltipText += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+      }
+      return tooltipText;
     }
-
-    return tooltipText;
   } else {
     const remaining = target - calories;
 
-    let tooltipText = `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
-
-    if (remaining > 0) {
-      tooltipText += ` • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
-    } else if (remaining < 0) {
-      tooltipText += ` • ${Math.abs(remaining).toFixed(1)} kcal ${t('table.summary.over')}`;
+    if (currentLocale === 'zh-CN') {
+      let tooltipText = `${calories.toFixed(1)} kcal • 占 ${Math.round(percentage)}%`;
+      if (remaining > 0) {
+        tooltipText += ` • 剩余 ${remaining.toFixed(1)} kcal`;
+      } else if (remaining < 0) {
+        tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} kcal`;
+      }
+      return tooltipText;
+    } else {
+      let tooltipText = `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+      if (remaining > 0) {
+        tooltipText += ` • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
+      } else if (remaining < 0) {
+        tooltipText += ` • ${Math.abs(remaining).toFixed(1)} kcal ${t('table.summary.over')}`;
+      }
+      return tooltipText;
     }
-
-    return tooltipText;
   }
 }
 
@@ -216,7 +300,7 @@ export function formatCalorieTooltip(calories: number, target: number, percentag
  * @param macro Macro name
  * @param value Macro value in grams
  * @param percentage Percentage of total macros
- * @returns Formatted tooltip string
+ * @returns Formatted tooltip string with proper spacing
  */
 export function formatMacroCompositionTooltip(
   macro: string,
@@ -234,7 +318,7 @@ export function formatMacroCompositionTooltip(
  * Format target tooltip
  * @param target Target value
  * @param unit Unit (g, kcal, kJ)
- * @returns Formatted tooltip string
+ * @returns Formatted tooltip string with proper spacing
  */
 export function formatTargetTooltip(target: number, unit: string): string {
   return t('tooltips.target', {
@@ -244,12 +328,12 @@ export function formatTargetTooltip(target: number, unit: string): string {
 }
 
 /**
- * Format percentage tooltip for macro cells
+ * Format percentage tooltip for macro cells with proper spacing
  * @param value Macro value in grams
  * @param macro Macro name
  * @param percentage Percentage of daily target
  * @param target Daily target value
- * @returns Formatted tooltip string
+ * @returns Formatted tooltip string with proper spacing
  */
 export function formatMacroPercentageTooltip(
   value: number,
@@ -258,6 +342,7 @@ export function formatMacroPercentageTooltip(
   target: number
 ): string {
   const remaining = target - value;
+  const currentLocale = getCurrentLocale();
 
   let tooltipText = t('tooltips.percentage', {
     value: value.toFixed(1),
@@ -266,19 +351,27 @@ export function formatMacroPercentageTooltip(
   });
 
   if (remaining > 0) {
-    tooltipText += ` • ${remaining.toFixed(1)}g ${t('general.remaining')}`;
+    if (currentLocale === 'zh-CN') {
+      tooltipText += ` • 剩余 ${remaining.toFixed(1)} g`;
+    } else {
+      tooltipText += ` • ${remaining.toFixed(1)} g ${t('general.remaining')}`;
+    }
   } else if (remaining < 0) {
-    tooltipText += ` • ${t('tooltips.over', { over: Math.abs(remaining).toFixed(1) })}`;
+    if (currentLocale === 'zh-CN') {
+      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+    } else {
+      tooltipText += ` • ${t('tooltips.over', { over: Math.abs(remaining).toFixed(1) })}`;
+    }
   }
 
   return tooltipText;
 }
 
 /**
- * Format energy value with automatic unit conversion
+ * Format energy value with automatic unit conversion and proper spacing
  * @param valueInKcal Energy value in kcal
  * @param showUnit Whether to include the unit in the output
- * @returns Formatted energy string
+ * @returns Formatted energy string with proper spacing
  */
 export function formatEnergy(valueInKcal: number, showUnit: boolean = true): string {
   if (!formatterPlugin) {
@@ -289,10 +382,20 @@ export function formatEnergy(valueInKcal: number, showUnit: boolean = true): str
 
   if (currentUnit === 'kJ') {
     const kj = convertEnergyUnit(valueInKcal, 'kcal', 'kJ');
-    return showUnit ? `${kj.toFixed(1)} kJ` : kj.toFixed(1);
+    return showUnit ? `${kj.toFixed(1)} kJ` : kj.toFixed(1); // Proper spacing
   } else {
-    return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1);
+    return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1); // Proper spacing
   }
+}
+
+/**
+ * Format serving size with proper spacing
+ * @param serving Serving size string
+ * @returns Formatted serving size with space between number and unit
+ */
+export function formatServing(serving: string): string {
+  // Handle various serving size formats and ensure proper spacing
+  return serving.replace(/(\d+(?:\.\d+)?)\s*g/i, '$1 g');
 }
 
 /**
@@ -315,11 +418,11 @@ export function formatNumber(value: number, decimals: number = 1): string {
 }
 
 /**
- * Format meal summary text
+ * Format meal summary text with proper spacing
  * @param mealName Name of the meal
  * @param itemCount Number of items in the meal
  * @param calories Total calories
- * @returns Formatted meal summary
+ * @returns Formatted meal summary with proper spacing
  */
 export function formatMealSummary(mealName: string, itemCount: number, calories: number): string {
   const calorieText = formatCalories(calories);
@@ -328,18 +431,18 @@ export function formatMealSummary(mealName: string, itemCount: number, calories:
 }
 
 /**
- * Format remaining/over values for summary rows
+ * Format remaining/over values for summary rows with proper spacing
  * @param remaining Remaining value (negative if over target)
  * @param unit Unit string
- * @returns Formatted remaining/over string
+ * @returns Formatted remaining/over string with proper spacing
  */
 export function formatRemaining(remaining: number, unit: string): string {
   if (remaining < 0) {
-    return `${formatNumber(Math.abs(remaining))}${unit} (${t('table.summary.over')})`;
+    return `${formatNumber(Math.abs(remaining))} ${unit} (${t('table.summary.over')})`;
   } else if (remaining === 0) {
-    return `0${unit}`;
+    return `0 ${unit}`;
   } else {
-    return `${formatNumber(remaining)}${unit}`;
+    return `${formatNumber(remaining)} ${unit}`;
   }
 }
 

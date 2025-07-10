@@ -211,39 +211,44 @@ export class I18nManager {
    */
   private detectUserLocale(): string {
     try {
-      // Get locale from Obsidian's native settings
+      // Get locale from Obsidian's native settings using safe methods
       const obsidianLocale =
+        this.getMomentLocale() || // Use existing safe method
+        document.documentElement.lang ||
         (this.app as any).vault?.config?.userInterfaceMode ||
-        this.getMomentLocale() ||
         (this.app as any).locale;
 
-      if (obsidianLocale && this.isLocaleSupported(obsidianLocale)) {
-        this.plugin.logger.debug(`Detected Obsidian locale: ${obsidianLocale}`);
-        return obsidianLocale;
-      }
+      this.plugin.logger.debug(`Detected Obsidian locale: ${obsidianLocale}`);
 
-      // If Obsidian locale isn't supported, try language code only
       if (obsidianLocale) {
-        const languageCode = obsidianLocale.split('-')[0];
+        // Handle Chinese locale variants - map both to zh-CN
+        if (obsidianLocale.toLowerCase().startsWith('zh')) {
+          this.plugin.logger.debug(`Mapping Chinese variant ${obsidianLocale} to zh-CN`);
+          return 'zh-CN';
+        }
+
+        // Check if exactly supported
+        if (this.isLocaleSupported(obsidianLocale)) {
+          return obsidianLocale;
+        }
+
+        // Try language code only (e.g., en-GB -> en)
+        const languageCode = obsidianLocale.split('-')[0].toLowerCase();
         if (this.isLocaleSupported(languageCode)) {
-          this.plugin.logger.debug(`Using language code from Obsidian locale: ${languageCode}`);
+          this.plugin.logger.debug(`Using language code: ${languageCode}`);
           return languageCode;
         }
       }
 
-      // Fall back to browser locale as last resort
+      // Fallback to browser locale
       const browserLocale = navigator.language || navigator.languages?.[0];
       if (browserLocale) {
-        // Try exact match first
         if (this.isLocaleSupported(browserLocale)) {
-          this.plugin.logger.debug(`Using browser locale: ${browserLocale}`);
           return browserLocale;
         }
 
-        // Try language code only (e.g., 'en' from 'en-US')
         const languageCode = browserLocale.split('-')[0];
         if (this.isLocaleSupported(languageCode)) {
-          this.plugin.logger.debug(`Using language code from browser: ${languageCode}`);
           return languageCode;
         }
       }

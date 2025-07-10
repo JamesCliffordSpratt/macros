@@ -83,11 +83,11 @@ export class ManualFoodEntryModal extends Modal {
     // Energy Fields Container (kcal and kJ side by side)
     const energyContainer = nutritionContainer.createDiv({ cls: 'energy-fields-container' });
 
-    // Calories Field
+    // Calories Field with bold label
     const caloriesGroup = energyContainer.createDiv({ cls: 'form-group energy-field' });
     caloriesGroup.createEl('label', {
       text: t('food.manual.calories'),
-      cls: 'form-label required',
+      cls: 'form-label required energy-label-bold',
     });
     this.caloriesInput = caloriesGroup.createEl('input', {
       type: 'number',
@@ -100,11 +100,11 @@ export class ManualFoodEntryModal extends Modal {
       },
     });
 
-    // kJ Field
+    // kJ Field with bold label
     const kjGroup = energyContainer.createDiv({ cls: 'form-group energy-field' });
     kjGroup.createEl('label', {
       text: t('food.manual.energy') + ' (kJ)',
-      cls: 'form-label',
+      cls: 'form-label energy-label-bold',
     });
     this.kjInput = kjGroup.createEl('input', {
       type: 'number',

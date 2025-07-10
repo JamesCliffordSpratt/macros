@@ -13,6 +13,7 @@ import {
   ProgressBarFactory,
 } from '../../../utils';
 import { parseGrams } from '../../../utils/parsingUtils';
+import { formatServing } from '../../../utils/formatters';
 import { Notice, Modal, ButtonComponent } from 'obsidian';
 import { t } from '../../../lang/I18nManager';
 
@@ -585,7 +586,7 @@ export class RowRenderer {
     const quantityCell = r.insertCell();
     quantityCell.classList.add('editable-quantity');
     safeAttachTooltip(quantityCell, t('table.actions.clickToEdit'), this.plugin);
-    quantityCell.textContent = row.serving;
+    quantityCell.textContent = formatServing(row.serving);
 
     const servingValue = parseGrams(row.serving);
 

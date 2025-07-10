@@ -179,8 +179,9 @@ export class MacrosDashboard {
         text: value,
       });
 
-      // Create custom tooltip with proper energy unit handling
+      // Create custom tooltip with proper energy unit handling and Chinese word order
       let tooltipMessage: string;
+      const currentLocale = this.plugin.i18nManager.getCurrentLocale();
 
       if (label === t('table.headers.calories')) {
         const currentUnit = this.plugin.settings.energyUnit;
@@ -193,12 +194,20 @@ export class MacrosDashboard {
           const remainingKj = targetKj - consumedKj;
           const percentage = targetKj > 0 ? (consumedKj / targetKj) * 100 : 0;
 
-          tooltipMessage = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
-
-          if (remainingKj > 0) {
-            tooltipMessage += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
-          } else if (remainingKj < 0) {
-            tooltipMessage += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+          if (currentLocale === 'zh-CN') {
+            tooltipMessage = `${consumedKj.toFixed(1)} kJ • 占 ${Math.round(percentage)}%`;
+            if (remainingKj > 0) {
+              tooltipMessage += ` • 剩余 ${remainingKj.toFixed(1)} kJ`;
+            } else if (remainingKj < 0) {
+              tooltipMessage += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} kJ`;
+            }
+          } else {
+            tooltipMessage = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+            if (remainingKj > 0) {
+              tooltipMessage += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+            } else if (remainingKj < 0) {
+              tooltipMessage += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+            }
           }
         } else {
           // Use original kcal values for kcal display
@@ -207,18 +216,39 @@ export class MacrosDashboard {
           const remainingKcal = targetKcal - consumedKcal;
           const percentage = targetKcal > 0 ? (consumedKcal / targetKcal) * 100 : 0;
 
-          tooltipMessage = `${consumedKcal.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
-
-          if (remainingKcal > 0) {
-            tooltipMessage += ` • ${remainingKcal.toFixed(1)} kcal ${t('general.remaining')}`;
-          } else if (remainingKcal < 0) {
-            tooltipMessage += ` • ${Math.abs(remainingKcal).toFixed(1)} kcal ${t('table.summary.over')}`;
+          if (currentLocale === 'zh-CN') {
+            tooltipMessage = `${consumedKcal.toFixed(1)} kcal • 占 ${Math.round(percentage)}%`;
+            if (remainingKcal > 0) {
+              tooltipMessage += ` • 剩余 ${remainingKcal.toFixed(1)} kcal`;
+            } else if (remainingKcal < 0) {
+              tooltipMessage += ` • 超出 ${Math.abs(remainingKcal).toFixed(1)} kcal`;
+            }
+          } else {
+            tooltipMessage = `${consumedKcal.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+            if (remainingKcal > 0) {
+              tooltipMessage += ` • ${remainingKcal.toFixed(1)} kcal ${t('general.remaining')}`;
+            } else if (remainingKcal < 0) {
+              tooltipMessage += ` • ${Math.abs(remainingKcal).toFixed(1)} kcal ${t('table.summary.over')}`;
+            }
           }
         }
       } else {
         // Use the standard formatDashboardTooltip for non-calorie metrics
         const numericValue = parseFloat(value.replace('g', ''));
-        tooltipMessage = formatDashboardTooltip(numericValue, target, label);
+
+        if (currentLocale === 'zh-CN') {
+          const percentage = target > 0 ? (numericValue / target) * 100 : 0;
+          const remaining = target - numericValue;
+
+          tooltipMessage = `${numericValue.toFixed(1)} g ${label.toLowerCase()} • 占 ${Math.round(percentage)}%`;
+          if (remaining > 0) {
+            tooltipMessage += ` • 剩余 ${remaining.toFixed(1)} g`;
+          } else if (remaining < 0) {
+            tooltipMessage += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+          }
+        } else {
+          tooltipMessage = formatDashboardTooltip(numericValue, target, label);
+        }
       }
 
       safeAttachTooltip(card, tooltipMessage, this.plugin);
