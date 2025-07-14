@@ -247,6 +247,14 @@ To use food search functionality, you need free [FatSecret API credentials](http
 
 ---
 
+## ☕ Support My Work
+
+If you find this plugin helpful and want to support its development:
+
+<a href="https://www.buymeacoffee.com/jamescliffordspratt" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" style="height: 60px !important; width: 217px !important;">
+</a>
+
 ## 🙏 Acknowledgments
 
 ### **Contributors**
