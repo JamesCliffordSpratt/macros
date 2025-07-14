@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice, normalizePath } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice, normalizePath, Component } from 'obsidian';
 import { ChartLoader } from '../utils/ChartLoader';
 import MacrosPlugin from '../main';
 import { AddMealTemplateModal, EditMealTemplateModal } from '../ui';
@@ -33,8 +33,202 @@ export interface PluginSettings {
   showCellPercentages: boolean;
   developerModeEnabled: boolean;
   uiCollapseStates?: Record<string, boolean>;
-  energyUnit: 'kcal' | 'kJ'; // New setting for energy unit
+  energyUnit: 'kcal' | 'kJ';
+  addToMacrosTabOrder: ('meals' | 'foods' | 'group')[]; // Updated to array format
   // Note: locale removed since we follow Obsidian's language settings
+}
+
+// Sortable component class (embedded in the same file for simplicity)
+class SortableTabOrder extends Component {
+  private plugin: MacrosPlugin;
+  private containerEl: HTMLElement;
+  private listEl: HTMLElement;
+  private draggedItem: HTMLElement | null = null;
+  private draggedIndex: number = -1;
+
+  constructor(plugin: MacrosPlugin, containerEl: HTMLElement) {
+    super();
+    this.plugin = plugin;
+    this.containerEl = containerEl;
+  }
+
+  create(): void {
+    const sortableContainer = this.containerEl.createDiv({ cls: 'sortable-tab-order-container' });
+
+    const instructionText = sortableContainer.createEl('p', {
+      text: t('settings.display.tabOrderInstructions'),
+      cls: 'sortable-instructions',
+    });
+
+    this.listEl = sortableContainer.createEl('ul', {
+      cls: 'sortable-tab-list',
+    });
+
+    this.render();
+    this.setupEventListeners();
+  }
+
+  private render(): void {
+    this.listEl.empty();
+
+    const tabOrder = this.plugin.settings.addToMacrosTabOrder;
+
+    tabOrder.forEach((tabKey, index) => {
+      const listItem = this.listEl.createEl('li', {
+        cls: 'sortable-tab-item',
+        attr: {
+          'data-tab-key': tabKey,
+          'data-index': index.toString(),
+          draggable: 'true',
+        },
+      });
+
+      const dragHandle = listItem.createEl('span', {
+        cls: 'drag-handle',
+        text: '⋮⋮',
+        attr: { title: t('settings.display.dragToReorder') },
+      });
+
+      const tabContent = listItem.createEl('div', { cls: 'tab-content' });
+
+      const tabIcon = this.getTabIcon(tabKey);
+      const tabLabel = this.getTabLabel(tabKey);
+
+      // Only add the icon once here
+      tabContent.createEl('span', { cls: 'tab-icon', text: tabIcon });
+      tabContent.createEl('span', { cls: 'tab-label', text: tabLabel });
+
+      const positionIndicator = listItem.createEl('span', {
+        cls: 'position-indicator',
+        text: (index + 1).toString(),
+      });
+    });
+  }
+
+  private getTabIcon(tabKey: string): string {
+    switch (tabKey) {
+      case 'meals':
+        return '🍽️';
+      case 'foods':
+        return '🥗';
+      case 'group':
+        return '🗂️';
+      default:
+        return '📋';
+    }
+  }
+
+  private getTabLabel(tabKey: string): string {
+    switch (tabKey) {
+      case 'meals':
+        return 'Meal Templates';
+      case 'foods':
+        return 'Individual Foods';
+      case 'group':
+        return 'Create Group';
+      default:
+        return tabKey;
+    }
+  }
+
+  private setupEventListeners(): void {
+    this.registerDomEvent(this.listEl, 'dragstart', (e: DragEvent) => {
+      const target = e.target as HTMLElement;
+      const listItem = target.closest('.sortable-tab-item') as HTMLElement;
+
+      if (listItem) {
+        this.draggedItem = listItem;
+        this.draggedIndex = parseInt(listItem.dataset.index || '0');
+
+        listItem.classList.add('dragging');
+
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/html', listItem.outerHTML);
+        }
+      }
+    });
+
+    this.registerDomEvent(this.listEl, 'dragend', (e: DragEvent) => {
+      if (this.draggedItem) {
+        this.draggedItem.classList.remove('dragging');
+        this.draggedItem = null;
+        this.draggedIndex = -1;
+      }
+
+      this.listEl.querySelectorAll('.sortable-tab-item').forEach((item) => {
+        item.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+      });
+    });
+
+    this.registerDomEvent(this.listEl, 'dragover', (e: DragEvent) => {
+      e.preventDefault();
+
+      const target = e.target as HTMLElement;
+      const listItem = target.closest('.sortable-tab-item') as HTMLElement;
+
+      if (listItem && listItem !== this.draggedItem) {
+        this.listEl.querySelectorAll('.sortable-tab-item').forEach((item) => {
+          item.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+        });
+
+        const rect = listItem.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+
+        if (e.clientY < midpoint) {
+          listItem.classList.add('drag-over-before');
+        } else {
+          listItem.classList.add('drag-over-after');
+        }
+      }
+    });
+
+    this.registerDomEvent(this.listEl, 'drop', async (e: DragEvent) => {
+      e.preventDefault();
+
+      if (!this.draggedItem) return;
+
+      const target = e.target as HTMLElement;
+      const dropTarget = target.closest('.sortable-tab-item') as HTMLElement;
+
+      if (dropTarget && dropTarget !== this.draggedItem) {
+        const dropIndex = parseInt(dropTarget.dataset.index || '0');
+        const rect = dropTarget.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+
+        let newIndex = dropIndex;
+        if (e.clientY >= midpoint) {
+          newIndex = dropIndex + 1;
+        }
+
+        await this.moveTab(this.draggedIndex, newIndex);
+      }
+
+      this.listEl.querySelectorAll('.sortable-tab-item').forEach((item) => {
+        item.classList.remove('drag-over', 'drag-over-before', 'drag-over-after', 'dragging');
+      });
+    });
+  }
+
+  private async moveTab(fromIndex: number, toIndex: number): Promise<void> {
+    const tabOrder = [...this.plugin.settings.addToMacrosTabOrder];
+
+    if (fromIndex < toIndex) {
+      toIndex--;
+    }
+
+    const [movedItem] = tabOrder.splice(fromIndex, 1);
+    tabOrder.splice(toIndex, 0, movedItem);
+
+    this.plugin.settings.addToMacrosTabOrder = tabOrder;
+    await this.plugin.saveSettings();
+
+    this.render();
+  }
+
+  onunload(): void {
+    super.onunload();
+  }
 }
 
 export class NutritionalSettingTab extends PluginSettingTab {
@@ -42,6 +236,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
   private previewChart: Chart | null = null;
   private chartId = 'settings-preview-chart';
   private i18n: I18nManager;
+  private sortableTabOrder: SortableTabOrder | null = null;
 
   constructor(app: App, plugin: MacrosPlugin) {
     super(app, plugin);
@@ -264,12 +459,28 @@ export class NutritionalSettingTab extends PluginSettingTab {
           .addOption('kcal', t('settings.display.energyUnitKcal'))
           .addOption('kJ', t('settings.display.energyUnitKj'))
           .setValue(this.plugin.settings.energyUnit)
-          .onChange(async (value: 'kcal' | 'kJ') => {
-            this.plugin.settings.energyUnit = value;
-            await this.plugin.saveSettings();
-            this.plugin.refreshMacrosTables?.();
+          .onChange(async (value: string) => {
+            if (value === 'kcal' || value === 'kJ') {
+              this.plugin.settings.energyUnit = value;
+              await this.plugin.saveSettings();
+              this.plugin.refreshMacrosTables?.();
+            }
           })
       );
+
+    // Updated Add to Macros Tab Order Setting with Sortable Component
+    const tabOrderSetting = new Setting(containerEl)
+      .setName(t('settings.display.addToMacrosTabOrder'))
+      .setDesc(t('settings.display.addToMacrosTabOrderDesc'));
+
+    // Clean up existing sortable component if it exists
+    if (this.sortableTabOrder) {
+      this.sortableTabOrder.unload();
+    }
+
+    // Create and initialize the sortable component
+    this.sortableTabOrder = new SortableTabOrder(this.plugin, tabOrderSetting.settingEl);
+    this.sortableTabOrder.create();
 
     // =======================================
     // PIE CHART CUSTOMIZATION
@@ -590,8 +801,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
     // If we already have a chart, update its colors
     if (this.previewChart) {
-      this.previewChart.data.datasets[0].backgroundColor = [proteinColor, fatColor, carbsColor];
-      this.previewChart.update();
+      const dataset = this.previewChart.data.datasets[0];
+      if (dataset) {
+        dataset.backgroundColor = [proteinColor, fatColor, carbsColor];
+        this.previewChart.update();
+      }
       return;
     }
 
@@ -608,26 +822,25 @@ export class NutritionalSettingTab extends PluginSettingTab {
       );
 
       // Override some options for the settings preview
-      if (this.previewChart.options && this.previewChart.options.plugins) {
+      if (this.previewChart?.options?.plugins) {
         // Enable legend for the preview chart
-        if (this.previewChart.options.plugins.legend) {
-          this.previewChart.options.plugins.legend.display = true;
-          this.previewChart.options.plugins.legend.position = 'bottom';
+        const legend = this.previewChart.options.plugins.legend;
+        if (legend) {
+          legend.display = true;
+          legend.position = 'bottom';
 
-          if (this.previewChart.options.plugins.legend.labels) {
-            this.previewChart.options.plugins.legend.labels.padding = 15;
-            this.previewChart.options.plugins.legend.labels.usePointStyle = true;
+          if (legend.labels) {
+            legend.labels.padding = 15;
+            legend.labels.usePointStyle = true;
             // @ts-ignore - pointStyle exists but might not be in your types
-            this.previewChart.options.plugins.legend.labels.pointStyle = 'circle';
+            legend.labels.pointStyle = 'circle';
           }
         }
 
         // Update tooltip formatting
-        if (
-          this.previewChart.options.plugins.tooltip &&
-          this.previewChart.options.plugins.tooltip.callbacks
-        ) {
-          this.previewChart.options.plugins.tooltip.callbacks.label = function (context) {
+        const tooltip = this.previewChart.options.plugins.tooltip;
+        if (tooltip?.callbacks) {
+          tooltip.callbacks.label = function (context) {
             const label = context.label || '';
             const value = (context.raw as number) || 0;
             return `${label}: ${value}%`;
@@ -636,24 +849,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
       }
 
       // Apply the changes
-      this.previewChart.update();
+      if (this.previewChart) {
+        this.previewChart.update();
+      }
     } catch (error) {
       console.error('Error creating preview chart:', error);
     }
-  }
-
-  /**
-   * Clean up when the settings tab is hidden
-   */
-  hide(): void {
-    // Clean up chart instance if it exists
-    if (this.previewChart) {
-      // Use the ChartLoader to destroy the chart
-      const chartLoader = ChartLoader.getInstance();
-      chartLoader.destroyChart(this.chartId);
-      this.previewChart = null;
-    }
-
-    super.hide();
   }
 }

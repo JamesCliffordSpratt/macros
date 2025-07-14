@@ -722,11 +722,26 @@ export class MacrosCalcRenderer {
         const foodHeader = foodList.createTHead().insertRow();
         const detailHeaderData = [
           { text: t('table.headers.food'), mobileText: t('table.headers.food') },
-          { text: t('calculator.quantity'), mobileText: 'Qty' },
-          { text: t('table.headers.calories'), mobileText: 'Cal' },
-          { text: t('table.headers.protein'), mobileText: 'Pro' },
-          { text: t('table.headers.fat'), mobileText: 'Fat' },
-          { text: t('table.headers.carbs'), mobileText: 'Carb' },
+          {
+            text: t('calculator.quantity'),
+            mobileText: 'Qty',
+          },
+          {
+            text: t('table.headers.calories'),
+            mobileText: 'Cal',
+          },
+          {
+            text: t('table.headers.protein'),
+            mobileText: 'Pro',
+          },
+          {
+            text: t('table.headers.fat'),
+            mobileText: 'Fat',
+          },
+          {
+            text: t('table.headers.carbs'),
+            mobileText: 'Carb',
+          },
         ];
 
         detailHeaderData.forEach((headerInfo) => {
@@ -756,16 +771,27 @@ export class MacrosCalcRenderer {
         context.allLines.forEach((line) => {
           if (line.trim() === '' || line.startsWith('id:')) return;
 
-          if (line.toLowerCase().startsWith('meal:')) {
-            // It's a meal header
-            currentMealName = line.substring(5).trim();
+          if (line.toLowerCase().startsWith('meal:') || line.toLowerCase().startsWith('group:')) {
+            // FIXED: Handle meal/group headers with comments properly
+            const isGroup = line.toLowerCase().startsWith('group:');
+            currentMealName = line.substring(isGroup ? 6 : 5).trim();
+
+            // Parse comment from meal/group line
+            let displayName = currentMealName;
+            let comment = '';
+
+            const commentIndex = currentMealName.indexOf('//');
+            if (commentIndex !== -1) {
+              displayName = currentMealName.substring(0, commentIndex).trim();
+              comment = currentMealName.substring(commentIndex + 2).trim();
+            }
 
             // Extract meal name and count if present
-            let mealName = currentMealName;
+            let mealName = displayName;
             let count = 1;
 
             // Check if there's a count indicator like "× 2"
-            const countMatch = currentMealName.match(/^(.*)\s+×\s+(\d+)$/);
+            const countMatch = displayName.match(/^(.*)\s+×\s+(\d+)$/);
             if (countMatch) {
               mealName = countMatch[1];
               count = parseInt(countMatch[2]);
@@ -773,32 +799,41 @@ export class MacrosCalcRenderer {
 
             const headerRow = foodBody.insertRow();
             const headerCell = headerRow.insertCell();
-            headerCell.textContent = currentMealName;
             headerCell.classList.add('macroscalc-meal-header');
             headerCell.colSpan = 6; // Span all columns
+
+            // FIXED: Create header content with comment icon (same structure as main macros processor)
+            const headerContainer = headerCell.createDiv({ cls: 'macro-food-name-container' });
+            const headerContent = headerContainer.createDiv({ cls: 'food-name-content' });
+
+            // Add the meal/group name
+            const nameSpan = headerContent.createSpan({
+              cls: 'macro-food-name',
+              text: displayName,
+            });
+
+            // FIXED: Add comment icon if comment exists
+            if (comment) {
+              const commentIcon = headerContent.createSpan({
+                cls: 'food-comment-icon',
+                text: '💬',
+              });
+
+              // Add tooltip with the comment text
+              safeAttachTooltip(commentIcon, comment, this.plugin);
+            }
 
             // We'll collect bullet points and display them directly instead of using templates
           } else if (line.startsWith('-') && currentMealName) {
             // This is a bullet point for the current meal
             const bulletContent = line.substring(1).trim();
 
-            // Process this bullet point item
-            let foodName = bulletContent;
-            let quantity = t('calculator.standardQuantity');
-            let specifiedQuantity: number | null = null;
-
-            if (bulletContent.includes(':')) {
-              const parts = bulletContent.split(':');
-              foodName = parts[0].trim();
-              quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
-              specifiedQuantity = parseGrams(quantity);
-            }
-
-            // Create a row for this bullet item
-            this.renderFoodItemRow(foodBody, foodName, quantity, specifiedQuantity);
+            // FIXED: Process this bullet point item with proper comment separation
+            this.renderFoodItemRowFromBullet(foodBody, bulletContent);
           } else if (!line.startsWith('-')) {
             // Regular food item (not part of a meal template)
-            this.renderFoodItemRow(foodBody, line, t('calculator.standardQuantity'));
+            // FIXED: Process regular food items with proper comment separation
+            this.renderFoodItemRowFromLine(foodBody, line);
           }
         });
       } catch (error) {
@@ -814,17 +849,102 @@ export class MacrosCalcRenderer {
     })();
   }
 
-  // Helper method to render a food item row with kJ support
+  /**
+   * FIXED: New method to render food item from bullet point with proper comment handling
+   */
+  private renderFoodItemRowFromBullet(
+    foodBody: HTMLTableSectionElement,
+    bulletContent: string
+  ): void {
+    // Parse the bullet content to separate food info from comments
+    let itemText = bulletContent;
+    let comment = '';
+
+    // Check for comment syntax
+    const commentIndex = bulletContent.indexOf('//');
+    if (commentIndex !== -1) {
+      itemText = bulletContent.substring(0, commentIndex).trim();
+      comment = bulletContent.substring(commentIndex + 2).trim();
+    }
+
+    // Process food name and quantity from the clean item text
+    let foodName = itemText;
+    let quantity = t('calculator.standardQuantity');
+    let specifiedQuantity: number | null = null;
+
+    if (itemText.includes(':')) {
+      const parts = itemText.split(':');
+      foodName = parts[0].trim();
+      quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
+      specifiedQuantity = parseGrams(quantity);
+    }
+
+    // Create the full line for processing (including comment for tooltip)
+    const fullLine = comment ? `${itemText} // ${comment}` : itemText;
+
+    // FIXED: Pass the clean food name, not the full item text
+    this.renderFoodItemRow(foodBody, fullLine, quantity, specifiedQuantity, foodName);
+  }
+
+  /**
+   * FIXED: New method to render food item from regular line with proper comment handling
+   */
+  private renderFoodItemRowFromLine(foodBody: HTMLTableSectionElement, line: string): void {
+    // Parse the line to separate food info from comments
+    let itemText = line;
+    let comment = '';
+
+    // Check for comment syntax
+    const commentIndex = line.indexOf('//');
+    if (commentIndex !== -1) {
+      itemText = line.substring(0, commentIndex).trim();
+      comment = line.substring(commentIndex + 2).trim();
+    }
+
+    // Process food name and quantity from the clean item text
+    let foodName = itemText;
+    let quantity = t('calculator.standardQuantity');
+    let specifiedQuantity: number | null = null;
+
+    if (itemText.includes(':')) {
+      const parts = itemText.split(':');
+      foodName = parts[0].trim();
+      quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
+      specifiedQuantity = parseGrams(quantity);
+    }
+
+    // Create the full line for processing (including comment for tooltip)
+    const fullLine = comment ? `${itemText} // ${comment}` : itemText;
+
+    // FIXED: Pass the clean food name, not the full item text
+    this.renderFoodItemRow(foodBody, fullLine, quantity, specifiedQuantity, foodName);
+  }
+
+  // FIXED: Updated renderFoodItemRow method with explicit foodName parameter
   private renderFoodItemRow(
     foodBody: HTMLTableSectionElement,
     itemLine: string,
     quantity: string,
-    specifiedQuantity: number | null = null
+    specifiedQuantity: number | null = null,
+    explicitFoodName?: string // FIXED: Add explicit food name parameter
   ): void {
-    let foodName = itemLine;
+    // Parse comment from the item line first
+    const comment = this.parseCommentFromLine(itemLine);
 
-    if (itemLine.includes(':') && specifiedQuantity === null) {
-      const parts = itemLine.split(':');
+    // Get the clean item text without comment for food processing
+    let cleanItemLine = itemLine;
+    if (comment) {
+      const commentIndex = itemLine.indexOf('//');
+      if (commentIndex !== -1) {
+        cleanItemLine = itemLine.substring(0, commentIndex).trim();
+      }
+    }
+
+    // FIXED: Use explicit food name if provided, otherwise extract from line
+    let foodName = explicitFoodName || cleanItemLine;
+
+    if (!explicitFoodName && cleanItemLine.includes(':') && specifiedQuantity === null) {
+      const parts = cleanItemLine.split(':');
       foodName = parts[0].trim();
       quantity = parts.length > 1 ? parts[1].trim() : t('calculator.standardQuantity');
       specifiedQuantity = parseGrams(quantity);
@@ -850,10 +970,40 @@ export class MacrosCalcRenderer {
     // Calculate total macros for percentages
     const totalMacros = nutritionData.protein + nutritionData.fat + nutritionData.carbs;
 
-    // Add cells with data
+    // FIXED: Add name cell with proper comment handling (same as macros processor)
     const nameCell = foodRow.insertCell();
-    nameCell.textContent = foodName;
+    const nameContainer = nameCell.createDiv({ cls: 'macro-food-name-container' });
 
+    // Create main food name container
+    const nameContentDiv = nameContainer.createDiv({ cls: 'food-name-content' });
+
+    // Create a span for the food name
+    const nameSpan = nameContentDiv.createSpan({
+      cls: 'macro-food-name',
+    });
+    nameSpan.textContent = foodName; // FIXED: Use clean food name without serving size
+
+    // FIXED: Add comment icon if comment exists
+    if (comment) {
+      const commentIcon = nameContentDiv.createSpan({
+        cls: 'food-comment-icon',
+        text: '💬',
+      });
+
+      // Add tooltip with the comment text
+      safeAttachTooltip(commentIcon, comment, this.plugin);
+    }
+
+    // Handle truncation tooltip for long food names
+    setTimeout(() => {
+      const isOverflowing = nameSpan.scrollWidth > nameSpan.clientWidth + 2;
+      if (isOverflowing) {
+        nameSpan.removeAttribute('title');
+        safeAttachTooltip(nameSpan, foodName, this.plugin);
+      }
+    }, 200);
+
+    // FIXED: Clean quantity cell (no comments)
     const quantityCell = foodRow.insertCell();
     quantityCell.textContent = quantity;
 
@@ -908,6 +1058,15 @@ export class MacrosCalcRenderer {
     }
 
     carbsCell.classList.add('macroscalc-carbs-value');
+  }
+
+  /**
+   * Parse comment from a macro line (same as RowRenderer)
+   */
+  private parseCommentFromLine(line: string): string {
+    const commentIndex = line.indexOf('//');
+    if (commentIndex === -1) return '';
+    return line.substring(commentIndex + 2).trim();
   }
 
   private toggleDetailRow(id: string, toggle: HTMLElement): void {

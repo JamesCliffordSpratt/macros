@@ -32,7 +32,9 @@ export class LiveFoodSearchModal extends Modal {
     contentEl.addClass('live-food-search-modal');
     contentEl.createEl('h2', { text: t('food.search.title'), cls: 'mod-header' });
 
-    const searchContainer = contentEl.createDiv({ cls: 'search-container' });
+    const searchContainer = contentEl.createDiv({
+      cls: 'search-container macros-search-container',
+    });
     this.searchInput = searchContainer.createEl('input', {
       type: 'text',
       placeholder: t('food.search.placeholder'),
@@ -40,11 +42,13 @@ export class LiveFoodSearchModal extends Modal {
     });
 
     this.loadingIndicator = contentEl.createDiv({
-      cls: 'loading-indicator is-hidden',
+      cls: 'loading-indicator macros-loading-indicator is-hidden',
       text: t('food.search.searching'),
     });
 
-    this.resultsContainer = contentEl.createDiv({ cls: 'results-container' });
+    this.resultsContainer = contentEl.createDiv({
+      cls: 'results-container macros-results-container',
+    });
 
     this.noResultsMessage = contentEl.createDiv({
       cls: 'no-results-message is-hidden',

@@ -1,5 +1,3 @@
-// Simplified and more reliable mobile tooltip handling
-
 import { DOMUtils } from './DOMUtils';
 import MacrosPlugin from '@/main';
 

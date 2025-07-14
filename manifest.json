@@ -3,8 +3,9 @@
   "name": "Macros",
   "version": "2.2.1",
   "minAppVersion": "1.0.0",
-  "description": "Track and visualize your daily macros, meals and nutrition inside your notes.",
+  "description": "Track daily nutrition, calories, protein, fat, and carbs with interactive tables and charts. Create meal templates, search foods via FatSecret API, and visualize macro data with customizable pie charts and multi-day analytics.",
   "author": "James Spratt",
   "authorUrl": "https://github.com/JamesCliffordSpratt",
+  "fundingUrl": "https://buymeacoffee.com/jamescliffordspratt",
   "isDesktopOnly": false
 }

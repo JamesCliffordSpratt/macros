@@ -2,23 +2,29 @@ import MacrosPlugin from '../../../main';
 import {
   MacrosState,
   attachTooltip,
+  safeAttachTooltip,
   CLASS_NAMES,
   MacroTotals,
   DailyTargets,
   Group,
 } from '../../../utils';
 import { RowRenderer } from './RowRenderer';
+import { ContextMenuManager, CommentTarget } from '../../../ui/modals/ContextMenuManager';
+import { Notice } from 'obsidian';
 import { t } from '../../../lang/I18nManager';
+import { formatCalories } from '../../../utils/formatters';
 
 export class GroupRenderer {
   private plugin: MacrosPlugin;
   private state: MacrosState | null;
   private rowRenderer: RowRenderer;
+  private contextMenuManager: ContextMenuManager;
 
   constructor(plugin: MacrosPlugin, state: MacrosState | null) {
     this.plugin = plugin;
     this.state = state;
     this.rowRenderer = new RowRenderer(this.plugin);
+    this.contextMenuManager = new ContextMenuManager(this.plugin);
   }
 
   renderGroups(
@@ -33,14 +39,15 @@ export class GroupRenderer {
       isMealItem?: boolean,
       mealName?: string,
       originalItemText?: string
-    ) => Promise<void>
+    ) => Promise<void>,
+    macrosId: string // Add macrosId parameter for comment functionality
   ): void {
     this.rowRenderer.setRemoveCallback(onRemoveMacroLine);
     this.rowRenderer.setUpdateQuantityCallback(onUpdateQuantity);
     const multipleGroups = groups.length > 1;
 
     groups.forEach((group) => {
-      this.renderGroup(table, group, dailyTargets, !multipleGroups);
+      this.renderGroup(table, group, dailyTargets, !multipleGroups, macrosId);
     });
 
     if (multipleGroups && this.plugin.settings.showSummaryRows) {
@@ -52,7 +59,8 @@ export class GroupRenderer {
     table: HTMLTableElement,
     group: Group,
     dailyTargets: DailyTargets,
-    showTotals: boolean
+    showTotals: boolean,
+    macrosId: string
   ): void {
     const sectionName = group.name.replace(/\\s+/g, '-').toLowerCase();
 
@@ -67,13 +75,18 @@ export class GroupRenderer {
     );
     headerRow.dataset.section = sectionName;
 
-    this.createGroupHeader(headerCell, group);
+    // Store macro line for comment functionality
+    if (group.macroLine) {
+      headerCell.dataset.macroLine = group.macroLine;
+    }
+
+    this.createGroupHeader(headerCell, group, macrosId);
     this.setupCollapsibleHeader(headerCell, headerRow, table);
 
     this.renderColumnHeaders(table, sectionName);
 
     group.rows.forEach((row) => {
-      this.rowRenderer.renderFoodRow(table, row, group, sectionName, dailyTargets);
+      this.rowRenderer.renderFoodRow(table, row, group, sectionName, dailyTargets, macrosId);
     });
 
     if (showTotals && this.plugin.settings.showSummaryRows) {
@@ -81,21 +94,114 @@ export class GroupRenderer {
     }
   }
 
-  private createGroupHeader(headerCell: HTMLTableCellElement, group: Group): void {
-    const headerContent = createEl('div', { cls: 'header-content' });
+  private async removeCompleteGroup(group: Group, macrosId: string): Promise<void> {
+    try {
+      // Get the current document context
+      const context = await this.plugin.dataManager.getDocumentContext(macrosId);
 
+      if (!context || context.allLines.length === 0) {
+        throw new Error('Could not load macros data');
+      }
+
+      // Create updated lines by removing the group and all its items
+      const updatedLines = [...context.allLines];
+      let groupLineIndex = -1;
+
+      // Find the group line
+      for (let i = 0; i < updatedLines.length; i++) {
+        const line = updatedLines[i];
+        if (line.toLowerCase().startsWith('group:')) {
+          let groupName = line.substring(6).trim();
+          // Handle potential comments in group names
+          if (groupName.includes(' //')) {
+            groupName = groupName.split(' //')[0].trim();
+          }
+
+          if (groupName.toLowerCase() === group.name.toLowerCase()) {
+            groupLineIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (groupLineIndex === -1) {
+        throw new Error(`Group "${group.name}" not found`);
+      }
+
+      // Remove the group line
+      updatedLines.splice(groupLineIndex, 1);
+
+      // Remove all bullet points that follow the group line
+      while (
+        groupLineIndex < updatedLines.length &&
+        updatedLines[groupLineIndex].trim().startsWith('-')
+      ) {
+        updatedLines.splice(groupLineIndex, 1);
+      }
+
+      // Update the macros block
+      const success = await this.plugin.dataManager.updateMacrosBlock(macrosId, updatedLines);
+
+      if (!success) {
+        throw new Error('Failed to update macros block');
+      }
+
+      // Force a complete refresh
+      await this.plugin.forceCompleteReload();
+    } catch (error) {
+      this.plugin.logger.error('Error removing group:', error);
+      new Notice(`Error removing group: ${(error as Error).message}`);
+    }
+  }
+
+  private createGroupHeader(
+    headerCell: HTMLTableCellElement,
+    group: Group,
+    macrosId: string
+  ): void {
+    const headerContent = createEl('div', { cls: 'header-content' });
     const leftContent = createEl('div', { cls: 'header-left' });
 
-    // SIMPLIFIED: No multiplier display since we don't use multipliers anymore
+    // Parse comment from group macro line if it exists
+    let displayName = group.name;
+    let comment = '';
+
+    if (group.macroLine) {
+      const commentIndex = group.macroLine.indexOf('//');
+      if (commentIndex !== -1) {
+        comment = group.macroLine.substring(commentIndex + 2).trim();
+        // Extract the base name without comment for display
+        const baseLine = group.macroLine.substring(0, commentIndex).trim();
+        if (baseLine.toLowerCase().startsWith('meal:')) {
+          displayName = baseLine.substring(5).trim(); // Remove 'meal:' prefix
+        } else if (baseLine.toLowerCase().startsWith('group:')) {
+          displayName = baseLine.substring(6).trim(); // Remove 'group:' prefix
+        }
+      }
+    }
+
     const nameSpan = createEl('span', {
       cls: 'header-label',
-      text: group.name, // Just show the meal name, no "× 2" suffix
+      text: displayName,
     });
     leftContent.appendChild(nameSpan);
 
+    // Add comment icon if comment exists
+    if (comment) {
+      const commentIcon = createEl('span', {
+        cls: 'meal-comment-icon',
+        text: '💬',
+      });
+
+      // Add tooltip with the comment text
+      safeAttachTooltip(commentIcon, comment, this.plugin);
+      leftContent.appendChild(commentIcon);
+    }
+
+    // UPDATED: Use formatCalories for proper energy unit handling and remove brackets
     const caloriesSpan = createEl('span', {
       cls: 'header-calorie-summary',
-      text: `(${group.total.calories.toFixed(1)} ${t('table.headers.calories').toLowerCase()})`,
+      text: formatCalories(group.total.calories), // This will automatically handle kcal/kJ conversion and proper spacing
     });
     leftContent.appendChild(caloriesSpan);
 
@@ -106,11 +212,21 @@ export class GroupRenderer {
       });
       attachTooltip(removeBtn, t('table.actions.removeMeal'));
 
-      const removeBtnHandler = async (e: MouseEvent) => {
-        e.stopPropagation();
+      // Updated remove button handler to handle both meals and groups
+      const removeBtnHandler = async (e: Event) => {
+        const mouseEvent = e as MouseEvent;
+        mouseEvent.stopPropagation();
+
         const macroLine = group.macroLine;
         if (macroLine) {
-          await this.rowRenderer.onRemove(macroLine);
+          // Check if this is a group and handle accordingly
+          if (macroLine.toLowerCase().startsWith('group:')) {
+            // Use the removeCompleteGroup method for groups
+            await this.removeCompleteGroup(group, macrosId);
+          } else {
+            // Use the original remove method for meals
+            await this.rowRenderer.onRemove(macroLine);
+          }
         }
       };
 
@@ -125,6 +241,58 @@ export class GroupRenderer {
     headerContent.appendChild(leftContent);
     headerContent.appendChild(toggleSpan);
     headerCell.appendChild(headerContent);
+
+    // Add context menu for meal headers (only if it's a meal, not "Other Items")
+    if (group.macroLine && group.macroLine.toLowerCase().startsWith('meal:')) {
+      this.setupMealContextMenu(headerCell, group, macrosId, displayName);
+    }
+  }
+
+  private setupMealContextMenu(
+    headerCell: HTMLTableCellElement,
+    group: Group,
+    macrosId: string,
+    cleanMealName: string
+  ): void {
+    // Add context menu handler
+    const contextMenuHandler = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      // Don't show context menu if clicking on remove button or toggle
+      const target = mouseEvent.target as HTMLElement;
+      if (
+        target.classList.contains(CLASS_NAMES.ICONS.REMOVE) ||
+        target.classList.contains('toggle-icon')
+      ) {
+        return;
+      }
+
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
+
+      // Extract current comment from macro line
+      let currentComment = '';
+      if (group.macroLine) {
+        const commentIndex = group.macroLine.indexOf('//');
+        if (commentIndex !== -1) {
+          currentComment = group.macroLine.substring(commentIndex + 2).trim();
+        }
+      }
+
+      const commentTarget: CommentTarget = {
+        type: 'meal',
+        name: cleanMealName,
+        macroLine: group.macroLine || '',
+        macrosId,
+        currentComment,
+      };
+
+      this.contextMenuManager.showMealContextMenu(mouseEvent, commentTarget, async () => {
+        // Refresh the table after comment update
+        await this.plugin.forceCompleteReload();
+      });
+    };
+
+    this.plugin.registerDomListener(headerCell, 'contextmenu', contextMenuHandler);
   }
 
   private setupCollapsibleHeader(
@@ -148,8 +316,13 @@ export class GroupRenderer {
 
     headerCell.dataset.macroState = isCollapsed ? 'collapsed' : 'expanded';
 
-    const headerCellClickHandler = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).classList.contains(CLASS_NAMES.ICONS.REMOVE)) {
+    const headerCellClickHandler = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      // Don't handle click if it's a context menu event or on control buttons
+      if (mouseEvent.button === 2) return; // Right click
+
+      const target = mouseEvent.target as HTMLElement;
+      if (target.classList.contains(CLASS_NAMES.ICONS.REMOVE)) {
         return;
       }
 

@@ -415,7 +415,7 @@ serving_size: ${servingSize}
    * Updates the macros code block in the active file by merging static and interactive lines.
    * SIMPLIFIED VERSION: No multipliers, direct quantity merging under meal headers
    */
-  async updateMacrosCodeBlock() {
+  async updateMacrosCodeBlock(): Promise<void> {
     await this.queueUpdate(async () => {
       const activeFile = this.plugin.app.workspace.getActiveFile();
       if (!activeFile) return;
@@ -557,23 +557,23 @@ serving_size: ${servingSize}
       individualItems: new Map(),
     };
 
+    let currentGroupName: string | null = null;
+    let currentGroupItems = new Map<string, number>();
+
     for (const item of interactiveItems) {
       const cleanItem = item.startsWith(INTERACTIVE_PREFIX)
         ? item.substring(INTERACTIVE_PREFIX.length)
         : item;
 
       if (cleanItem.toLowerCase().startsWith('meal:')) {
-        // New meal to add
+        // Existing meal handling
         const mealName = cleanItem.substring(5).trim();
-
-        // Find meal template
         const mealTemplate = this.plugin.settings.mealTemplates.find(
           (m) => m.name.toLowerCase() === mealName.toLowerCase()
         );
 
         if (mealTemplate) {
           const mealItems = new Map<string, number>();
-
           for (const templateItem of mealTemplate.items) {
             const { foodName, quantity } = this.parseItemText(templateItem);
             if (foodName) {
@@ -581,10 +581,31 @@ serving_size: ${servingSize}
               mealItems.set(foodName, existingQuantity + quantity);
             }
           }
-
           newItems.meals.set(mealName, mealItems);
         }
-      } else {
+      } else if (cleanItem.toLowerCase().startsWith('group:')) {
+        // FIXED: Group handling
+        currentGroupName = cleanItem.substring(6).trim(); // Remove 'group:' prefix
+        currentGroupItems = new Map<string, number>();
+
+        // Don't add to meals yet, wait for the group items
+      } else if (cleanItem.startsWith('- ') && currentGroupName) {
+        // FIXED: Group item handling
+        const itemText = cleanItem.substring(2).trim(); // Remove '- ' prefix
+        const { foodName, quantity } = this.parseItemText(itemText);
+
+        if (foodName) {
+          const existingQuantity = currentGroupItems.get(foodName) || 0;
+          currentGroupItems.set(foodName, existingQuantity + quantity);
+        }
+      } else if (!cleanItem.startsWith('-')) {
+        // If we were building a group and hit a non-bullet item, finalize the group
+        if (currentGroupName && currentGroupItems.size > 0) {
+          newItems.meals.set(currentGroupName, new Map(currentGroupItems));
+          currentGroupName = null;
+          currentGroupItems = new Map();
+        }
+
         // Individual food item
         const { foodName, quantity } = this.parseItemText(cleanItem);
         if (foodName) {
@@ -592,6 +613,11 @@ serving_size: ${servingSize}
           newItems.individualItems.set(foodName, existingQuantity + quantity);
         }
       }
+    }
+
+    // FIXED: Finalize any remaining group
+    if (currentGroupName && currentGroupItems.size > 0) {
+      newItems.meals.set(currentGroupName, new Map(currentGroupItems));
     }
 
     return newItems;
@@ -692,7 +718,7 @@ serving_size: ${servingSize}
   /**
    * Updates the global macro table cache by parsing macros blocks from the provided content.
    */
-  updateGlobalMacroTableFromContent(content: string) {
+  updateGlobalMacroTableFromContent(content: string): void {
     try {
       const regex = /```[\t ]*macros[\t ]+id:[\t ]*(\S+)[\t ]*\n([\s\S]*?)```/g;
       let match;

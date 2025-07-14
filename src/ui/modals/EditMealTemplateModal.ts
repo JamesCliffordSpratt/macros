@@ -111,26 +111,30 @@ export class EditMealTemplateModal extends Modal {
   }
 
   private createHeader(): void {
-    const header = this.contentEl.createDiv({ cls: 'modal-header' });
+    const header = this.contentEl.createDiv({ cls: 'modal-header macros-modal-header' });
     header.createEl('h2', {
       text: t('meals.edit.title', { mealName: this.meal.name }),
-      cls: 'modal-title',
+      cls: 'modal-title macros-modal-title',
     });
     header.createEl('p', {
       text: t('meals.edit.description'),
-      cls: 'modal-description',
+      cls: 'modal-description macros-modal-description',
     });
   }
 
   private createSearchBar(): void {
-    const searchContainer = this.contentEl.createDiv({ cls: 'search-container' });
+    const searchContainer = this.contentEl.createDiv({
+      cls: 'search-container macros-search-container',
+    });
 
-    const searchWrapper = searchContainer.createDiv({ cls: 'search-wrapper' });
-    searchWrapper.createEl('span', { cls: 'search-icon', text: '🔍' });
+    const searchWrapper = searchContainer.createDiv({
+      cls: 'search-wrapper macros-search-wrapper',
+    });
+    searchWrapper.createEl('span', { cls: 'search-icon macros-search-icon', text: '🔍' });
 
     this.searchInput = searchWrapper.createEl('input', {
       type: 'text',
-      cls: 'search-input',
+      cls: 'search-input macros-search-input',
       attr: { placeholder: t('meals.create.searchPlaceholder') },
     });
 
@@ -167,7 +171,7 @@ export class EditMealTemplateModal extends Modal {
 
     if (this.filteredFoods.length === 0) {
       this.foodsContainer.createDiv({
-        cls: 'no-results',
+        cls: 'no-results macros-no-results',
         text: t('meals.create.noResults'),
       });
       return;
@@ -182,12 +186,12 @@ export class EditMealTemplateModal extends Modal {
 
       // Enhanced nutrition info with kJ support
       if (food.nutrition) {
-        const nutritionInfo = foodCard.createDiv({ cls: 'nutrition-info' });
+        const nutritionInfo = foodCard.createDiv({ cls: 'nutrition-info macros-nutrition-info' });
 
         // Enhanced calorie display with kJ support
         const currentEnergyUnit = this.plugin.settings.energyUnit;
         const calorieSpan = nutritionInfo.createEl('span', {
-          cls: 'nutrition-item calories',
+          cls: 'nutrition-item macros-nutrition-item calories',
         });
 
         if (currentEnergyUnit === 'kJ') {
@@ -204,15 +208,15 @@ export class EditMealTemplateModal extends Modal {
 
         nutritionInfo.createEl('span', {
           text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
-          cls: 'nutrition-item protein',
+          cls: 'nutrition-item macros-nutrition-item protein',
         });
         nutritionInfo.createEl('span', {
           text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
-          cls: 'nutrition-item fat',
+          cls: 'nutrition-item macros-nutrition-item fat',
         });
         nutritionInfo.createEl('span', {
           text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
-          cls: 'nutrition-item carbs',
+          cls: 'nutrition-item macros-nutrition-item carbs',
         });
 
         // Serving size
@@ -227,7 +231,9 @@ export class EditMealTemplateModal extends Modal {
       }
 
       // Action buttons container
-      const buttonContainer = foodCard.createDiv({ cls: 'button-container' });
+      const buttonContainer = foodCard.createDiv({
+        cls: 'button-container macros-button-container',
+      });
 
       if (food.isSelected) {
         // Remove button
@@ -401,7 +407,9 @@ export class EditMealTemplateModal extends Modal {
   }
 
   private createActionButtons(): void {
-    const buttonContainer = this.contentEl.createDiv({ cls: 'action-buttons' });
+    const buttonContainer = this.contentEl.createDiv({
+      cls: 'action-buttons macros-action-buttons',
+    });
 
     const cancelButton = buttonContainer.createEl('button', {
       text: t('general.cancel'),

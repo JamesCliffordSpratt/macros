@@ -27,12 +27,12 @@ export class FoodEntrySelectionModal extends Modal {
     // Create header
     contentEl.createEl('h2', {
       text: t('food.entry.title'),
-      cls: 'modal-title',
+      cls: 'modal-title macros-modal-title',
     });
 
     contentEl.createEl('p', {
       text: t('food.entry.description'),
-      cls: 'modal-description',
+      cls: 'modal-description macros-modal-description',
     });
 
     // Create button container
@@ -60,12 +60,12 @@ export class FoodEntrySelectionModal extends Modal {
     if (hasCredentials) {
       liveSearchFooter.createEl('span', {
         text: t('food.entry.apiConfigured'),
-        cls: 'status-indicator status-success',
+        cls: 'status-indicator macros-status-indicator status-success',
       });
     } else {
       liveSearchFooter.createEl('span', {
         text: t('food.entry.apiNotConfigured'),
-        cls: 'status-indicator status-warning',
+        cls: 'status-indicator macros-status-indicator status-warning',
       });
     }
 
@@ -86,7 +86,7 @@ export class FoodEntrySelectionModal extends Modal {
     const manualEntryFooter = manualEntryOption.createDiv({ cls: 'option-footer' });
     manualEntryFooter.createEl('span', {
       text: t('food.entry.alwaysAvailable'),
-      cls: 'status-indicator status-success',
+      cls: 'status-indicator macros-status-indicator status-success',
     });
 
     // Add click handlers
@@ -131,7 +131,7 @@ export class FoodEntrySelectionModal extends Modal {
       if (!credentials) {
         // Show error and keep modal open
         const errorEl = this.contentEl.createDiv({
-          cls: 'api-error-message',
+          cls: 'api-error-message macros-api-error-message',
           text: t('notifications.apiCredentialsRequired'),
         });
 
@@ -158,7 +158,7 @@ export class FoodEntrySelectionModal extends Modal {
       this.plugin.logger.error('Error opening live search:', error);
 
       const errorEl = this.contentEl.createDiv({
-        cls: 'api-error-message',
+        cls: 'api-error-message macros-api-error-message',
         text: t('errors.apiConnectionFailed'),
       });
 

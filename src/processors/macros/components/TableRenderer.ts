@@ -215,7 +215,12 @@ export class MacrosTableRenderer {
       cls: ['macros-table', 'macros-table-colored'],
     });
 
-    // Render groups to table
+    // Store macros ID on the table for context menu functionality
+    if (this.id) {
+      table.dataset.macrosId = this.id;
+    }
+
+    // Render groups to table - UPDATED: Pass macrosId for comment functionality
     this.groupRenderer.renderGroups(
       table,
       groups,
@@ -223,7 +228,8 @@ export class MacrosTableRenderer {
       dailyTargets,
       async (macroLine) => await this.removeMacroLine(macroLine),
       async (macroLine, newQuantity, isMealItem, mealName) =>
-        await this.updateMacroLineQuantity(macroLine, newQuantity, isMealItem, mealName)
+        await this.updateMacroLineQuantity(macroLine, newQuantity, isMealItem, mealName),
+      this.id || '' // Pass macrosId for comment functionality
     );
 
     fragment.appendChild(table);
