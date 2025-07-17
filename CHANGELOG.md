@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/JamesCliffordSpratt/macros/compare/v2.3.0...v2.3.1) (2025-07-17)
+
+
+### Features
+
+* add clear button to search inputs and fix mobile menu CSS conflicts ([2b60dc6](https://github.com/JamesCliffordSpratt/macros/commit/2b60dc677386bde001f1a4896eed2bd80800e07a))
+
 ## [2.3.0](https://github.com/JamesCliffordSpratt/macros/compare/v2.2.1...v2.3.0) (2025-07-14)
 
 ### [2.2.1](https://github.com/JamesCliffordSpratt/macros/compare/v2.2.0...v2.2.1) (2025-07-10)
