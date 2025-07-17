@@ -21,6 +21,26 @@ interface NewItemsStructure {
   individualItems: Map<string, number>;
 }
 
+// FIX: Add proper type for active renderers instead of any
+interface MacroTotals {
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+interface CalcBreakdown {
+  id: string;
+  totals: MacroTotals;
+}
+
+interface MacrosCalcRenderer {
+  el: HTMLElement;
+  getIds: () => string[];
+  render: (aggregate: MacroTotals, breakdown: CalcBreakdown[]) => Promise<void>;
+  setNeedsRefresh?: () => void;
+}
+
 /**
  * DataManager
  * -----------
@@ -35,7 +55,8 @@ export class DataManager {
   macroTables: Map<string, string[]> = new Map();
   macrospcContainers: Map<string, Set<HTMLElement>> = new Map();
   macrocalcContainers: Set<HTMLElement> = new Set();
-  _activeMacrosCalcRenderers: Set<any> = new Set();
+  // FIX: Use proper type instead of any
+  _activeMacrosCalcRenderers: Set<MacrosCalcRenderer> = new Set();
   _registeredDomElements: { el: HTMLElement; type: string; handler: EventListener }[] = [];
 
   // File cache system
@@ -529,9 +550,12 @@ serving_size: ${servingSize}
         const { foodName, quantity } = this.parseItemText(itemText);
 
         if (foodName) {
-          const mealItems = structure.meals.get(currentMealName)!;
-          const existingQuantity = mealItems.get(foodName) || 0;
-          mealItems.set(foodName, existingQuantity + quantity);
+          // FIX: Add null check instead of using non-null assertion
+          const mealItems = structure.meals.get(currentMealName);
+          if (mealItems) {
+            const existingQuantity = mealItems.get(foodName) || 0;
+            mealItems.set(foodName, existingQuantity + quantity);
+          }
         }
       } else if (!line.startsWith('-') && !line.toLowerCase().startsWith('meal:')) {
         // Individual food item (not under a meal)
@@ -642,11 +666,13 @@ serving_size: ${servingSize}
         merged.meals.set(mealName, new Map(newMealItems));
       } else {
         // Existing meal - merge quantities
-        const existingMealItems = merged.meals.get(mealName)!;
-
-        for (const [foodName, quantity] of newMealItems) {
-          const existingQuantity = existingMealItems.get(foodName) || 0;
-          existingMealItems.set(foodName, existingQuantity + quantity);
+        // FIX: Add null check instead of using non-null assertion
+        const existingMealItems = merged.meals.get(mealName);
+        if (existingMealItems) {
+          for (const [foodName, quantity] of newMealItems) {
+            const existingQuantity = existingMealItems.get(foodName) || 0;
+            existingMealItems.set(foodName, existingQuantity + quantity);
+          }
         }
       }
     }

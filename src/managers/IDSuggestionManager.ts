@@ -33,7 +33,8 @@ export class MacrosIDSuggest extends EditorSuggest<IDSuggestion> {
     this.plugin = plugin;
   }
 
-  onTrigger(cursor: EditorPosition, editor: Editor, file: TFile): EditorSuggestTriggerInfo | null {
+  // FIX: Add underscore prefix to unused parameter
+  onTrigger(cursor: EditorPosition, editor: Editor, _file: TFile): EditorSuggestTriggerInfo | null {
     // Get the current line
     const line = editor.getLine(cursor.line);
 
@@ -186,8 +187,15 @@ export class MacrosIDSuggest extends EditorSuggest<IDSuggestion> {
     });
   }
 
-  selectSuggestion(suggestion: IDSuggestion, evt: MouseEvent | KeyboardEvent): void {
-    const { editor, start, end } = this.context!;
+  // FIX: Add underscore prefix to unused parameter and add null check
+  selectSuggestion(suggestion: IDSuggestion, _evt: MouseEvent | KeyboardEvent): void {
+    // FIX: Add null check instead of using non-null assertion
+    const context = this.context;
+    if (!context) {
+      return;
+    }
+
+    const { editor, start, end } = context;
 
     // Replace the text after "id: " or "ids: " with the suggestion
     editor.replaceRange(suggestion.insertText, start, end);
@@ -257,7 +265,7 @@ export class MacrosIDSuggest extends EditorSuggest<IDSuggestion> {
   /**
    * Gets an array of date strings for the week ending on the given date
    */
-  private getWeekDates(endDate: Date, daysBack: number = 6): string[] {
+  private getWeekDates(endDate: Date, daysBack = 6): string[] {
     const dates: string[] = [];
 
     for (let i = daysBack; i >= 0; i--) {

@@ -8,7 +8,7 @@ import { convertEnergyUnit } from '../../utils/energyUtils';
 
 interface FoodItemData {
   name: string;
-  file: any;
+  file: import('obsidian').TFile;
   nutrition?: {
     calories: number;
     protein: number;
@@ -117,7 +117,7 @@ export class AddMealTemplateModal extends Modal {
   private createMealNameSection(): void {
     const nameSection = this.contentEl.createDiv({ cls: 'meal-name-section' });
 
-    const label = nameSection.createEl('label', {
+    const _label = nameSection.createEl('label', {
       text: t('meals.create.nameLabel'),
       cls: 'meal-name-label',
     });

@@ -1,3 +1,9 @@
+/**
+ * Chart Utilities
+ * --------------
+ * Utility functions for chart creation and manipulation.
+ */
+
 import { ChartLoader } from '../ChartLoader';
 
 // Make Chart.js available on the window object in a type-safe way
@@ -23,35 +29,6 @@ export function calculatePieChartAngles(slices: { value: number }[]): number[] {
 
   if (angles.length > 0) angles[angles.length - 1] += angleDiff;
   return angles;
-}
-
-/**
- * Creates a legend for a pie chart
- * @param el Parent element to add the legend to
- * @param slices Array of slices with labels, values, and colors
- * @returns The created legend element
- */
-export function createPieChartLegend(
-  el: HTMLElement,
-  slices: { label: string; value: number; color: string }[]
-): HTMLElement {
-  const legendDiv = el.createEl('div', {
-    cls: 'macrospc-legend',
-  });
-
-  slices.forEach((slice) => {
-    const legendItem = legendDiv.createEl('div', {
-      cls: 'macrospc-legend-item',
-    });
-
-    const colorBox = legendItem.createEl('span');
-    colorBox.addClass('macrospc-legend-color-box');
-    colorBox.setAttribute('data-color', slice.color);
-
-    legendItem.createEl('span', { text: `${slice.label}: ${slice.value.toFixed(2)} g` });
-  });
-
-  return legendDiv;
 }
 
 /**
@@ -149,12 +126,42 @@ export function renderMacronutrientPieChart(
 }
 
 /**
+ * Creates a legend for a pie chart
+ * @param el Parent element to add the legend to
+ * @param slices Array of slices with labels, values, and colors
+ * @returns The created legend element
+ */
+export function createPieChartLegend(
+  el: HTMLElement,
+  slices: { label: string; value: number; color: string }[]
+): HTMLElement {
+  const legendDiv = el.createEl('div', {
+    cls: 'macrospc-legend',
+  });
+
+  slices.forEach((slice) => {
+    const legendItem = legendDiv.createEl('div', {
+      cls: 'macrospc-legend-item',
+    });
+
+    const colorBox = legendItem.createEl('span');
+    colorBox.addClass('macrospc-legend-color-box');
+    colorBox.setAttribute('data-color', slice.color);
+
+    legendItem.createEl('span', { text: `${slice.label}: ${slice.value.toFixed(2)} g` });
+  });
+
+  return legendDiv;
+}
+
+/**
  * Cleans up any legacy chart instances
  * This should be called during plugin unload to prevent memory leaks
  */
 export function cleanupMacroCharts(): void {
   if (window.macroCharts) {
-    Object.entries(window.macroCharts).forEach(([id, chart]) => {
+    // FIX: Use underscore prefix for unused parameter
+    Object.entries(window.macroCharts).forEach(([_id, chart]) => {
       if (chart && typeof chart.destroy === 'function') {
         chart.destroy();
       }
@@ -164,7 +171,7 @@ export function cleanupMacroCharts(): void {
 }
 
 /**
- * Ensures Chart.js is loaded (wrapper for ChartLoader)
+ * Ensure Chart.js is loaded using ChartLoader
  */
 export async function ensureChartJsLoaded(): Promise<void> {
   await ChartLoader.getInstance().loadChart();

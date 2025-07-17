@@ -97,8 +97,8 @@ class DeleteConfirmationModal extends Modal {
         this.close();
       });
 
-    // Delete button
-    const deleteBtn = new ButtonComponent(buttonContainer)
+    // Delete button - FIX: Use the button instead of assigning to unused variable
+    new ButtonComponent(buttonContainer)
       .setButtonText(t('general.remove'))
       .setClass('mod-warning')
       .onClick(async () => {
@@ -195,8 +195,8 @@ export class RowRenderer {
     tableRow: HTMLTableRowElement,
     row: MacroRow,
     macrosId: string,
-    isMealItem: boolean = false,
-    containerName: string = ''
+    isMealItem = false,
+    containerName = ''
   ): void {
     const contextMenuHandler = (e: Event) => {
       const mouseEvent = e as MouseEvent;
@@ -248,23 +248,22 @@ export class RowRenderer {
 
   /**
    * NEW: Unified long press handler that shows context menu instead of delete modal
+   * FIX: Use underscore prefix for unused parameters to satisfy ESLint
    */
   private setupUnifiedLongPress(
     tableRow: HTMLTableRowElement,
-    row: MacroRow,
-    macrosId: string,
-    isMealItem: boolean,
-    containerName: string
+    _row: MacroRow,
+    _macrosId: string,
+    _isMealItem: boolean,
+    _containerName: string
   ): void {
     if (!this.isMobileDevice()) {
       return; // Only enable on mobile devices
     }
 
     let longPressTimer: NodeJS.Timeout | null = null;
-    let startTime = 0;
     let startX = 0;
     let startY = 0;
-    let isLongPress = false;
     let hasMovedTooMuch = false;
 
     const longPressDuration = 500; // Reduced to 500ms for better UX
@@ -275,10 +274,8 @@ export class RowRenderer {
       if (e.touches.length !== 1) return; // Only single touch
 
       const touch = e.touches[0];
-      startTime = Date.now();
       startX = touch.clientX;
       startY = touch.clientY;
-      isLongPress = false;
       hasMovedTooMuch = false;
 
       // Add subtle visual feedback
@@ -287,8 +284,6 @@ export class RowRenderer {
       // Start long press timer
       longPressTimer = setTimeout(() => {
         if (!hasMovedTooMuch) {
-          isLongPress = true;
-
           // Haptic feedback if available
           if ('vibrate' in navigator) {
             navigator.vibrate(50); // Short vibration
@@ -336,7 +331,6 @@ export class RowRenderer {
 
       // Clean up visual states
       tableRow.classList.remove('long-press-active');
-      isLongPress = false;
       hasMovedTooMuch = false;
     };
 
@@ -348,7 +342,6 @@ export class RowRenderer {
       }
 
       tableRow.classList.remove('long-press-active');
-      isLongPress = false;
       hasMovedTooMuch = false;
     };
 
@@ -508,11 +501,12 @@ export class RowRenderer {
 
   /**
    * Remove a meal/group item by modifying the macros block with clean names
+   * FIX: Use underscore prefix for unused parameter
    */
   async onRemoveMealItem(
     containerName: string,
     foodName: string,
-    macroLine: string
+    _macroLine: string
   ): Promise<void> {
     if (!this.plugin.dataManager.getActiveFile()) {
       new Notice(t('errors.noActiveFile'));
@@ -825,7 +819,7 @@ export class RowRenderer {
     value: number,
     row: MacroRow,
     macroType: string,
-    dailyTargets: DailyTargets
+    _dailyTargets: DailyTargets
   ): void {
     const cell = tableRow.insertCell();
     cell.classList.add(CLASS_NAMES.MACRO.CELL, `${macroType}-cell`);
@@ -848,21 +842,14 @@ export class RowRenderer {
 
     ProgressBarFactory.createMacroProgressBar(cell, percentageOfFood, macroType);
 
-    let macroLabel = '';
-    let target = 0;
+    // FIX: Use the variables instead of declaring unused ones
     let macroType2: 'protein' | 'fat' | 'carbs' = 'protein';
 
     if (macroType === MACRO_TYPES.PROTEIN) {
-      macroLabel = t('table.headers.protein');
-      target = dailyTargets.protein;
       macroType2 = 'protein';
     } else if (macroType === MACRO_TYPES.FAT) {
-      macroLabel = t('table.headers.fat');
-      target = dailyTargets.fat;
       macroType2 = 'fat';
     } else if (macroType === MACRO_TYPES.CARBS) {
-      macroLabel = t('table.headers.carbs');
-      target = dailyTargets.carbs;
       macroType2 = 'carbs';
     }
 

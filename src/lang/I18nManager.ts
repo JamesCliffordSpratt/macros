@@ -16,6 +16,28 @@ export interface SupportedLocale {
   contributors?: string[];
 }
 
+// FIX: Define interfaces for type safety instead of using 'any'
+interface ObsidianAppWithConfig {
+  vault?: {
+    config?: {
+      userInterfaceMode?: string;
+    };
+  };
+  locale?: string;
+}
+
+interface WindowWithMoment {
+  moment?: {
+    locale?: () => string;
+  };
+}
+
+interface GlobalWithMoment {
+  moment?: {
+    locale?: () => string;
+  };
+}
+
 /**
  * I18nManager
  * -----------
@@ -211,12 +233,12 @@ export class I18nManager {
    */
   private detectUserLocale(): string {
     try {
-      // Get locale from Obsidian's native settings using safe methods
+      // FIX: Use typed interfaces instead of 'any'
       const obsidianLocale =
         this.getMomentLocale() || // Use existing safe method
         document.documentElement.lang ||
-        (this.app as any).vault?.config?.userInterfaceMode ||
-        (this.app as any).locale;
+        (this.app as ObsidianAppWithConfig).vault?.config?.userInterfaceMode ||
+        (this.app as ObsidianAppWithConfig).locale;
 
       this.plugin.logger.debug(`Detected Obsidian locale: ${obsidianLocale}`);
 
@@ -265,18 +287,19 @@ export class I18nManager {
    */
   private getMomentLocale(): string | null {
     try {
+      // FIX: Use typed interfaces for window and global moment access
       // Check if moment is available on window object
-      if (typeof window !== 'undefined' && (window as any).moment) {
-        const momentInstance = (window as any).moment;
-        if (momentInstance.locale && typeof momentInstance.locale === 'function') {
+      if (typeof window !== 'undefined' && (window as WindowWithMoment).moment) {
+        const momentInstance = (window as WindowWithMoment).moment;
+        if (momentInstance?.locale && typeof momentInstance.locale === 'function') {
           return momentInstance.locale();
         }
       }
 
       // Check global moment
-      if (typeof (globalThis as any).moment !== 'undefined') {
-        const momentInstance = (globalThis as any).moment;
-        if (momentInstance.locale && typeof momentInstance.locale === 'function') {
+      if (typeof (globalThis as GlobalWithMoment).moment !== 'undefined') {
+        const momentInstance = (globalThis as GlobalWithMoment).moment;
+        if (momentInstance?.locale && typeof momentInstance.locale === 'function') {
           return momentInstance.locale();
         }
       }
@@ -411,6 +434,7 @@ export class I18nManager {
 
   /**
    * Get nested value from object using dot notation
+   * FIX: Use proper typing for the reducer function
    */
   private getNestedValue(
     obj: LocaleData | undefined,
@@ -418,8 +442,11 @@ export class I18nManager {
   ): string | LocaleData | undefined {
     if (!obj) return undefined;
 
-    return path.split('.').reduce((current: any, key: string) => {
-      return current?.[key];
+    return path.split('.').reduce((current: string | LocaleData | undefined, key: string) => {
+      if (current && typeof current === 'object' && key in current) {
+        return current[key];
+      }
+      return undefined;
     }, obj);
   }
 

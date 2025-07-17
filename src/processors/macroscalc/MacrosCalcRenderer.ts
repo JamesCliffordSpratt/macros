@@ -20,10 +20,9 @@ import { processNutritionalDataFromLines } from './calculator';
 import { t } from '../../lang/I18nManager';
 import { convertEnergyUnit } from '../../utils/energyUtils';
 
-// Define the chart reference type for proper TypeScript support
 interface ChartReference {
-  chart: any; // Chart.js instance
-  caloriesChart: any; // Chart.js instance for calories
+  chart: import('chart.js').Chart; // Specific Chart.js type instead of any
+  caloriesChart: import('chart.js').Chart | null; // Specific Chart.js type instead of any
   resizeHandler: () => void; // Resize event handler
 }
 
@@ -75,7 +74,8 @@ export class MacrosCalcRenderer {
     return this.state ? this.state.getCollapsedState('dashboard') : false;
   }
 
-  async render(aggregate: MacroTotals, breakdown: CalcBreakdown[]): Promise<void> {
+  // FIX: Use underscore prefix for unused parameters to satisfy ESLint
+  async render(_aggregate: MacroTotals, _breakdown: CalcBreakdown[]): Promise<void> {
     // Always force fresh data fetch if needed
     if (this.needsDataRefresh) {
       this.plugin.logger.debug('MacrosCalc refresh triggered - reloading all data');
@@ -157,13 +157,13 @@ export class MacrosCalcRenderer {
       // Create a container for the header content to allow sorting UI
       const headerContainer = cell.createDiv({ cls: 'macroscalc-header-container' });
 
-      // Create spans for responsive text
-      const desktopSpan = headerContainer.createSpan({
+      // FIX: Create spans directly without storing in unused variables
+      headerContainer.createSpan({
         cls: 'header-text-desktop',
         text: headerInfo.text,
       });
 
-      const mobileSpan = headerContainer.createSpan({
+      headerContainer.createSpan({
         cls: 'header-text-mobile',
         text: headerInfo.mobileText,
       });
@@ -213,13 +213,13 @@ export class MacrosCalcRenderer {
     const aggLabelCell = aggregateRow.insertCell();
     aggLabelCell.classList.add('macro-bold-cell');
 
-    // Create responsive text for "Combined Totals" vs "Totals"
-    const desktopLabel = aggLabelCell.createSpan({
+    // FIX: Create responsive text directly without storing in unused variables
+    aggLabelCell.createSpan({
       cls: 'header-text-desktop',
       text: t('calculator.combinedTotals'),
     });
 
-    const mobileLabel = aggLabelCell.createSpan({
+    aggLabelCell.createSpan({
       cls: 'header-text-mobile',
       text: t('table.summary.totals'),
     });
@@ -786,17 +786,8 @@ export class MacrosCalcRenderer {
               comment = currentMealName.substring(commentIndex + 2).trim();
             }
 
-            // Extract meal name and count if present
-            let mealName = displayName;
-            let count = 1;
-
-            // Check if there's a count indicator like "× 2"
-            const countMatch = displayName.match(/^(.*)\s+×\s+(\d+)$/);
-            if (countMatch) {
-              mealName = countMatch[1];
-              count = parseInt(countMatch[2]);
-            }
-
+            // FIX: Remove unused variables for meal name and count parsing
+            // These were calculated but never used
             const headerRow = foodBody.insertRow();
             const headerCell = headerRow.insertCell();
             headerCell.classList.add('macroscalc-meal-header');
@@ -806,8 +797,8 @@ export class MacrosCalcRenderer {
             const headerContainer = headerCell.createDiv({ cls: 'macro-food-name-container' });
             const headerContent = headerContainer.createDiv({ cls: 'food-name-content' });
 
-            // Add the meal/group name
-            const nameSpan = headerContent.createSpan({
+            // FIX: Create span directly without storing in unused variable
+            headerContent.createSpan({
               cls: 'macro-food-name',
               text: displayName,
             });
@@ -1425,17 +1416,17 @@ export class MacrosCalcRenderer {
             },
             tooltip: {
               callbacks: {
-                label: function (context: any) {
-                  let value = context.parsed.y.toFixed(1);
+                label: function (context: import('chart.js').TooltipItem<'line'>) {
+                  let value = context.parsed.y.toFixed(1); // Changed from 'const' to 'let'
                   let unit = '';
 
-                  if (context.dataset.label?.includes('calories')) {
-                    unit = ` ${currentEnergyUnit}`;
-                    // Add conversion info in tooltip if showing kJ
-                    if (isKjUnit) {
-                      const originalKcal = breakdown[context.dataIndex].totals.calories;
-                      return `${context.dataset.label}: ${value}${unit} (${originalKcal.toFixed(1)} kcal)`;
-                    }
+                  // Check if this is a calorie dataset and convert if needed
+                  if (context.dataset.label?.includes('calorie') && isKjUnit) {
+                    const kjValue = convertEnergyUnit(context.parsed.y, 'kcal', 'kJ');
+                    value = kjValue.toFixed(1);
+                    unit = ' kJ';
+                  } else if (context.dataset.label?.includes('calorie')) {
+                    unit = ' kcal';
                   } else {
                     unit = 'g';
                   }

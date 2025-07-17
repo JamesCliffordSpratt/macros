@@ -35,6 +35,7 @@ export class AddToMacrosModal extends Modal {
 
   // UI elements
   private searchInput: HTMLInputElement;
+  private searchClearButton: HTMLElement;
   private mealsContainer: HTMLElement;
   private foodsContainer: HTMLElement;
   private groupContainer: HTMLElement;
@@ -212,14 +213,57 @@ export class AddToMacrosModal extends Modal {
       attr: { placeholder: t('meals.addTo.searchPlaceholder') },
     });
 
+    // Create clear button
+    this.searchClearButton = searchWrapper.createEl('button', {
+      cls: 'search-clear-button macros-search-clear-button',
+      attr: {
+        type: 'button',
+        title: t('general.clear'),
+        'aria-label': t('general.clear'),
+      },
+    });
+    this.searchClearButton.innerHTML = '✕';
+
+    // Initially hide the clear button
+    this.searchClearButton.style.display = 'none';
+
     // Add search functionality
     this.component.registerDomEvent(this.searchInput, 'input', () => {
       const query = this.searchInput.value;
+
+      // Show/hide clear button based on input content
+      if (query.length > 0) {
+        this.searchClearButton.style.display = 'flex';
+      } else {
+        this.searchClearButton.style.display = 'none';
+      }
+
       this.filterAndRender(query);
     });
 
-    // Handle keyboard navigation between tabs
+    // Add clear button functionality
+    this.component.registerDomEvent(this.searchClearButton, 'click', (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.searchInput.value = '';
+      this.searchClearButton.style.display = 'none';
+      this.searchInput.focus();
+      this.filterAndRender('');
+    });
+
+    // Handle keyboard navigation for clear button and existing functionality
     this.component.registerDomEvent(this.searchInput, 'keydown', (e: KeyboardEvent) => {
+      // Handle Escape key to clear search
+      if (e.key === 'Escape' && this.searchInput.value.length > 0) {
+        e.preventDefault();
+        this.searchInput.value = '';
+        this.searchClearButton.style.display = 'none';
+        this.filterAndRender('');
+        return;
+      }
+
+      // Handle tab navigation between tabs
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'Tab') {
           e.preventDefault();
@@ -888,7 +932,7 @@ export class AddToMacrosModal extends Modal {
         text: t('meals.addTo.noSelectedItems'),
       });
     } else {
-      allSelectedItems.forEach((item, index) => {
+      allSelectedItems.forEach((item, _index) => {
         const itemTag = this.selectedItemsContainer.createDiv({ cls: 'selected-item-tag' });
 
         let displayText = item.startsWith('interactive:')

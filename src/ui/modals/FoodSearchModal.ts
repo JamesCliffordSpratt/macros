@@ -6,7 +6,7 @@ export class FoodSearchModal extends Modal {
   onSubmit: (searchTerm: string) => void;
   private component: Component;
 
-  constructor(app: App, onSubmit: (searchTerm: string) => void, plugin?: MacrosPlugin) {
+  constructor(app: App, onSubmit: (searchTerm: string) => void, _plugin?: MacrosPlugin) {
     super(app);
     this.onSubmit = onSubmit;
     this.component = new Component();

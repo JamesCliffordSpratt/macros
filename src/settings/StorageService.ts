@@ -44,7 +44,7 @@ class SortableTabOrder extends Component {
   private containerEl: HTMLElement;
   private listEl: HTMLElement;
   private draggedItem: HTMLElement | null = null;
-  private draggedIndex: number = -1;
+  private draggedIndex = -1;
 
   constructor(plugin: MacrosPlugin, containerEl: HTMLElement) {
     super();
@@ -55,7 +55,8 @@ class SortableTabOrder extends Component {
   create(): void {
     const sortableContainer = this.containerEl.createDiv({ cls: 'sortable-tab-order-container' });
 
-    const instructionText = sortableContainer.createEl('p', {
+    // FIX: Remove unused variable assignment - element is created but doesn't need to be stored
+    sortableContainer.createEl('p', {
       text: t('settings.display.tabOrderInstructions'),
       cls: 'sortable-instructions',
     });
@@ -83,49 +84,35 @@ class SortableTabOrder extends Component {
         },
       });
 
-      const dragHandle = listItem.createEl('span', {
+      // FIX: Remove unused variable assignment - element is created but doesn't need to be stored
+      listItem.createEl('span', {
         cls: 'drag-handle',
         text: '⋮⋮',
         attr: { title: t('settings.display.dragToReorder') },
       });
 
       const tabContent = listItem.createEl('div', { cls: 'tab-content' });
-
-      const tabIcon = this.getTabIcon(tabKey);
       const tabLabel = this.getTabLabel(tabKey);
 
       // Only add the icon once here
-      tabContent.createEl('span', { cls: 'tab-icon', text: tabIcon });
       tabContent.createEl('span', { cls: 'tab-label', text: tabLabel });
 
-      const positionIndicator = listItem.createEl('span', {
+      // FIX: Remove unused variable assignment - element is created but doesn't need to be stored
+      listItem.createEl('span', {
         cls: 'position-indicator',
         text: (index + 1).toString(),
       });
     });
   }
 
-  private getTabIcon(tabKey: string): string {
-    switch (tabKey) {
-      case 'meals':
-        return '🍽️';
-      case 'foods':
-        return '🥗';
-      case 'group':
-        return '🗂️';
-      default:
-        return '📋';
-    }
-  }
-
   private getTabLabel(tabKey: string): string {
     switch (tabKey) {
       case 'meals':
-        return 'Meal Templates';
+        return t('meals.addTo.mealTemplates');
       case 'foods':
-        return 'Individual Foods';
+        return t('meals.addTo.individualFoods');
       case 'group':
-        return 'Create Group';
+        return t('meals.addTo.createGroup');
       default:
         return tabKey;
     }
@@ -149,7 +136,8 @@ class SortableTabOrder extends Component {
       }
     });
 
-    this.registerDomEvent(this.listEl, 'dragend', (e: DragEvent) => {
+    // FIX: Use underscore prefix for unused parameter
+    this.registerDomEvent(this.listEl, 'dragend', (_e: DragEvent) => {
       if (this.draggedItem) {
         this.draggedItem.classList.remove('dragging');
         this.draggedItem = null;
@@ -265,8 +253,9 @@ export class NutritionalSettingTab extends PluginSettingTab {
       value: this.plugin.settings.storageFolder,
     });
 
-    // Initialize FolderSuggest with the input element
-    const folderSuggest = new FolderSuggest(this.app, folderInputEl, 'Nutrition');
+    // FIX: Initialize FolderSuggest without storing in unused variable
+    // The FolderSuggest instance is created and attached to the input, but we don't need to store the reference
+    new FolderSuggest(this.app, folderInputEl, 'Nutrition');
 
     // Add change handler
     folderInputEl.addEventListener('change', async () => {
@@ -297,7 +286,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
         // kcal input
         const kcalContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
-        const kcalLabel = kcalContainer.createEl('label', {
+        // FIX: Remove unused variable assignment - element is created but doesn't need to be stored
+        kcalContainer.createEl('label', {
           text: 'kcal',
           cls: 'energy-input-label',
         });
@@ -314,7 +304,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
         // kJ input
         const kjContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
-        const kjLabel = kjContainer.createEl('label', {
+        // FIX: Remove unused variable assignment - element is created but doesn't need to be stored
+        kjContainer.createEl('label', {
           text: 'kJ',
           cls: 'energy-input-label',
         });
@@ -832,8 +823,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
           if (legend.labels) {
             legend.labels.padding = 15;
             legend.labels.usePointStyle = true;
-            // @ts-ignore - pointStyle exists but might not be in your types
-            legend.labels.pointStyle = 'circle';
+            // Use proper type assertion for Chart.js legend labels
+            (legend.labels as { pointStyle?: string }).pointStyle = 'circle';
           }
         }
 

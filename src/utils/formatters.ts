@@ -76,7 +76,7 @@ export function formatWeight(weight: number): string {
  * @param unit Unit string (default: 'g')
  * @returns Formatted string with space between value and unit
  */
-export function formatMacro(value: number, unit: string = 'g'): string {
+export function formatMacro(value: number, unit = 'g'): string {
   return `${value.toFixed(1)} ${unit}`; // Added space between number and unit
 }
 
@@ -373,7 +373,7 @@ export function formatMacroPercentageTooltip(
  * @param showUnit Whether to include the unit in the output
  * @returns Formatted energy string with proper spacing
  */
-export function formatEnergy(valueInKcal: number, showUnit: boolean = true): string {
+export function formatEnergy(valueInKcal: number, showUnit = true): string {
   if (!formatterPlugin) {
     return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1);
   }
@@ -413,7 +413,7 @@ export function getCurrentEnergyUnitString(): string {
  * @param decimals Number of decimal places (default: 1)
  * @returns Formatted number string
  */
-export function formatNumber(value: number, decimals: number = 1): string {
+export function formatNumber(value: number, decimals = 1): string {
   return value.toFixed(decimals);
 }
 

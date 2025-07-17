@@ -10,10 +10,14 @@ import { t } from '../../lang/I18nManager';
  */
 export class FoodEntrySelectionModal extends Modal {
   private plugin: MacrosPlugin;
-  private onFoodSelected: (item: any) => void;
+  private onFoodSelected: (item: import('../../core/api').FoodItem) => void;
   private component: Component;
 
-  constructor(app: App, plugin: MacrosPlugin, onFoodSelected: (item: any) => void) {
+  constructor(
+    app: App,
+    plugin: MacrosPlugin,
+    onFoodSelected: (item: import('../../core/api').FoodItem) => void
+  ) {
     super(app);
     this.plugin = plugin;
     this.onFoodSelected = onFoodSelected;

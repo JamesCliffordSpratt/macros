@@ -3,6 +3,19 @@ import { processNutritionalDataFromLines } from './calculator';
 import { MacrosCalcRenderer } from './MacrosCalcRenderer';
 import { t } from '../../lang/I18nManager';
 
+interface MacrosCalcRenderer_Interface {
+  el: HTMLElement;
+  getIds: () => string[];
+  render: (
+    aggregate: { calories: number; protein: number; fat: number; carbs: number },
+    breakdown: Array<{
+      id: string;
+      totals: { calories: number; protein: number; fat: number; carbs: number };
+    }>
+  ) => Promise<void>;
+  setNeedsRefresh?: () => void;
+}
+
 export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
   // Initialize the registry if needed
   if (!plugin.macroService._activeMacrosCalcRenderers) {
@@ -181,7 +194,7 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
     // Also clean up the renderer registry
     if (plugin.macroService._activeMacrosCalcRenderers) {
       // Create a new set with only valid renderers
-      const validRenderers = new Set<any>();
+      const validRenderers = new Set<MacrosCalcRenderer_Interface>();
 
       for (const renderer of plugin.macroService._activeMacrosCalcRenderers) {
         // Check if the renderer's element is still in the DOM

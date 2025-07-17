@@ -148,9 +148,11 @@ export function mergeMacroLines(lines: string[]): string[] {
       const { foodName, quantity } = parseItemText(itemText);
 
       if (foodName) {
-        const mealItems = mealStructure.get(currentMeal)!;
-        const existingQuantity = mealItems.get(foodName) || 0;
-        mealItems.set(foodName, existingQuantity + quantity);
+        const mealItems = mealStructure.get(currentMeal);
+        if (mealItems) {
+          const existingQuantity = mealItems.get(foodName) || 0;
+          mealItems.set(foodName, existingQuantity + quantity);
+        }
       }
     } else if (!line.startsWith('-')) {
       // Individual food item (not under a meal)

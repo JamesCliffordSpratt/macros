@@ -8,7 +8,7 @@ import { convertEnergyUnit } from '../../utils/energyUtils';
 
 interface FoodItemData {
   name: string;
-  file: any;
+  file: import('obsidian').TFile;
   nutrition?: {
     calories: number;
     protein: number;

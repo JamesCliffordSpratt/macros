@@ -8,7 +8,7 @@ import { t } from '../../lang/I18nManager';
  */
 export class ManualFoodEntryModal extends Modal {
   private plugin: MacrosPlugin;
-  private onFoodSelected: (item: any) => void;
+  private onFoodSelected: (item: { food_name: string; food_description: string }) => void;
   private component: Component;
 
   // Form elements
@@ -27,7 +27,11 @@ export class ManualFoodEntryModal extends Modal {
   // Data tracking
   private addedItems: string[] = [];
 
-  constructor(app: App, plugin: MacrosPlugin, onFoodSelected: (item: any) => void) {
+  constructor(
+    app: App,
+    plugin: MacrosPlugin,
+    onFoodSelected: (item: { food_name: string; food_description: string }) => void
+  ) {
     super(app);
     this.plugin = plugin;
     this.onFoodSelected = onFoodSelected;

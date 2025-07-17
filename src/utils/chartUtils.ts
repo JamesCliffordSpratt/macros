@@ -160,7 +160,7 @@ export function createPieChartLegend(
  */
 export function cleanupMacroCharts(): void {
   if (window.macroCharts) {
-    Object.entries(window.macroCharts).forEach(([id, chart]) => {
+    Object.entries(window.macroCharts).forEach(([_id, chart]) => {
       if (chart && typeof chart.destroy === 'function') {
         chart.destroy();
       }

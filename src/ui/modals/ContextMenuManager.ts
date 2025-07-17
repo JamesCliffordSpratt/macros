@@ -47,6 +47,18 @@ export class ContextMenuManager {
   }
 
   /**
+   * Apply plugin-specific styling to the menu element
+   */
+  private applyMenuStyling(): void {
+    setTimeout(() => {
+      const menuElement = document.querySelector('.menu');
+      if (menuElement) {
+        menuElement.setAttribute('data-macros-plugin', 'true');
+      }
+    }, 0);
+  }
+
+  /**
    * Parse comment from a macro line
    * @param line The macro line text
    * @returns The comment text (without //) or empty string if no comment
@@ -136,7 +148,6 @@ export class ContextMenuManager {
     }
 
     // Calculate better positioning to avoid conflicts
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
     const menuX = Math.min(event.clientX, window.innerWidth - 200); // Prevent overflow
     const menuY = Math.min(event.clientY, window.innerHeight - 150); // Prevent overflow
 
@@ -151,16 +162,19 @@ export class ContextMenuManager {
     // Show menu and handle cleanup
     menu.showAtMouseEvent(adjustedEvent);
 
+    // Apply plugin-specific styling
+    this.applyMenuStyling();
+
     // Set up cleanup when menu closes
     const originalHide = menu.hide.bind(menu);
-    (menu as any).hide = () => {
+    (menu as Menu & { hide: () => void }).hide = () => {
       this.restoreTooltips();
       return originalHide();
     };
 
     // Also restore tooltips if menu is cancelled
     setTimeout(() => {
-      if (!document.querySelector('.menu')) {
+      if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
     }, 100);
@@ -169,7 +183,11 @@ export class ContextMenuManager {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.removedNodes.forEach((node) => {
-          if (node instanceof HTMLElement && node.classList.contains('menu')) {
+          if (
+            node instanceof HTMLElement &&
+            node.classList.contains('menu') &&
+            node.getAttribute('data-macros-plugin') === 'true'
+          ) {
             this.restoreTooltips();
             observer.disconnect();
           }
@@ -207,8 +225,8 @@ export class ContextMenuManager {
     target: CommentTarget,
     onCommentUpdate: () => Promise<void>,
     onRemoveItem: () => Promise<void>,
-    isMealItem: boolean = false,
-    containerName: string = ''
+    isMealItem = false,
+    containerName = ''
   ): void {
     event.preventDefault();
     event.stopPropagation();
@@ -252,9 +270,12 @@ export class ContextMenuManager {
     // Add separator
     menu.addSeparator();
 
-    // Remove item option
+    // Remove item option - FIX: Clean the names before displaying
+    const cleanItemName = this.removeCommentFromLine(target.name);
+    const cleanContainerName = this.removeCommentFromLine(containerName);
+
     const removeText = isMealItem
-      ? t('table.actions.removeFromMeal', { itemName: target.name, mealName: containerName })
+      ? t('table.actions.removeFromMeal', { itemName: cleanItemName, mealName: cleanContainerName })
       : t('table.actions.removeItem');
 
     menu.addItem((item: MenuItem) =>
@@ -271,7 +292,6 @@ export class ContextMenuManager {
     );
 
     // Calculate better positioning to avoid conflicts
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
     const menuX = Math.min(event.clientX, window.innerWidth - 200);
     const menuY = Math.min(event.clientY, window.innerHeight - 200); // More space for larger menu
 
@@ -286,16 +306,20 @@ export class ContextMenuManager {
     // Show menu and handle cleanup
     menu.showAtMouseEvent(adjustedEvent);
 
+    // Apply plugin-specific styling
+    this.applyMenuStyling();
+
     // Set up cleanup when menu closes
     const originalHide = menu.hide.bind(menu);
-    (menu as any).hide = () => {
+    // FIX: Use proper type instead of any - Menu type for proper binding
+    (menu as Menu & { hide: () => void }).hide = () => {
       this.restoreTooltips();
       return originalHide();
     };
 
     // Also restore tooltips if menu is cancelled
     setTimeout(() => {
-      if (!document.querySelector('.menu')) {
+      if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
     }, 100);
@@ -304,7 +328,11 @@ export class ContextMenuManager {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.removedNodes.forEach((node) => {
-          if (node instanceof HTMLElement && node.classList.contains('menu')) {
+          if (
+            node instanceof HTMLElement &&
+            node.classList.contains('menu') &&
+            node.getAttribute('data-macros-plugin') === 'true'
+          ) {
             this.restoreTooltips();
             observer.disconnect();
           }

@@ -13,7 +13,7 @@ export class CustomServingSizeModal extends Modal {
     foodName: string,
     defaultServing: number,
     onSubmit: (customServing: number) => void,
-    plugin?: MacrosPlugin
+    _plugin?: MacrosPlugin // FIX: Use underscore prefix for unused parameter
   ) {
     super(app);
     this.foodName = foodName;
@@ -28,14 +28,14 @@ export class CustomServingSizeModal extends Modal {
     // Add mobile-friendly class to the modal
     contentEl.addClass('custom-serving-modal');
 
-    // Create header with better mobile spacing
-    const headerEl = contentEl.createEl('h2', {
+    // FIX: Create header element directly without storing in unused variable
+    contentEl.createEl('h2', {
       text: t('food.customServing.title', { foodName: this.foodName }),
       cls: 'custom-serving-modal-title',
     });
 
-    // Create description with mobile-friendly text
-    const descEl = contentEl.createEl('p', {
+    // FIX: Create description element directly without storing in unused variable
+    contentEl.createEl('p', {
       text: t('food.customServing.description', { defaultServing: this.defaultServing.toString() }),
       cls: 'custom-serving-modal-description',
     });

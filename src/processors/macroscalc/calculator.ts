@@ -1,6 +1,5 @@
-import { processNutritionalData } from '../../utils';
 import MacrosPlugin from '@/main';
-import { NutritionData, MacroTotals } from '../../utils';
+import { MacroTotals } from '../../utils';
 
 export interface CalcBreakdown {
   id: string;

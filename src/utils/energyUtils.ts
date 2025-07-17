@@ -63,7 +63,7 @@ export function kjToKcal(kj: number): number {
 export function formatEnergyValue(
   valueInKcal: number,
   displayUnit: 'kcal' | 'kJ',
-  decimals: number = 1
+  decimals = 1
 ): string {
   const convertedValue = convertEnergyUnit(valueInKcal, 'kcal', displayUnit);
   return `${convertedValue.toFixed(decimals)} ${displayUnit}`;
@@ -145,7 +145,7 @@ export function calculateEnergyFromMacros(
   protein: number,
   fat: number,
   carbs: number,
-  alcohol: number = 0
+  alcohol = 0
 ): number {
   // Atwater factors (kcal per gram)
   const PROTEIN_KCAL_PER_G = 4;

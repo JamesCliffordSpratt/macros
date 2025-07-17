@@ -1,14 +1,7 @@
 import MacrosPlugin from '../main';
 import { Chart, ChartConfiguration, ChartDataset, TooltipItem, registerables } from 'chart.js';
 import { ChartLoader, MacrosState, DOMUtils } from '../utils';
-import {
-  formatDashboardTooltip,
-  getSummaryHeader,
-  formatCalories,
-  formatGrams,
-  formatChartTitle,
-  getCurrentEnergyUnitString,
-} from '../utils/formatters';
+import { formatChartTitle, getCurrentEnergyUnitString } from '../utils/formatters';
 import { t } from '../lang/I18nManager';
 import { convertEnergyUnit } from '../utils/energyUtils';
 
@@ -129,7 +122,7 @@ export class ChartManager {
       loadingEl.remove();
 
       // Create header with better state management
-      const allDates = ids
+      const _allDates = ids
         .map((id) => {
           const parsed = Date.parse(id);
           return isNaN(parsed) ? null : { id, date: new Date(parsed) };

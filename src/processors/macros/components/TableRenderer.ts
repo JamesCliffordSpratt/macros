@@ -1,5 +1,12 @@
 import MacrosPlugin from '../../../main';
-import { MacrosState, CLASS_NAMES, MacroTotals, DailyTargets } from '../../../utils';
+import {
+  MacrosState,
+  CLASS_NAMES,
+  MacroTotals,
+  DailyTargets,
+  Group,
+  MacroRow,
+} from '../../../utils';
 import { TableHeader } from '../table-header';
 import { MacrosDashboard } from '../dashboard';
 import { GroupRenderer } from './GroupRenderer';
@@ -11,10 +18,10 @@ import { Notice, debounce, TFile } from 'obsidian';
  * @param group A group of macro rows
  * @returns The total calories calculated consistently
  */
-function calculateConsistentCaloriesForGroup(group: any): number {
+function calculateConsistentCaloriesForGroup(group: Group): number {
   let totalCalories = 0;
 
-  group.rows.forEach((row: any) => {
+  group.rows.forEach((row: MacroRow) => {
     totalCalories += row.calories;
   });
 
@@ -30,7 +37,7 @@ export class MacrosTableRenderer {
   private tableHeader: TableHeader | null = null;
   private updateInProgress = false;
   private cachedLines: string[] | null = null;
-  private cachedProcessedGroups: Array<Record<string, unknown>> | null = null;
+  private cachedProcessedGroups: Group[] | null = null;
 
   // Debounced redraw function to prevent multiple consecutive redraws
   private debouncedRedraw = debounce(
@@ -163,7 +170,7 @@ export class MacrosTableRenderer {
     };
 
     // Process groups only if needed (memoize expensive operation)
-    let groups;
+    let groups: Group[];
     if (!this.cachedProcessedGroups) {
       groups = processLinesIntoGroups(lines, this.plugin);
       this.cachedProcessedGroups = groups;

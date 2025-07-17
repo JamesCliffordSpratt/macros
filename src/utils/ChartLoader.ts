@@ -30,7 +30,7 @@ export class ChartLoader {
         ChartJS.register(...registerables);
 
         // Make ChartJS available on window for backward compatibility
-        (window as any).Chart = ChartJS;
+        (window as Window & { Chart: typeof ChartJS }).Chart = ChartJS;
 
         this.initialized = true;
       }

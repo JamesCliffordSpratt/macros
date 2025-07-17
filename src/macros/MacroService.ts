@@ -2,6 +2,20 @@ import MacrosPlugin from '../main';
 import { TFile } from 'obsidian';
 import { parseGrams, processNutritionalData } from '../utils';
 
+// Type definition for MacrosCalc renderers
+interface MacrosCalcRenderer {
+  el: HTMLElement;
+  getIds: () => string[];
+  render: (
+    aggregate: { calories: number; protein: number; fat: number; carbs: number },
+    breakdown: Array<{
+      id: string;
+      totals: { calories: number; protein: number; fat: number; carbs: number };
+    }>
+  ) => Promise<void>;
+  setNeedsRefresh?: () => void;
+}
+
 /**
  * MacroService
  * ------------
@@ -12,8 +26,8 @@ export class MacroService {
   private plugin: MacrosPlugin;
   private static instance: MacroService;
 
-  // Tracking for active renderers
-  _activeMacrosCalcRenderers: Set<any> = new Set();
+  // Tracking for active renderers with proper typing
+  _activeMacrosCalcRenderers: Set<MacrosCalcRenderer> = new Set();
 
   private constructor(plugin: MacrosPlugin) {
     this.plugin = plugin;

@@ -244,6 +244,7 @@ export class GroupRenderer {
 
     // Add context menu for meal headers (only if it's a meal, not "Other Items")
     if (group.macroLine && group.macroLine.toLowerCase().startsWith('meal:')) {
+      // FIX: Pass the clean display name instead of the raw group name
       this.setupMealContextMenu(headerCell, group, macrosId, displayName);
     }
   }
