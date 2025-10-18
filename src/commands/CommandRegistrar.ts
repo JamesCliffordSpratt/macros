@@ -1,6 +1,8 @@
 import { Notice } from 'obsidian';
 import MacrosPlugin from '../main';
 import { FoodEntrySelectionModal } from '../ui';
+import { LiveFoodSearchModal } from '../ui/live-search/LiveSearchModal';
+import { ManualFoodEntryModal } from '../ui/modals/ManualFoodEntryModal';
 
 /**
  * CommandManager
@@ -33,6 +35,48 @@ export function registerCommands(plugin: MacrosPlugin): void {
       } catch (error) {
         plugin.logger.error('Error opening food entry selection:', error);
         new Notice('Unable to open food entry selection. Please try again.');
+      }
+    },
+  });
+
+  // Command: Direct access to Live Search modal (API search)
+  plugin.addCommand({
+    id: 'open-live-search',
+    name: 'Search food databases (Live Search)',
+    callback: () => {
+      try {
+        // Get API credentials for backward compatibility with LiveFoodSearchModal
+        const fallbackKey = plugin.settings.fatSecretApiKey || '';
+        const fallbackSecret = plugin.settings.fatSecretApiSecret || '';
+
+        new LiveFoodSearchModal(
+          plugin.app,
+          fallbackKey,
+          fallbackSecret,
+          plugin.dataManager.createFoodItemCallback(),
+          plugin
+        ).open();
+      } catch (error) {
+        plugin.logger.error('Error opening live search modal:', error);
+        new Notice('Unable to open live search. Please try again.');
+      }
+    },
+  });
+
+  // Command: Direct access to Manual Entry modal
+  plugin.addCommand({
+    id: 'open-manual-entry',
+    name: 'Add food item manually (Manual Entry)',
+    callback: () => {
+      try {
+        new ManualFoodEntryModal(
+          plugin.app,
+          plugin,
+          plugin.dataManager.createFoodItemCallback()
+        ).open();
+      } catch (error) {
+        plugin.logger.error('Error opening manual entry modal:', error);
+        new Notice('Unable to open manual entry. Please try again.');
       }
     },
   });

@@ -3,6 +3,7 @@ import { parseGrams, processNutritionalData } from '../../utils';
 import { MealTemplate } from '../../settings/StorageService';
 import MacrosPlugin from '../../main';
 import { CustomServingSizeModal } from './CustomServingSizeModal';
+import { AddMealTemplateModal } from './AddMealTemplateModal';
 import { t } from '../../lang/I18nManager';
 import { convertEnergyUnit } from '../../utils/energyUtils';
 
@@ -525,6 +526,29 @@ export class AddToMacrosModal extends Modal {
 
   private renderMeals(): void {
     this.mealsContainer.empty();
+
+    // Create header section with action button
+    const headerSection = this.mealsContainer.createDiv({ cls: 'meals-header-section' });
+
+    const createMealButton = headerSection.createEl('button', {
+      text: '+ ' + t('settings.meals.create'),
+      cls: 'create-meal-template-button mod-cta',
+    });
+
+    this.component.registerDomEvent(createMealButton, 'click', () => {
+      // Open the Add Meal Template Modal
+      const addMealModal = new AddMealTemplateModal(this.plugin);
+
+      // When the modal closes, refresh the meals list
+      addMealModal.onClose = () => {
+        // Reload meal data and re-render
+        this.loadData().then(() => {
+          this.filterAndRender(this.searchInput.value);
+        });
+      };
+
+      addMealModal.open();
+    });
 
     if (this.filteredMeals.length === 0) {
       this.mealsContainer.createDiv({

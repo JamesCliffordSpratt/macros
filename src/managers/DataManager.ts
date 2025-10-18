@@ -1,11 +1,6 @@
-import { TFolder, TFile, normalizePath, Notice } from 'obsidian';
+import { TFolder, TFile, normalizePath } from 'obsidian';
 import MacrosPlugin from '../main';
-import { FoodItem } from '../core/api';
-import {
-  extractServingSize,
-  extractNutritionalData,
-  processNutritionalData,
-} from '../utils/nutritionUtils';
+import { processNutritionalData } from '../utils/nutritionUtils';
 
 // Constant used for interactive lines in macros blocks.
 const INTERACTIVE_PREFIX = 'interactive:';
@@ -237,40 +232,413 @@ export class DataManager {
 
   /**
    * Creates a reusable callback function for handling selected food items
+   * Updated to work with both FatSecret and USDA (UnifiedFoodResult) formats
+   * FIXED: Proper file existence checking and error handling
    */
   createFoodItemCallback() {
-    return async (selectedFood: FoodItem) => {
+    return async (selectedFood: any) => {
       try {
-        const servingSize = extractServingSize(selectedFood.food_description);
-        const nutritionalData = extractNutritionalData(selectedFood.food_description);
-        const fileName = `${selectedFood.food_name}.md`;
-        const frontmatter = `---
+        let foodName: string;
+        let servingSize: string;
+        let nutritionalData: {
+          calories: string;
+          protein: string;
+          fat: string;
+          carbs: string;
+          fiber?: string;
+          sugars?: string;
+          salt?: string;
+        };
+        let additionalMetadata: {
+          source: string;
+          brands?: string;
+          categories?: string;
+          ingredients?: string;
+          nutritionGrade?: string;
+          novaGroup?: number;
+          ecoscore?: string;
+          dataQuality?: string;
+          completeness?: number;
+          imageUrl?: string;
+        } = {
+          source: 'unknown',
+        };
+
+        // Check if this is a UnifiedFoodResult (from the new search system)
+        if (selectedFood.source) {
+          foodName = selectedFood.name;
+
+          if (selectedFood.source === 'openfoodfacts') {
+            // Handle Open Food Facts format
+            servingSize = `${selectedFood.gramsServing}g`;
+
+            // Extract nutrition from description or raw data
+            if (selectedFood.raw && typeof selectedFood.raw === 'object') {
+              const offData = selectedFood.raw as any;
+              nutritionalData = {
+                calories: offData.calories?.toString() || '0',
+                protein: offData.protein?.toString() || '0',
+                fat: offData.fat?.toString() || '0',
+                carbs: offData.carbs?.toString() || '0',
+                fiber: offData.fiber?.toString(),
+                sugars: offData.sugars?.toString(),
+                salt: offData.salt?.toString(),
+              };
+            } else {
+              // Fallback: parse from description
+              nutritionalData = this.extractNutritionalDataFromDescription(
+                selectedFood.description
+              );
+            }
+
+            // Set Open Food Facts specific metadata
+            additionalMetadata = {
+              source: 'openfoodfacts',
+              brands: selectedFood.brandName,
+              categories: selectedFood.categories,
+              ingredients: selectedFood.ingredients,
+              nutritionGrade: selectedFood.nutritionGrade,
+              novaGroup: selectedFood.novaGroup,
+              ecoscore: selectedFood.ecoscore,
+              dataQuality: selectedFood.dataQuality,
+              completeness: selectedFood.completeness,
+              imageUrl: selectedFood.imageUrl,
+            };
+          } else if (selectedFood.source === 'usda') {
+            // Handle USDA format (existing code)
+            servingSize = `${selectedFood.gramsServing}g`;
+            const description = selectedFood.description;
+
+            const caloriesMatch = description.match(/Calories:\s*(\d+(?:\.\d+)?)kcal/i);
+            const fatMatch = description.match(/Fat:\s*(\d+(?:\.\d+)?)g/i);
+            const carbsMatch = description.match(/Carbs:\s*(\d+(?:\.\d+)?)g/i);
+            const proteinMatch = description.match(/Protein:\s*(\d+(?:\.\d+)?)g/i);
+
+            nutritionalData = {
+              calories: caloriesMatch ? caloriesMatch[1] : '0',
+              fat: fatMatch ? fatMatch[1] : '0',
+              carbs: carbsMatch ? carbsMatch[1] : '0',
+              protein: proteinMatch ? proteinMatch[1] : '0',
+            };
+
+            additionalMetadata = {
+              source: 'usda',
+              ...(selectedFood.brandName && { brands: selectedFood.brandName }),
+            };
+          } else {
+            // Handle FatSecret format (existing code)
+            if (selectedFood.raw && selectedFood.raw.food_description) {
+              servingSize = this.extractServingSize(selectedFood.raw.food_description);
+              nutritionalData = this.extractNutritionalData(selectedFood.raw.food_description);
+            } else {
+              servingSize = `${selectedFood.gramsServing}g`;
+              nutritionalData = this.extractNutritionalDataFromDescription(
+                selectedFood.description
+              );
+            }
+
+            additionalMetadata = {
+              source: 'fatsecret',
+            };
+          }
+        } else {
+          // Handle legacy FoodItem format (existing code)
+          foodName = selectedFood.food_name;
+          servingSize = this.extractServingSize(selectedFood.food_description);
+          nutritionalData = this.extractNutritionalData(selectedFood.food_description);
+          additionalMetadata = {
+            source: 'fatsecret',
+          };
+        }
+
+        // Validate that we have the required data
+        if (!foodName) {
+          throw new Error('Food name is missing');
+        }
+
+        // Create safe filename for file operations
+        const safeFileName = this.createSafeFileName(foodName);
+        const fileName = `${safeFileName}.md`;
+
+        // Enhanced frontmatter with Open Food Facts support
+        let frontmatter = `---
 calories: ${nutritionalData.calories}
 protein: ${nutritionalData.protein}
 fat: ${nutritionalData.fat}
 carbs: ${nutritionalData.carbs}
-serving_size: ${servingSize}
----\n`;
+serving_size: ${servingSize}`;
 
-        // Normalize the path for folder and create if needed
+        // Add optional nutrition fields for Open Food Facts
+        if (nutritionalData.fiber) {
+          frontmatter += `\nfiber: ${nutritionalData.fiber}`;
+        }
+        if (nutritionalData.sugars) {
+          frontmatter += `\nsugars: ${nutritionalData.sugars}`;
+        }
+        if (nutritionalData.salt) {
+          frontmatter += `\nsalt: ${nutritionalData.salt}`;
+        }
+
+        // Add source-specific metadata
+        frontmatter += `\nsource: ${additionalMetadata.source}`;
+
+        if (additionalMetadata.source === 'openfoodfacts') {
+          // Add Open Food Facts specific fields
+          if (selectedFood.id) {
+            frontmatter += `\noff_code: ${selectedFood.id.replace('off_', '')}`;
+          }
+          if (additionalMetadata.brands) {
+            frontmatter += `\nbrands: "${additionalMetadata.brands}"`;
+          }
+          if (additionalMetadata.categories) {
+            frontmatter += `\ncategories: "${additionalMetadata.categories}"`;
+          }
+          if (additionalMetadata.nutritionGrade) {
+            frontmatter += `\nnutrition_grade: ${additionalMetadata.nutritionGrade}`;
+          }
+          if (additionalMetadata.novaGroup) {
+            frontmatter += `\nnova_group: ${additionalMetadata.novaGroup}`;
+          }
+          if (additionalMetadata.ecoscore) {
+            frontmatter += `\necoScore: ${additionalMetadata.ecoscore}`;
+          }
+          if (additionalMetadata.dataQuality) {
+            frontmatter += `\ndata_quality: ${additionalMetadata.dataQuality}`;
+          }
+          if (additionalMetadata.completeness) {
+            frontmatter += `\ncompleteness: ${additionalMetadata.completeness}`;
+          }
+          if (additionalMetadata.imageUrl) {
+            frontmatter += `\nimage_url: "${additionalMetadata.imageUrl}"`;
+          }
+        } else if (additionalMetadata.source === 'usda') {
+          // Add USDA specific fields (existing code)
+          if (selectedFood.id) {
+            frontmatter += `\nfdc_id: ${selectedFood.id.replace('usda_', '')}`;
+          }
+          if (selectedFood.dataType) {
+            frontmatter += `\ndata_type: ${selectedFood.dataType}`;
+          }
+          if (selectedFood.isFoundation) {
+            frontmatter += `\nfoundation_food: true`;
+          }
+          if (selectedFood.brandName) {
+            frontmatter += `\nbrand_name: "${selectedFood.brandName}"`;
+          }
+        }
+
+        frontmatter += `\ncreated: ${new Date().toISOString()}
+---
+
+# ${foodName}`;
+
+        // Enhanced content with Open Food Facts information
+        if (additionalMetadata.source === 'openfoodfacts') {
+          frontmatter += `
+
+## Product Information
+`;
+          if (additionalMetadata.brands) {
+            frontmatter += `**Brands:** ${additionalMetadata.brands}  \n`;
+          }
+          if (additionalMetadata.categories) {
+            frontmatter += `**Categories:** ${additionalMetadata.categories}  \n`;
+          }
+          if (additionalMetadata.nutritionGrade) {
+            frontmatter += `**Nutrition Grade:** ${additionalMetadata.nutritionGrade.toUpperCase()} (Nutri-Score)  \n`;
+          }
+          if (additionalMetadata.novaGroup) {
+            const novaLabels = [
+              '',
+              'Unprocessed or minimally processed',
+              'Processed culinary ingredients',
+              'Processed foods',
+              'Ultra-processed foods',
+            ];
+            frontmatter += `**Processing Level:** NOVA ${additionalMetadata.novaGroup} (${novaLabels[additionalMetadata.novaGroup]})  \n`;
+          }
+          if (additionalMetadata.ecoscore) {
+            frontmatter += `**Environmental Impact:** Eco-Score ${additionalMetadata.ecoscore.toUpperCase()}  \n`;
+          }
+        }
+
+        frontmatter += `
+
+## Nutritional Information (per ${servingSize})
+- **Calories:** ${nutritionalData.calories} kcal
+- **Protein:** ${nutritionalData.protein}g
+- **Fat:** ${nutritionalData.fat}g
+- **Carbohydrates:** ${nutritionalData.carbs}g`;
+
+        // Add optional nutrition information
+        if (nutritionalData.fiber) {
+          frontmatter += `\n- **Fiber:** ${nutritionalData.fiber}g`;
+        }
+        if (nutritionalData.sugars) {
+          frontmatter += `\n- **Sugars:** ${nutritionalData.sugars}g`;
+        }
+        if (nutritionalData.salt) {
+          frontmatter += `\n- **Salt:** ${nutritionalData.salt}g`;
+        }
+
+        // Add ingredients if available
+        if (additionalMetadata.ingredients) {
+          frontmatter += `
+
+## Ingredients
+${additionalMetadata.ingredients}`;
+        }
+
+        // Add source attribution
+        frontmatter += `
+
+**Source:** `;
+        if (additionalMetadata.source === 'openfoodfacts') {
+          frontmatter += 'Open Food Facts (Community Database)';
+          if (additionalMetadata.dataQuality) {
+            frontmatter += ` - Data Quality: ${additionalMetadata.dataQuality.charAt(0).toUpperCase() + additionalMetadata.dataQuality.slice(1)}`;
+          }
+        } else if (additionalMetadata.source === 'usda') {
+          frontmatter += 'USDA FoodData Central';
+        } else {
+          frontmatter += 'FatSecret Platform API';
+        }
+
+        // Add data quality notice for Open Food Facts
+        if (
+          additionalMetadata.source === 'openfoodfacts' &&
+          additionalMetadata.dataQuality !== 'high'
+        ) {
+          frontmatter += `
+
+> **Note:** This data comes from the Open Food Facts community database. Please verify nutrition information if accuracy is critical for your needs.`;
+        }
+
+        // File creation logic (existing code)
         const folderPath = normalizePath(this.plugin.settings.storageFolder);
+        const filePath = normalizePath(`${folderPath}/${safeFileName}.md`);
 
-        // Check if folder exists, create if needed
         const folder = this.plugin.app.vault.getFolderByPath(folderPath);
         if (!folder) {
           await this.plugin.app.vault.createFolder(folderPath);
         }
 
-        // Create the file with normalized path
-        const filePath = normalizePath(`${folderPath}/${fileName}`);
-        await this.plugin.app.vault.create(filePath, frontmatter);
-
-        new Notice(`Saved ${fileName}`);
+        try {
+          await this.plugin.app.vault.create(filePath, frontmatter);
+          this.invalidateFileCache();
+        } catch (createError) {
+          if (createError.message?.includes('already exists')) {
+            throw new Error(
+              'File was created by another process. Please try again with a different name.'
+            );
+          }
+          throw createError;
+        }
       } catch (error) {
         this.plugin.logger.error('Error creating food file:', error);
-        new Notice(`Error saving food item: ${error.message || 'Unknown error'}`);
+        throw error;
       }
     };
+  }
+  /**
+   * Helper method to extract serving size (keep existing implementation)
+   */
+  private extractServingSize(description: string): string {
+    try {
+      const regex = /Per\s*(\d+(\.\d+)?)\s*(g|medium|large|slice|cup|tbsp|oz)/i;
+      const match = description.match(regex);
+      return match ? `${match[1]}${match[3]}` : '100g';
+    } catch (error) {
+      console.error('Error extracting serving size:', error);
+      return '100g';
+    }
+  }
+
+  /**
+   * Helper method to extract nutritional data (keep existing implementation)
+   */
+  private extractNutritionalData(description: string): {
+    calories: string;
+    fat: string;
+    carbs: string;
+    protein: string;
+  } {
+    try {
+      const caloriesMatch = description.match(/Calories:\s*(\d+(\.\d+)?)kcal/i);
+      const fatMatch = description.match(/Fat:\s*(\d+(\.\d+)?)g/i);
+      const carbsMatch = description.match(/Carbs:\s*(\d+(\.\d+)?)g/i);
+      const proteinMatch = description.match(/Protein:\s*(\d+(\.\d+)?)g/i);
+      return {
+        calories: caloriesMatch ? caloriesMatch[1] : '0',
+        fat: fatMatch ? fatMatch[1] : '0',
+        carbs: carbsMatch ? carbsMatch[1] : '0',
+        protein: proteinMatch ? proteinMatch[1] : '0',
+      };
+    } catch (error) {
+      console.error('Error extracting nutritional data:', error);
+      return { calories: '0', fat: '0', carbs: '0', protein: '0' };
+    }
+  }
+
+  /**
+   * Helper method to extract nutritional data from generic description
+   */
+  private extractNutritionalDataFromDescription(description: string): {
+    calories: string;
+    fat: string;
+    carbs: string;
+    protein: string;
+  } {
+    // Try multiple patterns for different description formats
+    const patterns = [
+      // USDA format: "Per 100g - Calories: 52kcal | Fat: 0.2g | Carbs: 13.8g | Protein: 0.3g"
+      {
+        calories: /Calories:\s*(\d+(?:\.\d+)?)kcal/i,
+        fat: /Fat:\s*(\d+(?:\.\d+)?)g/i,
+        carbs: /Carbs:\s*(\d+(?:\.\d+)?)g/i,
+        protein: /Protein:\s*(\d+(?:\.\d+)?)g/i,
+      },
+      // Alternative format
+      {
+        calories: /(\d+(?:\.\d+)?)\s*kcal/i,
+        fat: /Fat[:\s]*(\d+(?:\.\d+)?)g/i,
+        carbs: /Carb[s]?[:\s]*(\d+(?:\.\d+)?)g/i,
+        protein: /Protein[:\s]*(\d+(?:\.\d+)?)g/i,
+      },
+    ];
+
+    for (const pattern of patterns) {
+      const caloriesMatch = description.match(pattern.calories);
+      const fatMatch = description.match(pattern.fat);
+      const carbsMatch = description.match(pattern.carbs);
+      const proteinMatch = description.match(pattern.protein);
+
+      // If we found at least calories, use this pattern
+      if (caloriesMatch) {
+        return {
+          calories: caloriesMatch[1] || '0',
+          fat: fatMatch?.[1] || '0',
+          carbs: carbsMatch?.[1] || '0',
+          protein: proteinMatch?.[1] || '0',
+        };
+      }
+    }
+
+    // Fallback
+    return { calories: '0', fat: '0', carbs: '0', protein: '0' };
+  }
+
+  /**
+   * Helper method to create a safe filename from food name
+   * FIXED: More robust filename sanitization
+   */
+  private createSafeFileName(foodName: string): string {
+    return foodName
+      .replace(/[<>:"/\\|?*]/g, '') // Remove invalid filename characters
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .replace(/^\s+|\s+$/g, '') // Trim whitespace
+      .substring(0, 100) // Limit length
+      .replace(/\.$/, ''); // Remove trailing period if present
   }
 
   /**

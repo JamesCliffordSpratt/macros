@@ -4,6 +4,7 @@ import { registerProcessors } from './ProcessorManager';
 import { registerCommands } from '../commands/CommandRegistrar';
 import { setupRibbon } from './RibbonManager';
 import { ManagerRegistry } from './ManagerRegistry';
+import { RenameWatcher } from './RenameWatcher';
 
 /**
  * Handles the complete initialization sequence for the plugin.
@@ -18,6 +19,10 @@ export async function initializePlugin(plugin: MacrosPlugin): Promise<void> {
 
   // Make sure the logger respects the developer mode setting
   plugin.logger.setDebugMode(plugin.settings.developerModeEnabled);
+
+  // Initialize rename watcher
+  plugin.renameWatcher = new RenameWatcher(plugin);
+  plugin.renameWatcher.init();
 
   // Setup components in dependency order
   setupSettings(plugin);
@@ -34,6 +39,9 @@ export async function initializePlugin(plugin: MacrosPlugin): Promise<void> {
  * This centralizes cleanup logic outside of the main plugin class.
  */
 export function shutdownPlugin(plugin: MacrosPlugin): void {
+  // Clean up rename watcher
+  plugin.renameWatcher?.cleanup();
+
   // Clean up all managers through registry
   ManagerRegistry.unloadAll(plugin);
 

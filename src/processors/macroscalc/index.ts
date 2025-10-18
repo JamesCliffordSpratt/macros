@@ -1,6 +1,7 @@
 import MacrosPlugin from '../../main';
 import { processNutritionalDataFromLines } from './calculator';
 import { MacrosCalcRenderer } from './MacrosCalcRenderer';
+import { MetricsRegistry, registerBuiltinMetrics } from './metrics';
 import { t } from '../../lang/I18nManager';
 
 interface MacrosCalcRenderer_Interface {
@@ -17,16 +18,18 @@ interface MacrosCalcRenderer_Interface {
 }
 
 export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
+  // Initialize metrics system
+  const registry = MetricsRegistry.getInstance();
+  registerBuiltinMetrics(registry);
+
   // Initialize the registry if needed
   if (!plugin.macroService._activeMacrosCalcRenderers) {
     plugin.macroService._activeMacrosCalcRenderers = new Set();
   }
 
   // Add a global event listener for refresh events
-  // This is critical to ensure renderers refresh when data changes
   plugin.registerEvent(
     plugin.app.workspace.on('layout-change', () => {
-      // On ANY layout change, trigger refresh of all renderers
       forceRefreshAllRenderers(plugin);
     })
   );
@@ -34,8 +37,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
   // Also listen for file modifications
   plugin.registerEvent(
     plugin.app.vault.on('modify', () => {
-      // When any file is modified, force refresh
-      setTimeout(() => forceRefreshAllRenderers(plugin), 300); // Add delay to allow file ops to complete
+      setTimeout(() => forceRefreshAllRenderers(plugin), 300);
     })
   );
 
@@ -76,29 +78,24 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
         return;
       }
 
-      // CRITICAL FIX: Force full reload of data for each ID, including bullet points
+      // Force full reload of data for each ID, including bullet points
       for (const id of ids) {
-        // Use centralized DataManager method to get FULL data including bullet points
         const linesWithBullets = await plugin.dataManager.getFullMacrosData(id);
 
         if (linesWithBullets.length > 0) {
           plugin.logger.debug(`Loaded ${linesWithBullets.length} lines for ${id} with bullets`);
-
-          // CRITICAL FIX: Store the raw lines with bullets and let the calculator handle processing
-          // This prevents double-processing of multipliers
           plugin.macroService.macroTables.set(id, linesWithBullets);
-
           plugin.logger.debug(`Stored raw data for ${id} with ${linesWithBullets.length} lines`);
         } else {
           plugin.logger.warn(`Could not load data for ID: ${id}`);
         }
       }
 
-      // Use the calculator's processNutritionalDataFromLines (which processes raw data correctly)
+      // Use the calculator's processNutritionalDataFromLines
       plugin.logger.debug('Using calculator.ts processNutritionalDataFromLines for macroscalc');
       const { aggregate, breakdown } = await processNutritionalDataFromLines(plugin, ids);
 
-      // Use the enhanced renderer
+      // Use the enhanced renderer with metrics support
       const renderer = new MacrosCalcRenderer(plugin, el, ids);
 
       // Add a data attribute so we can find this element later
@@ -110,7 +107,6 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
       // Setup cleanup
       plugin.registerEvent(
         plugin.app.workspace.on('layout-change', () => {
-          // Check if element is still in DOM
           if (!el.isConnected || !document.contains(el)) {
             plugin.macroService._activeMacrosCalcRenderers.delete(renderer);
           }
@@ -121,7 +117,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
     }
   );
 
-  // CRITICAL: Replace the redrawAllMacrocalc method with a more forceful version
+  // Replace the redrawAllMacrocalc method with a more forceful version
   plugin.redrawAllMacrocalc = async function () {
     await forceRefreshAllRenderers(this);
   };
@@ -129,7 +125,6 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
 
 /**
  * Force refresh all renderers with the latest data
- * This bypasses the normal refresh mechanism for a more forceful approach
  */
 async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
   try {

@@ -7,19 +7,21 @@ export class CustomServingSizeModal extends Modal {
   defaultServing: number;
   onSubmit: (customServing: number) => void;
   private component: Component;
+  private plugin?: MacrosPlugin;
 
   constructor(
     app: App,
     foodName: string,
     defaultServing: number,
     onSubmit: (customServing: number) => void,
-    _plugin?: MacrosPlugin // FIX: Use underscore prefix for unused parameter
+    plugin?: MacrosPlugin
   ) {
     super(app);
     this.foodName = foodName;
     this.defaultServing = defaultServing;
     this.onSubmit = onSubmit;
     this.component = new Component();
+    this.plugin = plugin;
   }
 
   onOpen() {
@@ -28,15 +30,47 @@ export class CustomServingSizeModal extends Modal {
     // Add mobile-friendly class to the modal
     contentEl.addClass('custom-serving-modal');
 
-    // FIX: Create header element directly without storing in unused variable
+    // Create header element directly without storing in unused variable
     contentEl.createEl('h2', {
       text: t('food.customServing.title', { foodName: this.foodName }),
       cls: 'custom-serving-modal-title',
     });
 
-    // FIX: Create description element directly without storing in unused variable
+    // Try to get the default serving size from the food file if plugin is available
+    let suggestedServing = this.defaultServing;
+    let isUsingCustomDefault = false;
+
+    if (this.plugin) {
+      const foodFile = this.plugin.dataManager.findFoodFile(this.foodName);
+      if (foodFile) {
+        const cache = this.plugin.app.metadataCache.getFileCache(foodFile);
+        if (cache?.frontmatter) {
+          const defaultServingSize = cache.frontmatter['default_serving_size'];
+          if (defaultServingSize) {
+            // Parse the default serving size (remove 'g' suffix if present)
+            const parsedDefaultServing = parseFloat(
+              defaultServingSize.toString().replace(/g$/i, '')
+            );
+            if (!isNaN(parsedDefaultServing) && parsedDefaultServing > 0) {
+              suggestedServing = parsedDefaultServing;
+              isUsingCustomDefault = true;
+            }
+          }
+        }
+      }
+    }
+
+    // Create description with information about the serving size
+    let descriptionText = t('food.customServing.description', {
+      defaultServing: this.defaultServing.toString(),
+    });
+
+    if (isUsingCustomDefault && suggestedServing !== this.defaultServing) {
+      descriptionText = `Using your custom default serving size: ${suggestedServing}g (original: ${this.defaultServing}g)`;
+    }
+
     contentEl.createEl('p', {
-      text: t('food.customServing.description', { defaultServing: this.defaultServing.toString() }),
+      text: descriptionText,
       cls: 'custom-serving-modal-description',
     });
 
@@ -47,8 +81,8 @@ export class CustomServingSizeModal extends Modal {
       type: 'number',
       cls: 'custom-serving-input',
     });
-    inputEl.placeholder = `${this.defaultServing}`;
-    inputEl.value = `${this.defaultServing}`;
+    inputEl.placeholder = `${suggestedServing}`;
+    inputEl.value = `${suggestedServing}`;
 
     const handleSubmit = () => {
       const value = parseFloat(inputEl.value);
@@ -78,6 +112,20 @@ export class CustomServingSizeModal extends Modal {
     });
 
     this.component.registerDomEvent(submitBtn, 'click', handleSubmit);
+
+    // If using custom default, add a reset button
+    if (isUsingCustomDefault && suggestedServing !== this.defaultServing) {
+      const resetBtn = buttonContainer.createEl('button', {
+        text: `Reset to Original (${this.defaultServing}g)`,
+        cls: 'custom-serving-reset-btn mod-button',
+      });
+
+      this.component.registerDomEvent(resetBtn, 'click', () => {
+        inputEl.value = this.defaultServing.toString();
+        inputEl.focus();
+        inputEl.select();
+      });
+    }
 
     // Focus input after a small delay to ensure proper rendering
     setTimeout(() => {

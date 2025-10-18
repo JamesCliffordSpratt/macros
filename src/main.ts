@@ -13,6 +13,7 @@ import {
   APIService,
 } from './managers';
 import { I18nManager } from './lang/I18nManager';
+import { RenameWatcher } from './managers/RenameWatcher';
 
 /**
  * Macros Plugin
@@ -32,6 +33,7 @@ export default class MacrosPlugin extends Plugin {
   macroService!: MacroService;
   apiService!: APIService;
   i18nManager!: I18nManager;
+  renameWatcher!: RenameWatcher;
 
   // Track DOM event listeners separately
   private domEventListeners: Array<{ unbind: () => void }> = [];
@@ -109,10 +111,25 @@ export default class MacrosPlugin extends Plugin {
     if (!this.settings.energyUnit) {
       this.settings.energyUnit = 'kcal';
     }
-  }
 
-  async saveSettings() {
-    await this.saveData(this.settings);
+    // Ensure new USDA settings exist with defaults
+    if (this.settings.usdaEnabled === undefined) {
+      this.settings.usdaEnabled = false;
+    }
+    if (this.settings.usdaApiKey === undefined) {
+      this.settings.usdaApiKey = '';
+    }
+    if (this.settings.fatSecretEnabled === undefined) {
+      // Auto-enable FatSecret if credentials are present
+      this.settings.fatSecretEnabled = !!(
+        this.settings.fatSecretApiKey && this.settings.fatSecretApiSecret
+      );
+    }
+
+    // Ensure macroscalc metrics configs exist with defaults
+    if (!this.settings.macroscalcMetricsConfigs) {
+      this.settings.macroscalcMetricsConfigs = [];
+    }
   }
 
   async calculateMacrosFromLinesAsync(
@@ -146,6 +163,10 @@ export default class MacrosPlugin extends Plugin {
 
   refreshMacrosTables() {
     this.refreshManager.refreshMarkdownViews();
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   async updateMacrosCodeBlock() {

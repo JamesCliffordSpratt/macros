@@ -27,6 +27,16 @@ export class GroupRenderer {
     this.contextMenuManager = new ContextMenuManager(this.plugin);
   }
 
+  /**
+   * Parse timestamp from a macro line
+   * @param line The macro line text
+   * @returns The timestamp text (without @@) or empty string if no timestamp
+   */
+  private parseTimestampFromLine(line: string): string {
+    const timestampMatch = line.match(/@(\d{2}:\d{2})/);
+    return timestampMatch ? timestampMatch[1] : '';
+  }
+
   renderGroups(
     table: HTMLTableElement,
     groups: Group[],
@@ -112,9 +122,12 @@ export class GroupRenderer {
         const line = updatedLines[i];
         if (line.toLowerCase().startsWith('group:')) {
           let groupName = line.substring(6).trim();
-          // Handle potential comments in group names
+          // Handle potential comments and timestamps in group names
           if (groupName.includes(' //')) {
             groupName = groupName.split(' //')[0].trim();
+          }
+          if (groupName.includes(' @')) {
+            groupName = groupName.split(' @')[0].trim();
           }
 
           if (groupName.toLowerCase() === group.name.toLowerCase()) {
@@ -162,29 +175,56 @@ export class GroupRenderer {
     const headerContent = createEl('div', { cls: 'header-content' });
     const leftContent = createEl('div', { cls: 'header-left' });
 
-    // Parse comment from group macro line if it exists
+    // Parse comment and timestamp from group macro line if it exists
     let displayName = group.name;
     let comment = '';
+    let timestamp = '';
 
     if (group.macroLine) {
       const commentIndex = group.macroLine.indexOf('//');
       if (commentIndex !== -1) {
         comment = group.macroLine.substring(commentIndex + 2).trim();
-        // Extract the base name without comment for display
-        const baseLine = group.macroLine.substring(0, commentIndex).trim();
-        if (baseLine.toLowerCase().startsWith('meal:')) {
-          displayName = baseLine.substring(5).trim(); // Remove 'meal:' prefix
-        } else if (baseLine.toLowerCase().startsWith('group:')) {
-          displayName = baseLine.substring(6).trim(); // Remove 'group:' prefix
-        }
+      }
+
+      timestamp = this.parseTimestampFromLine(group.macroLine);
+
+      // Extract the base name without comment and timestamp for display
+      let baseLine = group.macroLine;
+      if (commentIndex !== -1) {
+        baseLine = baseLine.substring(0, commentIndex).trim();
+      }
+      baseLine = baseLine.replace(/@\d{2}:\d{2}/g, '').trim();
+
+      if (baseLine.toLowerCase().startsWith('meal:')) {
+        displayName = baseLine.substring(5).trim(); // Remove 'meal:' prefix
+      } else if (baseLine.toLowerCase().startsWith('group:')) {
+        displayName = baseLine.substring(6).trim(); // Remove 'group:' prefix
       }
     }
+
+    // Create a container for the name and icons
+    const nameContainer = createEl('div', { cls: 'header-name-container' });
 
     const nameSpan = createEl('span', {
       cls: 'header-label',
       text: displayName,
     });
-    leftContent.appendChild(nameSpan);
+    nameContainer.appendChild(nameSpan);
+
+    // Create icons container for proper alignment
+    const iconsContainer = createEl('div', { cls: 'header-icons-container' });
+
+    // Add timestamp icon if timestamp exists
+    if (timestamp) {
+      const timestampIcon = createEl('span', {
+        cls: 'meal-timestamp-icon',
+        text: '⏰',
+      });
+
+      // Add tooltip with the timestamp
+      safeAttachTooltip(timestampIcon, t('timestamps.consumed', { time: timestamp }), this.plugin);
+      iconsContainer.appendChild(timestampIcon);
+    }
 
     // Add comment icon if comment exists
     if (comment) {
@@ -195,8 +235,11 @@ export class GroupRenderer {
 
       // Add tooltip with the comment text
       safeAttachTooltip(commentIcon, comment, this.plugin);
-      leftContent.appendChild(commentIcon);
+      iconsContainer.appendChild(commentIcon);
     }
+
+    nameContainer.appendChild(iconsContainer);
+    leftContent.appendChild(nameContainer);
 
     // UPDATED: Use formatCalories for proper energy unit handling and remove brackets
     const caloriesSpan = createEl('span', {
@@ -205,10 +248,11 @@ export class GroupRenderer {
     });
     leftContent.appendChild(caloriesSpan);
 
+    // Rest of the method remains the same...
     if (group.macroLine) {
       const removeBtn = createEl('span', {
         cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE}`,
-        text: '–',
+        text: '—',
       });
       attachTooltip(removeBtn, t('table.actions.removeMeal'));
 

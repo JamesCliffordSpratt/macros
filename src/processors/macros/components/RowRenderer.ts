@@ -17,6 +17,7 @@ import { formatServing } from '../../../utils/formatters';
 import { Notice, Modal, ButtonComponent } from 'obsidian';
 import { t } from '../../../lang/I18nManager';
 import { ContextMenuManager, CommentTarget } from '../../../ui/modals/ContextMenuManager';
+import { ToleranceData } from '../../../ui/modals/ToleranceModal';
 
 /**
  * Confirmation Modal for Delete Actions - FIXED LOCALIZATION
@@ -168,15 +169,22 @@ export class RowRenderer {
   }
 
   /**
-   * FIXED: Extract clean name without comments
-   * @param name Name that might contain comments (e.g., "Meal1 // test")
-   * @returns Clean name without comments (e.g., "Meal1")
+   * FIXED: Extract clean name without comments and timestamps
+   * @param name Name that might contain comments and timestamps (e.g., "Meal1 @12:30 // test")
+   * @returns Clean name without comments and timestamps (e.g., "Meal1")
    */
   private extractCleanName(name: string): string {
-    if (name.includes(' //')) {
-      return name.split(' //')[0].trim();
+    let cleanName = name;
+
+    // Remove comments
+    if (cleanName.includes(' //')) {
+      cleanName = cleanName.split(' //')[0].trim();
     }
-    return name.trim();
+
+    // Remove timestamps
+    cleanName = cleanName.replace(/@\d{2}:\d{2}/g, '').trim();
+
+    return cleanName;
   }
 
   /**
@@ -186,6 +194,23 @@ export class RowRenderer {
     const commentIndex = line.indexOf('//');
     if (commentIndex === -1) return '';
     return line.substring(commentIndex + 2).trim();
+  }
+
+  /**
+   * Parse timestamp from a macro line
+   */
+  private parseTimestampFromLine(line: string): string {
+    const timestampMatch = line.match(/@(\d{2}:\d{2})/);
+    return timestampMatch ? timestampMatch[1] : '';
+  }
+
+  /**
+   * Get tolerance data for a food item
+   * @param foodName The food name to check
+   * @returns ToleranceData or null if no tolerance exists
+   */
+  private getToleranceData(foodName: string): ToleranceData | null {
+    return this.plugin.settings.foodTolerances?.[foodName.toLowerCase()] || null;
   }
 
   /**
@@ -451,7 +476,7 @@ export class RowRenderer {
 
     const removeBtn = container.createSpan({
       cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE} macro-food-remove-btn`,
-      text: '–',
+      text: '−',
     });
 
     const cleanContainerName = this.extractCleanName(containerName);
@@ -632,7 +657,7 @@ export class RowRenderer {
   }
 
   /**
-   * UPDATED: Main renderFoodRow method with unified long press
+   * UPDATED: Main renderFoodRow method with unified long press, timestamp support, and tolerance icons
    */
   renderFoodRow(
     table: HTMLTableElement,
@@ -666,8 +691,10 @@ export class RowRenderer {
     const nameCell = r.insertCell();
     const nameContainer = nameCell.createDiv({ cls: 'macro-food-name-container' });
 
-    // Parse comment from the macro line
+    // Parse comment and timestamp from the macro line
     const comment = this.parseCommentFromLine(row.macroLine);
+    const timestamp = this.parseTimestampFromLine(row.macroLine);
+    const toleranceData = this.getToleranceData(row.name);
 
     // Create main food name container
     const nameContentDiv = nameContainer.createDiv({ cls: 'food-name-content' });
@@ -678,9 +705,34 @@ export class RowRenderer {
     });
     nameSpan.textContent = row.name;
 
+    // Create icons container for proper alignment
+    const iconsContainer = nameContentDiv.createDiv({ cls: 'food-icons-container' });
+
+    // Add tolerance icon first if it exists (most important)
+    if (toleranceData) {
+      const toleranceIcon = iconsContainer.createSpan({
+        cls: 'food-tolerance-icon',
+        text: toleranceData.severity,
+      });
+
+      // Create detailed tooltip for tolerance
+      const toleranceTooltip = `${t('tolerances.severity')}: ${toleranceData.severity}\n${t('tolerances.symptoms')}: ${toleranceData.symptoms}`;
+      safeAttachTooltip(toleranceIcon, toleranceTooltip, this.plugin);
+    }
+
+    // Add timestamp icon if timestamp exists
+    if (timestamp) {
+      const timestampIcon = iconsContainer.createSpan({
+        cls: 'food-timestamp-icon',
+        text: '⏰',
+      });
+
+      safeAttachTooltip(timestampIcon, t('timestamps.consumed', { time: timestamp }), this.plugin);
+    }
+
     // Add comment icon if comment exists
     if (comment) {
-      const commentIcon = nameContentDiv.createSpan({
+      const commentIcon = iconsContainer.createSpan({
         cls: 'food-comment-icon',
         text: '💬',
       });

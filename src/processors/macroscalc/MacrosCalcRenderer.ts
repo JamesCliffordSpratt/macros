@@ -3,8 +3,8 @@ import {
   formatCalories,
   formatGrams,
   formatPercentage,
-  ChartLoader,
   safeAttachTooltip,
+  ChartLoader,
   CLASS_NAMES,
   MACRO_TYPES,
   MacroTotals,
@@ -19,11 +19,18 @@ import { processNutritionalData } from '../../utils/nutritionUtils';
 import { processNutritionalDataFromLines } from './calculator';
 import { t } from '../../lang/I18nManager';
 import { convertEnergyUnit } from '../../utils/energyUtils';
+import {
+  MetricsRegistry,
+  MetricsEditModal,
+  registerBuiltinMetrics,
+  MetricConfig,
+  MetricData,
+} from './metrics';
 
 interface ChartReference {
-  chart: import('chart.js').Chart; // Specific Chart.js type instead of any
-  caloriesChart: import('chart.js').Chart | null; // Specific Chart.js type instead of any
-  resizeHandler: () => void; // Resize event handler
+  chart: import('chart.js').Chart;
+  caloriesChart: import('chart.js').Chart | null;
+  resizeHandler: () => void;
 }
 
 export class MacrosCalcRenderer {
@@ -32,55 +39,100 @@ export class MacrosCalcRenderer {
   private ids: string[];
   private sortConfig: { column: string; ascending: boolean } = { column: '', ascending: true };
   private expandedRows: Set<string> = new Set();
-  private charts: ChartReference[] = []; // Add the charts property with proper typing
+  private charts: ChartReference[] = [];
   private state: MacrosState | null;
   private isDashboardCollapsed = false;
-  // Add a new property to track if data needs refreshing
   private needsDataRefresh = true;
-  // Add a reference to the ChartLoader
   private chartLoader: ChartLoader = ChartLoader.getInstance();
+
+  // Metrics system properties
+  private metricsConfigs: MetricConfig[] = [];
+  private lastCalculatedTotals: MacroTotals = { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  private lastBreakdownData: CalcBreakdown[] = [];
 
   constructor(plugin: MacrosPlugin, el: HTMLElement, ids: string[]) {
     this.plugin = plugin;
     this.el = el;
     this.ids = ids;
 
-    // Create a unique ID for this instance based on the IDs
     const combinedId = this.ids.join('-');
-    // Initialize MacrosState
     this.state = new MacrosState(plugin, combinedId, 'calc');
+
+    // Initialize metrics system
+    this.initializeMetrics();
   }
 
-  // Add a getter for the IDs
+  private initializeMetrics(): void {
+    // Register built-in metrics
+    const registry = MetricsRegistry.getInstance();
+    registerBuiltinMetrics(registry);
+
+    // Load user's metric configurations
+    this.loadMetricsConfig();
+  }
+
+  private loadMetricsConfig(): void {
+    // Get saved configs from plugin settings
+    const savedConfigs = this.plugin.settings.macroscalcMetricsConfigs || [];
+
+    // If no saved configs, use defaults
+    if (savedConfigs.length === 0) {
+      const registry = MetricsRegistry.getInstance();
+      this.metricsConfigs = registry.getAll().map((metric) => ({
+        id: metric.id,
+        enabled: metric.defaultEnabled,
+        settings: metric.getConfigUI?.()?.getDefaultConfig() || {},
+      }));
+    } else {
+      this.metricsConfigs = savedConfigs;
+    }
+  }
+
+  private saveMetricsConfig(): void {
+    this.plugin.settings.macroscalcMetricsConfigs = this.metricsConfigs;
+    this.plugin.saveSettings();
+  }
+
+  // Add this method to get display options from metrics config
+  private getDisplayOptions(): { showTable: boolean; showChart: boolean } {
+    // Find the display options config
+    const displayConfig = this.metricsConfigs.find((config) => config.id === 'display-options');
+
+    if (displayConfig && displayConfig.enabled && displayConfig.settings) {
+      return {
+        showTable: displayConfig.settings.showTable !== false,
+        showChart: displayConfig.settings.showChart !== false,
+      };
+    }
+
+    // Default to showing both if no config found
+    return { showTable: true, showChart: true };
+  }
+
   public getIds(): string[] {
     return this.ids;
   }
 
-  // Add a method to force a data refresh
   public setNeedsRefresh(): void {
     this.needsDataRefresh = true;
     this.plugin.logger.debug(`MacrosCalc renderer for ${this.ids.join(',')} marked for refresh`);
   }
 
-  // Save collapse state using MacrosState
   private saveDashboardCollapseState(isCollapsed: boolean): void {
     if (this.state) {
       this.state.saveCollapsedState('dashboard', isCollapsed);
     }
   }
 
-  // Load collapse state from MacrosState
   private loadDashboardCollapseState(): boolean {
     return this.state ? this.state.getCollapsedState('dashboard') : false;
   }
 
-  // FIX: Use underscore prefix for unused parameters to satisfy ESLint
-  async render(_aggregate: MacroTotals, _breakdown: CalcBreakdown[]): Promise<void> {
+  async render(aggregate: MacroTotals, breakdown: CalcBreakdown[]): Promise<void> {
     // Always force fresh data fetch if needed
     if (this.needsDataRefresh) {
       this.plugin.logger.debug('MacrosCalc refresh triggered - reloading all data');
 
-      // First clear all cached data for our IDs
       for (const id of this.ids) {
         if (this.plugin.macroService.macroTables.has(id)) {
           this.plugin.macroService.macroTables.delete(id);
@@ -93,31 +145,48 @@ export class MacrosCalcRenderer {
           this.plugin.logger.debug(
             `MacrosCalc loaded ${allLines.length} lines for ${id} (including bullet points)`
           );
-
-          // Store these lines for calculation
           this.plugin.macroService.macroTables.set(id, allLines);
         } else {
           this.plugin.logger.debug(`No data found for ID ${id}`);
         }
       }
 
-      // Reset the refresh flag
       this.needsDataRefresh = false;
     }
 
-    // CRITICAL FIX: Always recalculate the aggregate and breakdown using the fixed calculator
-    // Don't trust the passed-in values as they might be from the old calculation logic
-    const { aggregate: freshAggregate, breakdown: freshBreakdown } =
-      await processNutritionalDataFromLines(this.plugin, this.ids);
+    // Always recalculate the aggregate and breakdown using the fixed calculator
+    // But only if we don't already have cached totals (for display-only refreshes)
+    let finalAggregate = aggregate;
+    let finalBreakdown = breakdown;
 
-    this.plugin.logger.debug('MacrosCalc using fresh calculations:', {
-      aggregate: freshAggregate,
-      breakdown: freshBreakdown,
-    });
+    if (
+      this.needsDataRefresh ||
+      !this.lastCalculatedTotals ||
+      this.lastCalculatedTotals.calories === 0
+    ) {
+      const { aggregate: freshAggregate, breakdown: freshBreakdown } =
+        await processNutritionalDataFromLines(this.plugin, this.ids);
 
-    // Use the fresh calculations instead of the passed-in values
-    const finalAggregate = freshAggregate;
-    const finalBreakdown = freshBreakdown;
+      this.plugin.logger.debug('MacrosCalc using fresh calculations:', {
+        aggregate: freshAggregate,
+        breakdown: freshBreakdown,
+      });
+
+      // Cache the calculations for metrics
+      this.lastCalculatedTotals = freshAggregate;
+      this.lastBreakdownData = freshBreakdown;
+
+      finalAggregate = freshAggregate;
+      finalBreakdown = freshBreakdown;
+    } else {
+      // Use cached data for display-only refreshes
+      finalAggregate = this.lastCalculatedTotals;
+      finalBreakdown = this.lastBreakdownData;
+      this.plugin.logger.debug('MacrosCalc using cached calculations for display refresh');
+    }
+
+    // Get display options
+    const displayOptions = this.getDisplayOptions();
 
     // Create a document fragment to batch DOM operations
     const fragment = document.createDocumentFragment();
@@ -129,169 +198,163 @@ export class MacrosCalcRenderer {
     // Create dashboard summary at the top - use the FRESH aggregate data
     this.renderDashboard(fragment as unknown as HTMLElement, finalAggregate);
 
-    // Create the main table with styling that matches other components
-    const tableContainer = (fragment as unknown as HTMLElement).createDiv({
-      cls: 'macroscalc-container',
-    });
-
-    // Apply initial collapse state to the table container
-    if (this.isDashboardCollapsed) {
-      tableContainer.classList.add('macroscalc-hidden');
-    }
-
-    const table = tableContainer.createEl('table', { cls: CLASS_NAMES.TABLE.CONTAINER });
-
-    // Create header row with mobile-responsive headers
-    const headerRow = table.insertRow();
-    const headerData = [
-      { text: t('calculator.tableHeaders.id'), mobileText: 'ID' },
-      { text: t('table.headers.calories'), mobileText: 'Cal' },
-      { text: t('table.headers.protein'), mobileText: 'Pro' },
-      { text: t('table.headers.fat'), mobileText: 'Fat' },
-      { text: t('table.headers.carbs'), mobileText: 'Carb' },
-    ];
-
-    headerData.forEach((headerInfo, index) => {
-      const cell = headerRow.insertCell();
-
-      // Create a container for the header content to allow sorting UI
-      const headerContainer = cell.createDiv({ cls: 'macroscalc-header-container' });
-
-      // FIX: Create spans directly without storing in unused variables
-      headerContainer.createSpan({
-        cls: 'header-text-desktop',
-        text: headerInfo.text,
+    // Only create the main table if showTable is enabled
+    if (displayOptions.showTable) {
+      // Create the main table with styling that matches other components
+      const tableContainer = (fragment as unknown as HTMLElement).createDiv({
+        cls: 'macroscalc-container',
       });
 
-      headerContainer.createSpan({
-        cls: 'header-text-mobile',
-        text: headerInfo.mobileText,
-      });
+      // Apply initial collapse state to the table container
+      if (this.isDashboardCollapsed) {
+        tableContainer.classList.add('macroscalc-hidden');
+      }
 
-      if (index > 0) {
-        // Don't add sort button to Table ID column
-        const sortButton = headerContainer.createSpan({ cls: 'macroscalc-sort-icon' });
-        sortButton.setText('⇅');
+      const table = tableContainer.createEl('table', { cls: CLASS_NAMES.TABLE.CONTAINER });
 
-        // Set initial sort indicator if this is the current sort column
-        if (this.sortConfig.column === headerInfo.text) {
-          sortButton.setText(this.sortConfig.ascending ? '↑' : '↓');
-          sortButton.classList.add('active');
+      // Create header row with mobile-responsive headers
+      const headerRow = table.insertRow();
+      const headerData = [
+        { text: t('calculator.tableHeaders.id'), mobileText: 'ID' },
+        { text: t('table.headers.calories'), mobileText: 'Cal' },
+        { text: t('table.headers.protein'), mobileText: 'Pro' },
+        { text: t('table.headers.fat'), mobileText: 'Fat' },
+        { text: t('table.headers.carbs'), mobileText: 'Carb' },
+      ];
+
+      headerData.forEach((headerInfo, index) => {
+        const cell = headerRow.insertCell();
+
+        const headerContainer = cell.createDiv({ cls: 'macroscalc-header-container' });
+
+        headerContainer.createSpan({
+          cls: 'header-text-desktop',
+          text: headerInfo.text,
+        });
+
+        headerContainer.createSpan({
+          cls: 'header-text-mobile',
+          text: headerInfo.mobileText,
+        });
+
+        if (index > 0) {
+          const sortButton = headerContainer.createSpan({ cls: 'macroscalc-sort-icon' });
+          sortButton.setText('⇅');
+
+          if (this.sortConfig.column === headerInfo.text) {
+            sortButton.setText(this.sortConfig.ascending ? '↑' : '↓');
+            sortButton.classList.add('active');
+          }
+
+          sortButton.addEventListener('click', () => {
+            this.sortTable(table, headerInfo.text);
+          });
         }
 
-        // Add sort functionality
-        sortButton.addEventListener('click', () => {
-          this.sortTable(table, headerInfo.text);
+        cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
+
+        if (headerInfo.text === t('table.headers.protein'))
+          cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
+        if (headerInfo.text === t('table.headers.fat'))
+          cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
+        if (headerInfo.text === t('table.headers.carbs'))
+          cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
+        if (headerInfo.text === t('table.headers.calories'))
+          cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
+      });
+
+      // Render each breakdown row - use the FRESH breakdown data
+      finalBreakdown.forEach((item, index) => {
+        this.renderTableRow(table, item, finalAggregate, index % 2 === 1);
+        this.renderExpandableDetailRow(table, item);
+      });
+
+      // Render aggregate totals row with special styling - use the FRESH aggregate data
+      const aggregateRow = table.insertRow();
+      aggregateRow.classList.add(CLASS_NAMES.TABLE.TOTALS_ROW);
+
+      const aggLabelCell = aggregateRow.insertCell();
+      aggLabelCell.classList.add('macro-bold-cell');
+
+      aggLabelCell.createSpan({
+        cls: 'header-text-desktop',
+        text: t('calculator.combinedTotals'),
+      });
+
+      aggLabelCell.createSpan({
+        cls: 'header-text-mobile',
+        text: t('table.summary.totals'),
+      });
+
+      // Calculate total macros for percentages
+      const totalMacros = finalAggregate.protein + finalAggregate.fat + finalAggregate.carbs;
+
+      // Enhanced calories cell with kJ support
+      const aggCaloriesCell = aggregateRow.insertCell();
+      aggCaloriesCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CALORIES_CELL);
+
+      const currentEnergyUnit = this.plugin.settings.energyUnit;
+      if (currentEnergyUnit === 'kJ') {
+        const kjValue = convertEnergyUnit(finalAggregate.calories, 'kcal', 'kJ');
+        aggCaloriesCell.innerText = `${kjValue.toFixed(1)} kJ`;
+        safeAttachTooltip(
+          aggCaloriesCell,
+          `${finalAggregate.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`,
+          this.plugin
+        );
+      } else {
+        aggCaloriesCell.innerText = formatCalories(finalAggregate.calories);
+      }
+
+      // Protein
+      const aggProteinCell = aggregateRow.insertCell();
+      aggProteinCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.PROTEIN_CELL);
+      aggProteinCell.textContent = formatGrams(finalAggregate.protein);
+      if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
+        const proteinPercentage = formatPercentage((finalAggregate.protein / totalMacros) * 100);
+        aggProteinCell.createSpan({
+          cls: CLASS_NAMES.MACRO.PERCENTAGE,
+          text: `(${proteinPercentage}%)`,
         });
       }
 
-      cell.classList.add(CLASS_NAMES.TABLE.COLUMN_HEADER);
+      // Fat
+      const aggFatCell = aggregateRow.insertCell();
+      aggFatCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.FAT_CELL);
+      aggFatCell.textContent = formatGrams(finalAggregate.fat);
+      if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
+        const fatPercentage = formatPercentage((finalAggregate.fat / totalMacros) * 100);
+        aggFatCell.createSpan({
+          cls: CLASS_NAMES.MACRO.PERCENTAGE,
+          text: `(${fatPercentage}%)`,
+        });
+      }
 
-      // Add specific macro styling for appropriate columns
-      if (headerInfo.text === t('table.headers.protein'))
-        cell.classList.add(CLASS_NAMES.MACRO.PROTEIN_CELL);
-      if (headerInfo.text === t('table.headers.fat'))
-        cell.classList.add(CLASS_NAMES.MACRO.FAT_CELL);
-      if (headerInfo.text === t('table.headers.carbs'))
-        cell.classList.add(CLASS_NAMES.MACRO.CARBS_CELL);
-      if (headerInfo.text === t('table.headers.calories'))
-        cell.classList.add(CLASS_NAMES.MACRO.CALORIES_CELL);
-    });
-
-    // Render each breakdown row - use the FRESH breakdown data
-    finalBreakdown.forEach((item, index) => {
-      this.renderTableRow(table, item, finalAggregate, index % 2 === 1);
-
-      // Render expandable detail row (initially hidden)
-      this.renderExpandableDetailRow(table, item);
-    });
-
-    // Render aggregate totals row with special styling - use the FRESH aggregate data
-    const aggregateRow = table.insertRow();
-    aggregateRow.classList.add(CLASS_NAMES.TABLE.TOTALS_ROW);
-
-    const aggLabelCell = aggregateRow.insertCell();
-    aggLabelCell.classList.add('macro-bold-cell');
-
-    // FIX: Create responsive text directly without storing in unused variables
-    aggLabelCell.createSpan({
-      cls: 'header-text-desktop',
-      text: t('calculator.combinedTotals'),
-    });
-
-    aggLabelCell.createSpan({
-      cls: 'header-text-mobile',
-      text: t('table.summary.totals'),
-    });
-
-    // Calculate total macros for percentages
-    const totalMacros = finalAggregate.protein + finalAggregate.fat + finalAggregate.carbs;
-
-    // Enhanced calories cell with kJ support
-    const aggCaloriesCell = aggregateRow.insertCell();
-    aggCaloriesCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CALORIES_CELL);
-
-    // Display calories with proper energy unit
-    const currentEnergyUnit = this.plugin.settings.energyUnit;
-    if (currentEnergyUnit === 'kJ') {
-      const kjValue = convertEnergyUnit(finalAggregate.calories, 'kcal', 'kJ');
-      aggCaloriesCell.innerText = `${kjValue.toFixed(1)} kJ`;
-      // Add tooltip showing both units
-      safeAttachTooltip(
-        aggCaloriesCell,
-        `${finalAggregate.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`,
-        this.plugin
-      );
-    } else {
-      aggCaloriesCell.innerText = formatCalories(finalAggregate.calories);
+      // Carbs
+      const aggCarbsCell = aggregateRow.insertCell();
+      aggCarbsCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CARBS_CELL);
+      aggCarbsCell.textContent = formatGrams(finalAggregate.carbs);
+      if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
+        const carbsPercentage = formatPercentage((finalAggregate.carbs / totalMacros) * 100);
+        aggCarbsCell.createSpan({
+          cls: CLASS_NAMES.MACRO.PERCENTAGE,
+          text: `(${carbsPercentage}%)`,
+        });
+      }
     }
 
-    // Protein
-    const aggProteinCell = aggregateRow.insertCell();
-    aggProteinCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.PROTEIN_CELL);
-    aggProteinCell.textContent = formatGrams(finalAggregate.protein);
-    if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-      const proteinPercentage = formatPercentage((finalAggregate.protein / totalMacros) * 100);
-      aggProteinCell.createSpan({
-        cls: CLASS_NAMES.MACRO.PERCENTAGE,
-        text: `(${proteinPercentage}%)`,
+    // Only add comparison visualization if showChart is enabled
+    if (displayOptions.showChart) {
+      const chartSection = (fragment as unknown as HTMLElement).createDiv({
+        cls: 'macroscalc-chart-section',
       });
+
+      if (this.isDashboardCollapsed) {
+        chartSection.classList.add('macroscalc-hidden');
+      }
+
+      await this.renderComparisonChart(chartSection, finalBreakdown);
     }
-
-    // Fat
-    const aggFatCell = aggregateRow.insertCell();
-    aggFatCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.FAT_CELL);
-    aggFatCell.textContent = formatGrams(finalAggregate.fat);
-    if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-      const fatPercentage = formatPercentage((finalAggregate.fat / totalMacros) * 100);
-      aggFatCell.createSpan({
-        cls: CLASS_NAMES.MACRO.PERCENTAGE,
-        text: `(${fatPercentage}%)`,
-      });
-    }
-
-    // Carbs
-    const aggCarbsCell = aggregateRow.insertCell();
-    aggCarbsCell.classList.add('macro-bold-cell', CLASS_NAMES.MACRO.CARBS_CELL);
-    aggCarbsCell.textContent = formatGrams(finalAggregate.carbs);
-    if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
-      const carbsPercentage = formatPercentage((finalAggregate.carbs / totalMacros) * 100);
-      aggCarbsCell.createSpan({
-        cls: CLASS_NAMES.MACRO.PERCENTAGE,
-        text: `(${carbsPercentage}%)`,
-      });
-    }
-
-    // Add comparison visualization - only if not collapsed - use the FRESH breakdown data
-    const chartSection = (fragment as unknown as HTMLElement).createDiv({
-      cls: 'macroscalc-chart-section',
-    });
-
-    if (this.isDashboardCollapsed) {
-      chartSection.classList.add('macroscalc-hidden');
-    }
-
-    await this.renderComparisonChart(chartSection, finalBreakdown);
 
     // Add to main element
     this.el.appendChild(fragment);
@@ -302,21 +365,27 @@ export class MacrosCalcRenderer {
       cls: `${CLASS_NAMES.DASHBOARD.CONTAINER} macroscalc-dashboard-container`,
     });
 
-    // Create a header with collapse/expand controls - use the new collapsible-header class
+    // Create header with edit button and toggle functionality
     const dashboardHeader = dashboardContainer.createDiv({
       cls: `${CLASS_NAMES.DASHBOARD.HEADER} macroscalc-dashboard-header collapsible-header`,
     });
 
-    // Create a container for the header content - use header-content class
     const headerContent = dashboardHeader.createDiv({ cls: 'header-content' });
 
-    // Add title - use header-label class
+    // Add title
     headerContent.createSpan({
       cls: 'header-label',
       text: this.getSummaryLabel(),
     });
 
-    // Add toggle button - use toggle-icon class
+    // Add edit button
+    const editButton = headerContent.createSpan({
+      cls: 'macroscalc-edit-metrics-btn',
+      text: '⚙️',
+      attr: { 'aria-label': t('metrics.edit.title') },
+    });
+
+    // Add toggle button
     const toggleButton = headerContent.createSpan({
       cls: 'toggle-icon',
     });
@@ -327,13 +396,22 @@ export class MacrosCalcRenderer {
       dashboardHeader.classList.add('collapsed');
     }
 
-    // Add click handler to the ENTIRE header, not just the button
-    // Use the plugin's registerEvent for proper cleanup
-    this.plugin.registerDomListener(dashboardHeader, 'click', () => {
+    // Edit button click handler
+    this.plugin.registerDomListener(editButton, 'click', (e: Event) => {
+      e.stopPropagation();
+      this.openMetricsEditModal();
+    });
+
+    // Toggle button click handler
+    this.plugin.registerDomListener(dashboardHeader, 'click', (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('macroscalc-edit-metrics-btn')) {
+        return; // Don't toggle when clicking edit button
+      }
       this.toggleDashboard(dashboardContainer, toggleButton);
     });
 
-    // Create content area - use collapsible-content class
+    // Create content area
     const dashboardContent = dashboardContainer.createDiv({
       cls: `${CLASS_NAMES.DASHBOARD.CONTENT} macroscalc-dashboard-content collapsible-content`,
     });
@@ -343,52 +421,186 @@ export class MacrosCalcRenderer {
       dashboardContent.classList.add('collapsed');
     }
 
-    // Calculate total macro grams for percentage calculation
-    const totalMacros = totals.protein + totals.fat + totals.carbs;
+    // Only render the organized custom metrics (removed basic metrics)
+    this.renderCustomMetrics(dashboardContent, totals);
+  }
 
-    // Calculate percentages for display
-    const proteinPercentage =
-      totalMacros > 0 ? Math.round((totals.protein / totalMacros) * 100) : 0;
-    const fatPercentage = totalMacros > 0 ? Math.round((totals.fat / totalMacros) * 100) : 0;
-    const carbsPercentage = totalMacros > 0 ? Math.round((totals.carbs / totalMacros) * 100) : 0;
+  private renderBasicMetrics(container: HTMLElement, totals: MacroTotals): void {
+    // Remove this method's content entirely since we now have organized custom metrics
+    // that include totals, averages, and ratios in a much better format.
+    // The custom metrics system handles all the data display we need.
 
-    // Enhanced calories metric card with kJ support
-    const currentEnergyUnit = this.plugin.settings.energyUnit;
-    let calorieDisplayValue: string;
-    if (currentEnergyUnit === 'kJ') {
-      const kjValue = convertEnergyUnit(totals.calories, 'kcal', 'kJ');
-      calorieDisplayValue = `${kjValue.toFixed(1)} kJ`;
-    } else {
-      calorieDisplayValue = formatCalories(totals.calories);
+    // This method is now intentionally empty to avoid redundant metric cards
+    return;
+  }
+
+  private renderCustomMetrics(container: HTMLElement, totals: MacroTotals): void {
+    // Create metrics data with configs included
+    const metricsData: MetricData & { configs?: MetricConfig[] } = {
+      id: this.ids.join(','),
+      totals,
+      breakdown: this.lastBreakdownData,
+      dateIds: this.ids.filter((id) => /^\d{4}-\d{2}-\d{2}$/.test(id)),
+      targets: {
+        calories: this.plugin.settings.dailyCaloriesTarget,
+        protein: this.plugin.settings.dailyProteinTarget,
+        fat: this.plugin.settings.dailyFatTarget,
+        carbs: this.plugin.settings.dailyCarbsTarget,
+      },
+      configs: this.metricsConfigs, // Pass the configs to the metrics
+    };
+
+    // Calculate metrics with configs passed in the data
+    const registry = MetricsRegistry.getInstance();
+    const metricResults = registry.calculateMetrics(metricsData, this.metricsConfigs);
+
+    // Group metrics by category
+    const categorizedMetrics = new Map<string, { metric: any; values: any[] }[]>();
+
+    for (const [metricId, values] of metricResults) {
+      const metric = registry.get(metricId);
+      if (!metric || values.length === 0) continue;
+
+      const category = metric.category || 'other';
+      if (!categorizedMetrics.has(category)) {
+        categorizedMetrics.set(category, []);
+      }
+      categorizedMetrics.get(category)!.push({ metric, values });
     }
 
-    this.createMetricCard(
-      dashboardContent,
-      t('table.headers.calories'),
-      calorieDisplayValue,
-      MACRO_TYPES.CALORIES
-    );
+    // Render categories in a specific order (excluding display since it doesn't show metrics)
+    const categoryOrder = ['totals', 'ratios', 'trends', 'extremes', 'adherence', 'other'];
 
-    this.createMetricCard(
-      dashboardContent,
-      t('table.headers.protein'),
-      `${formatGrams(totals.protein)} (${proteinPercentage}%)`,
-      MACRO_TYPES.PROTEIN
-    );
+    categoryOrder.forEach((categoryKey) => {
+      const categoryMetrics = categorizedMetrics.get(categoryKey);
+      if (!categoryMetrics || categoryMetrics.length === 0) return;
 
-    this.createMetricCard(
-      dashboardContent,
-      t('table.headers.fat'),
-      `${formatGrams(totals.fat)} (${fatPercentage}%)`,
-      MACRO_TYPES.FAT
-    );
+      // Create section for this category
+      const categorySection = container.createDiv({
+        cls: 'macroscalc-metrics-category-section',
+      });
 
-    this.createMetricCard(
-      dashboardContent,
-      t('table.headers.carbs'),
-      `${formatGrams(totals.carbs)} (${carbsPercentage}%)`,
-      MACRO_TYPES.CARBS
-    );
+      // Add category header
+      const categoryHeader = categorySection.createDiv({
+        cls: 'macroscalc-metrics-section-header',
+      });
+      categoryHeader.textContent = this.getCategoryDisplayName(categoryKey);
+
+      // Create appropriate grid for this category
+      const gridClass = this.getGridClassForCategory(categoryKey);
+      const categoryGrid = categorySection.createDiv({
+        cls: gridClass,
+      });
+
+      // Render all metrics in this category
+      categoryMetrics.forEach(({ metric, values }) => {
+        values.forEach((value) => {
+          this.createCustomMetricCard(categoryGrid, value, categoryKey);
+        });
+      });
+    });
+  }
+
+  private getCategoryDisplayName(category: string): string {
+    const categoryNames: Record<string, string> = {
+      totals: 'TOTALS & AVERAGES',
+      ratios: 'MACRO RATIOS',
+      trends: 'TRENDS',
+      extremes: 'EXTREMES',
+      adherence: 'ADHERENCE & STREAKS',
+      other: 'OTHER METRICS',
+    };
+    return categoryNames[category] || category.toUpperCase();
+  }
+
+  private getGridClassForCategory(category: string): string {
+    const gridClasses: Record<string, string> = {
+      totals: 'macroscalc-totals-grid',
+      ratios: 'macroscalc-ratios-grid',
+      trends: 'macroscalc-trends-grid',
+      extremes: 'macroscalc-extremes-grid',
+      adherence: 'macroscalc-adherence-grid',
+      other: 'macroscalc-metrics-category-grid',
+    };
+    return gridClasses[category] || 'macroscalc-metrics-category-grid';
+  }
+
+  private createCustomMetricCard(
+    container: HTMLElement,
+    metricValue: any,
+    category?: string
+  ): void {
+    const card = container.createDiv({
+      cls: 'macroscalc-custom-metric-card',
+    });
+
+    // Add category data attribute for styling
+    if (category) {
+      card.setAttribute('data-category', category);
+    }
+
+    if (metricValue.color) {
+      card.style.borderLeftColor = metricValue.color;
+      card.addClass('colored-metric');
+    }
+
+    card.createDiv({
+      cls: 'metric-label',
+      text: metricValue.label,
+    });
+
+    const valueEl = card.createDiv({
+      cls: 'metric-value',
+      text: metricValue.value.toString(),
+    });
+
+    if (metricValue.unit) {
+      valueEl.createSpan({
+        cls: 'metric-unit',
+        text: metricValue.unit,
+      });
+    }
+
+    if (metricValue.subtext) {
+      card.createDiv({
+        cls: 'metric-subtext',
+        text: metricValue.subtext,
+      });
+    }
+
+    if (metricValue.tooltip) {
+      safeAttachTooltip(card, metricValue.tooltip, this.plugin);
+    }
+  }
+
+  private openMetricsEditModal(): void {
+    const modal = new MetricsEditModal(this.plugin, this.metricsConfigs, (newConfigs) => {
+      this.metricsConfigs = newConfigs;
+      this.saveMetricsConfig();
+
+      // Force a complete re-render instead of just refreshing the dashboard
+      this.forceCompleteRerender();
+    });
+    modal.open();
+  }
+
+  private forceCompleteRerender(): void {
+    // Mark that we need a data refresh (even though we don't, this ensures fresh rendering)
+    this.setNeedsRefresh();
+
+    // Force re-render the entire component with fresh calculations
+    this.render(this.lastCalculatedTotals, this.lastBreakdownData);
+  }
+
+  private refreshDashboard(): void {
+    // Find the dashboard content and re-render it
+    const dashboardContent = this.el.querySelector('.macroscalc-dashboard-content');
+    if (dashboardContent) {
+      dashboardContent.empty();
+
+      // Only render the organized custom metrics (removed basic metrics)
+      this.renderCustomMetrics(dashboardContent as HTMLElement, this.lastCalculatedTotals);
+    }
   }
 
   private toggleDashboard(container: HTMLElement, toggleButton: HTMLElement): void {
@@ -404,35 +616,127 @@ export class MacrosCalcRenderer {
     dashboardHeader.classList.toggle('collapsed', this.isDashboardCollapsed);
 
     if (this.isDashboardCollapsed) {
-      // COLLAPSING
       if (content) {
         content.classList.add('collapsed');
       }
-
+      // Only hide table if it exists
       if (tableContainer) tableContainer.classList.add('macroscalc-hidden');
+      // Only hide chart if it exists
       if (chartSection) chartSection.classList.add('macroscalc-hidden');
     } else {
-      // EXPANDING
       if (content) {
         content.classList.remove('collapsed');
       }
-
+      // Only show table if it exists
       if (tableContainer) tableContainer.classList.remove('macroscalc-hidden');
+      // Only show chart if it exists
       if (chartSection) chartSection.classList.remove('macroscalc-hidden');
     }
 
-    // Save the state using MacrosState
     this.saveDashboardCollapseState(this.isDashboardCollapsed);
   }
 
   private getSummaryLabel(): string {
-    const allDates = this.ids.every((id) => /^\d{4}-\d{2}-\d{2}$/.test(id));
+    // Check if all IDs are dates in YYYY-MM-DD format
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+    const allDates = this.ids.every((id) => datePattern.test(id));
+
     if (allDates) {
-      return t('calculator.summaryDays', {
-        count: this.ids.length,
-        days: this.ids.length === 1 ? '' : 's',
+      // Parse all dates and sort them
+      const dates = this.ids
+        .map((id) => {
+          const [year, month, day] = id.split('-').map((n) => parseInt(n));
+          return new Date(year, month - 1, day);
+        })
+        .sort((a, b) => a.getTime() - b.getTime());
+
+      if (dates.length === 0) {
+        return t('calculator.summaryTables', {
+          count: this.ids.length,
+          tables: this.ids.length === 1 ? '' : 's',
+        });
+      }
+
+      const firstDate = dates[0];
+      const lastDate = dates[dates.length - 1];
+
+      // Format dates nicely
+      const formatDate = (date: Date): string => {
+        const months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ];
+
+        const month = months[date.getMonth()];
+        const day = date.getDate();
+        const year = date.getFullYear();
+
+        // If same year as last date, omit year from first date
+        if (firstDate !== lastDate && firstDate.getFullYear() === lastDate.getFullYear()) {
+          return `${month} ${day}`;
+        }
+        return `${month} ${day}, ${year}`;
+      };
+
+      // Special case: single date
+      if (dates.length === 1) {
+        return t('calculator.summarySingleDate', {
+          date: formatDate(firstDate),
+        });
+      }
+
+      // Special case: same date (shouldn't happen but handle it)
+      if (firstDate.getTime() === lastDate.getTime()) {
+        return t('calculator.summarySingleDate', {
+          date: formatDate(firstDate),
+        });
+      }
+
+      // Special case: consecutive dates in same month
+      if (
+        firstDate.getMonth() === lastDate.getMonth() &&
+        firstDate.getFullYear() === lastDate.getFullYear()
+      ) {
+        const month = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ][firstDate.getMonth()];
+
+        return t('calculator.summaryDateRangeSameMonth', {
+          month: month,
+          startDay: firstDate.getDate(),
+          endDay: lastDate.getDate(),
+          year: firstDate.getFullYear(),
+        });
+      }
+
+      // Different months or years
+      return t('calculator.summaryDateRange', {
+        startDate: formatDate(firstDate),
+        endDate: formatDate(lastDate),
       });
     } else {
+      // Mixed IDs or non-date IDs - use the original logic
       return t('calculator.summaryTables', {
         count: this.ids.length,
         tables: this.ids.length === 1 ? '' : 's',
@@ -456,21 +760,20 @@ export class MacrosCalcRenderer {
     const valueContainer = card.createDiv({ cls: CLASS_NAMES.DASHBOARD.METRIC_VALUE_CONTAINER });
 
     // Extract the numeric value and percentage from the combined value
-    // For example, from "31.0g (21%)" extract "31.0g" and "21%"
     let displayValue = value;
     let percentageValue = '';
 
     const percentMatch = value.match(/(\d+\.?\d*g?)\s*\((\d+)%\)/);
     if (percentMatch) {
-      displayValue = percentMatch[1]; // The numeric part
-      percentageValue = percentMatch[2]; // Just the percentage number without %
+      displayValue = percentMatch[1];
+      percentageValue = percentMatch[2];
     }
 
     // Main value
     const valueEl = valueContainer.createDiv({ cls: CLASS_NAMES.DASHBOARD.METRIC_VALUE });
     valueEl.setText(displayValue);
 
-    // Add percentage display similar to macros dashboard
+    // Add percentage display
     if (percentageValue) {
       valueContainer.createDiv({
         cls: CLASS_NAMES.DASHBOARD.METRIC_PERCENTAGE,
@@ -478,11 +781,10 @@ export class MacrosCalcRenderer {
       });
     }
 
-    // If we have extracted a percentage, we can also add progress bars
+    // Add progress bars for percentages
     if (percentageValue && parseInt(percentageValue) > 0) {
       const percentage = parseInt(percentageValue);
 
-      // Add progress bar with the same styling as in MacrosDashboard
       const progressContainer = card.createDiv({
         cls: CLASS_NAMES.DASHBOARD.METRIC_PROGRESS_CONTAINER,
       });
@@ -502,7 +804,6 @@ export class MacrosCalcRenderer {
       const roundedWidth = Math.round(safeWidth / 5) * 5;
       progressBar.addClass(`progress-width-${roundedWidth}`);
 
-      // Add overflow indicator for values over 115%
       if (percentage > 115) {
         progressContainer.createDiv({
           cls: 'overflow-indicator',
@@ -521,7 +822,6 @@ export class MacrosCalcRenderer {
     const row = table.insertRow();
     row.dataset.id = item.id;
 
-    // Apply alternating row background
     if (isAltRow) {
       row.classList.add('macroscalc-alt-row');
     }
@@ -530,7 +830,6 @@ export class MacrosCalcRenderer {
     const idCell = row.insertCell();
     idCell.classList.add('macroscalc-id-cell-container');
 
-    // Create the expand toggle with the new toggle-icon class
     const expandToggle = idCell.createSpan({ cls: 'toggle-icon macroscalc-expand-toggle' });
     if (this.expandedRows.has(item.id)) {
       expandToggle.classList.add('expanded');
@@ -541,7 +840,6 @@ export class MacrosCalcRenderer {
       this.toggleDetailRow(item.id, expandToggle);
     });
 
-    // Add the ID text directly after the toggle (no wrapper div)
     idCell.createSpan({ text: item.id, cls: 'macroscalc-id-text' });
 
     // Calculate total macros for percentages
@@ -551,7 +849,6 @@ export class MacrosCalcRenderer {
     const caloriesCell = row.insertCell();
     caloriesCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CALORIES_CELL);
 
-    // Display calories with proper energy unit
     const currentEnergyUnit = this.plugin.settings.energyUnit;
     if (currentEnergyUnit === 'kJ') {
       const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
@@ -560,10 +857,7 @@ export class MacrosCalcRenderer {
       caloriesCell.textContent = formatCalories(item.totals.calories);
     }
 
-    // Conditional formatting for high values
     const caloriePercentage = (item.totals.calories / aggregate.calories) * 100;
-
-    // Create progress bar for calories similar to other macros
     ProgressBarFactory.createMacroProgressBar(
       caloriesCell,
       caloriePercentage,
@@ -594,7 +888,6 @@ export class MacrosCalcRenderer {
     proteinCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.PROTEIN_CELL);
     proteinCell.textContent = formatGrams(item.totals.protein);
 
-    // Only add percentage if the setting is enabled
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const proteinPercentage = Math.round((item.totals.protein / totalMacros) * 100);
       proteinCell.createSpan({
@@ -603,11 +896,9 @@ export class MacrosCalcRenderer {
       });
     }
 
-    // Create progress bar based on percentage
     const proteinPercentage = totalMacros > 0 ? (item.totals.protein / totalMacros) * 100 : 0;
     ProgressBarFactory.createMacroProgressBar(proteinCell, proteinPercentage, MACRO_TYPES.PROTEIN);
 
-    // Add tooltip
     safeAttachTooltip(
       proteinCell,
       t('calculator.tooltips.macro', {
@@ -623,7 +914,6 @@ export class MacrosCalcRenderer {
     fatCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.FAT_CELL);
     fatCell.textContent = formatGrams(item.totals.fat);
 
-    // Only add percentage if the setting is enabled
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const fatPercentage = Math.round((item.totals.fat / totalMacros) * 100);
       fatCell.createSpan({
@@ -632,11 +922,9 @@ export class MacrosCalcRenderer {
       });
     }
 
-    // Create progress bar based on percentage
     const fatPercentage = totalMacros > 0 ? (item.totals.fat / totalMacros) * 100 : 0;
     ProgressBarFactory.createMacroProgressBar(fatCell, fatPercentage, MACRO_TYPES.FAT);
 
-    // Add tooltip
     safeAttachTooltip(
       fatCell,
       t('calculator.tooltips.macro', {
@@ -652,7 +940,6 @@ export class MacrosCalcRenderer {
     carbsCell.classList.add(CLASS_NAMES.MACRO.CELL, CLASS_NAMES.MACRO.CARBS_CELL);
     carbsCell.textContent = formatGrams(item.totals.carbs);
 
-    // Only add percentage if the setting is enabled
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const carbsPercentage = Math.round((item.totals.carbs / totalMacros) * 100);
       carbsCell.createSpan({
@@ -661,11 +948,9 @@ export class MacrosCalcRenderer {
       });
     }
 
-    // Create progress bar based on percentage
     const carbsPercentage = totalMacros > 0 ? (item.totals.carbs / totalMacros) * 100 : 0;
     ProgressBarFactory.createMacroProgressBar(carbsCell, carbsPercentage, MACRO_TYPES.CARBS);
 
-    // Add tooltip
     safeAttachTooltip(
       carbsCell,
       t('calculator.tooltips.macro', {
@@ -682,30 +967,22 @@ export class MacrosCalcRenderer {
     detailRow.dataset.parentId = item.id;
     detailRow.classList.add('macroscalc-detail-row');
 
-    // Initially hide the detail row
     if (!this.expandedRows.has(item.id)) {
       detailRow.classList.add('table-row-hidden');
     } else {
       detailRow.classList.add('table-row-visible');
     }
 
-    // Create a cell that spans all columns
     const detailCell = detailRow.insertCell();
     detailCell.colSpan = 5;
 
-    // Attach a progress indicator until data loads
     const loadingMessage = detailCell.createEl('p', { text: t('general.loading') });
 
-    // Use a Promise to handle async document loading
     (async () => {
       try {
-        // Use the centralized method to get document context
         const context = await this.plugin.dataManager.getDocumentContext(item.id);
-
-        // Create the detail content
         const detailContent = detailCell.createDiv();
 
-        // Remove loading message
         if (loadingMessage && loadingMessage.parentNode) {
           loadingMessage.parentNode.removeChild(loadingMessage);
         }
@@ -715,49 +992,28 @@ export class MacrosCalcRenderer {
           return;
         }
 
-        // Create a mini table for the food items with mobile optimization
         const foodList = detailContent.createEl('table', { cls: 'macroscalc-details-table' });
 
-        // Add header with mobile-responsive text
         const foodHeader = foodList.createTHead().insertRow();
         const detailHeaderData = [
           { text: t('table.headers.food'), mobileText: t('table.headers.food') },
-          {
-            text: t('calculator.quantity'),
-            mobileText: 'Qty',
-          },
-          {
-            text: t('table.headers.calories'),
-            mobileText: 'Cal',
-          },
-          {
-            text: t('table.headers.protein'),
-            mobileText: 'Pro',
-          },
-          {
-            text: t('table.headers.fat'),
-            mobileText: 'Fat',
-          },
-          {
-            text: t('table.headers.carbs'),
-            mobileText: 'Carb',
-          },
+          { text: t('calculator.quantity'), mobileText: 'Qty' },
+          { text: t('table.headers.calories'), mobileText: 'Cal' },
+          { text: t('table.headers.protein'), mobileText: 'Pro' },
+          { text: t('table.headers.fat'), mobileText: 'Fat' },
+          { text: t('table.headers.carbs'), mobileText: 'Carb' },
         ];
 
         detailHeaderData.forEach((headerInfo) => {
           const th = document.createElement('th');
-
-          // Create spans for responsive text
           const desktopSpan = createEl('span', {
             cls: 'header-text-desktop',
             text: headerInfo.text,
           });
-
           const mobileSpan = createEl('span', {
             cls: 'header-text-mobile',
             text: headerInfo.mobileText,
           });
-
           th.appendChild(desktopSpan);
           th.appendChild(mobileSpan);
           foodHeader.appendChild(th);
@@ -765,72 +1021,81 @@ export class MacrosCalcRenderer {
 
         const foodBody = foodList.createTBody();
 
-        // Process and display each line
         let currentMealName = '';
 
         context.allLines.forEach((line) => {
           if (line.trim() === '' || line.startsWith('id:')) return;
 
           if (line.toLowerCase().startsWith('meal:') || line.toLowerCase().startsWith('group:')) {
-            // FIXED: Handle meal/group headers with comments properly
             const isGroup = line.toLowerCase().startsWith('group:');
             currentMealName = line.substring(isGroup ? 6 : 5).trim();
 
-            // Parse comment from meal/group line
             let displayName = currentMealName;
             let comment = '';
+            let timestamp = '';
 
+            // Parse comment
             const commentIndex = currentMealName.indexOf('//');
             if (commentIndex !== -1) {
               displayName = currentMealName.substring(0, commentIndex).trim();
               comment = currentMealName.substring(commentIndex + 2).trim();
             }
 
-            // FIX: Remove unused variables for meal name and count parsing
-            // These were calculated but never used
+            // Parse timestamp
+            const timestampMatch = displayName.match(/@(\d{2}:\d{2})/);
+            if (timestampMatch) {
+              timestamp = timestampMatch[1];
+              displayName = displayName.replace(/@\d{2}:\d{2}/g, '').trim();
+            }
+
             const headerRow = foodBody.insertRow();
             const headerCell = headerRow.insertCell();
             headerCell.classList.add('macroscalc-meal-header');
-            headerCell.colSpan = 6; // Span all columns
+            headerCell.colSpan = 6;
 
-            // FIXED: Create header content with comment icon (same structure as main macros processor)
             const headerContainer = headerCell.createDiv({ cls: 'macro-food-name-container' });
             const headerContent = headerContainer.createDiv({ cls: 'food-name-content' });
 
-            // FIX: Create span directly without storing in unused variable
             headerContent.createSpan({
               cls: 'macro-food-name',
               text: displayName,
             });
 
-            // FIXED: Add comment icon if comment exists
+            // Create icons container for proper alignment
+            const iconsContainer = headerContent.createDiv({ cls: 'food-icons-container' });
+
+            // Add timestamp icon if timestamp exists
+            if (timestamp) {
+              const timestampIcon = iconsContainer.createSpan({
+                cls: 'food-timestamp-icon',
+                text: '⏰',
+              });
+
+              safeAttachTooltip(
+                timestampIcon,
+                t('timestamps.consumed', { time: timestamp }),
+                this.plugin
+              );
+            }
+
+            // Add comment icon if comment exists
             if (comment) {
-              const commentIcon = headerContent.createSpan({
+              const commentIcon = iconsContainer.createSpan({
                 cls: 'food-comment-icon',
                 text: '💬',
               });
 
-              // Add tooltip with the comment text
               safeAttachTooltip(commentIcon, comment, this.plugin);
             }
-
-            // We'll collect bullet points and display them directly instead of using templates
           } else if (line.startsWith('-') && currentMealName) {
-            // This is a bullet point for the current meal
             const bulletContent = line.substring(1).trim();
-
-            // FIXED: Process this bullet point item with proper comment separation
             this.renderFoodItemRowFromBullet(foodBody, bulletContent);
           } else if (!line.startsWith('-')) {
-            // Regular food item (not part of a meal template)
-            // FIXED: Process regular food items with proper comment separation
             this.renderFoodItemRowFromLine(foodBody, line);
           }
         });
       } catch (error) {
         this.plugin.logger.error(`Error rendering detail row for ID ${item.id}:`, error);
-
-        // Update loading message to show error
         if (loadingMessage && loadingMessage.parentNode) {
           loadingMessage.textContent = t('calculator.errorLoadingData', {
             error: (error as Error).message,
@@ -841,24 +1106,36 @@ export class MacrosCalcRenderer {
   }
 
   /**
-   * FIXED: New method to render food item from bullet point with proper comment handling
+   * Parse timestamp from a macro line
+   * @param line The macro line text
+   * @returns The timestamp text (without @) or empty string if no timestamp
    */
+  private parseTimestampFromLine(line: string): string {
+    const timestampMatch = line.match(/@(\d{2}:\d{2})/);
+    return timestampMatch ? timestampMatch[1] : '';
+  }
+
   private renderFoodItemRowFromBullet(
     foodBody: HTMLTableSectionElement,
     bulletContent: string
   ): void {
-    // Parse the bullet content to separate food info from comments
     let itemText = bulletContent;
     let comment = '';
+    let timestamp = '';
 
-    // Check for comment syntax
+    // Parse comment
     const commentIndex = bulletContent.indexOf('//');
     if (commentIndex !== -1) {
       itemText = bulletContent.substring(0, commentIndex).trim();
       comment = bulletContent.substring(commentIndex + 2).trim();
     }
 
-    // Process food name and quantity from the clean item text
+    // Parse timestamp from the item text before extracting food name
+    timestamp = this.parseTimestampFromLine(itemText);
+    if (timestamp) {
+      itemText = itemText.replace(/@\d{2}:\d{2}/g, '').trim();
+    }
+
     let foodName = itemText;
     let quantity = t('calculator.standardQuantity');
     let specifiedQuantity: number | null = null;
@@ -870,29 +1147,36 @@ export class MacrosCalcRenderer {
       specifiedQuantity = parseGrams(quantity);
     }
 
-    // Create the full line for processing (including comment for tooltip)
     const fullLine = comment ? `${itemText} // ${comment}` : itemText;
-
-    // FIXED: Pass the clean food name, not the full item text
-    this.renderFoodItemRow(foodBody, fullLine, quantity, specifiedQuantity, foodName);
+    this.renderFoodItemRow(
+      foodBody,
+      fullLine,
+      quantity,
+      specifiedQuantity,
+      foodName,
+      comment,
+      timestamp
+    );
   }
 
-  /**
-   * FIXED: New method to render food item from regular line with proper comment handling
-   */
   private renderFoodItemRowFromLine(foodBody: HTMLTableSectionElement, line: string): void {
-    // Parse the line to separate food info from comments
     let itemText = line;
     let comment = '';
+    let timestamp = '';
 
-    // Check for comment syntax
+    // Parse comment
     const commentIndex = line.indexOf('//');
     if (commentIndex !== -1) {
       itemText = line.substring(0, commentIndex).trim();
       comment = line.substring(commentIndex + 2).trim();
     }
 
-    // Process food name and quantity from the clean item text
+    // Parse timestamp from the item text before extracting food name
+    timestamp = this.parseTimestampFromLine(itemText);
+    if (timestamp) {
+      itemText = itemText.replace(/@\d{2}:\d{2}/g, '').trim();
+    }
+
     let foodName = itemText;
     let quantity = t('calculator.standardQuantity');
     let specifiedQuantity: number | null = null;
@@ -904,25 +1188,27 @@ export class MacrosCalcRenderer {
       specifiedQuantity = parseGrams(quantity);
     }
 
-    // Create the full line for processing (including comment for tooltip)
     const fullLine = comment ? `${itemText} // ${comment}` : itemText;
-
-    // FIXED: Pass the clean food name, not the full item text
-    this.renderFoodItemRow(foodBody, fullLine, quantity, specifiedQuantity, foodName);
+    this.renderFoodItemRow(
+      foodBody,
+      fullLine,
+      quantity,
+      specifiedQuantity,
+      foodName,
+      comment,
+      timestamp
+    );
   }
 
-  // FIXED: Updated renderFoodItemRow method with explicit foodName parameter
   private renderFoodItemRow(
     foodBody: HTMLTableSectionElement,
     itemLine: string,
     quantity: string,
     specifiedQuantity: number | null = null,
-    explicitFoodName?: string // FIXED: Add explicit food name parameter
+    explicitFoodName?: string,
+    comment?: string,
+    timestamp?: string
   ): void {
-    // Parse comment from the item line first
-    const comment = this.parseCommentFromLine(itemLine);
-
-    // Get the clean item text without comment for food processing
     let cleanItemLine = itemLine;
     if (comment) {
       const commentIndex = itemLine.indexOf('//');
@@ -931,7 +1217,6 @@ export class MacrosCalcRenderer {
       }
     }
 
-    // FIXED: Use explicit food name if provided, otherwise extract from line
     let foodName = explicitFoodName || cleanItemLine;
 
     if (!explicitFoodName && cleanItemLine.includes(':') && specifiedQuantity === null) {
@@ -941,10 +1226,8 @@ export class MacrosCalcRenderer {
       specifiedQuantity = parseGrams(quantity);
     }
 
-    // Create a row for this food item
     const foodRow = foodBody.insertRow();
 
-    // Find matching food file and get nutrition data
     const folderPath = this.plugin.settings.storageFolder;
     const files = this.plugin.dataManager.getFilesInFolder(folderPath);
     const matchingFile = findMatchingFoodFile(files, foodName);
@@ -958,34 +1241,40 @@ export class MacrosCalcRenderer {
       }
     }
 
-    // Calculate total macros for percentages
     const totalMacros = nutritionData.protein + nutritionData.fat + nutritionData.carbs;
 
-    // FIXED: Add name cell with proper comment handling (same as macros processor)
     const nameCell = foodRow.insertCell();
     const nameContainer = nameCell.createDiv({ cls: 'macro-food-name-container' });
-
-    // Create main food name container
     const nameContentDiv = nameContainer.createDiv({ cls: 'food-name-content' });
 
-    // Create a span for the food name
     const nameSpan = nameContentDiv.createSpan({
       cls: 'macro-food-name',
     });
-    nameSpan.textContent = foodName; // FIXED: Use clean food name without serving size
+    nameSpan.textContent = foodName;
 
-    // FIXED: Add comment icon if comment exists
+    // Create icons container for proper alignment
+    const iconsContainer = nameContentDiv.createDiv({ cls: 'food-icons-container' });
+
+    // Add timestamp icon first if timestamp exists (most important)
+    if (timestamp) {
+      const timestampIcon = iconsContainer.createSpan({
+        cls: 'food-timestamp-icon',
+        text: '⏰',
+      });
+
+      safeAttachTooltip(timestampIcon, t('timestamps.consumed', { time: timestamp }), this.plugin);
+    }
+
+    // Add comment icon if comment exists
     if (comment) {
-      const commentIcon = nameContentDiv.createSpan({
+      const commentIcon = iconsContainer.createSpan({
         cls: 'food-comment-icon',
         text: '💬',
       });
 
-      // Add tooltip with the comment text
       safeAttachTooltip(commentIcon, comment, this.plugin);
     }
 
-    // Handle truncation tooltip for long food names
     setTimeout(() => {
       const isOverflowing = nameSpan.scrollWidth > nameSpan.clientWidth + 2;
       if (isOverflowing) {
@@ -994,11 +1283,9 @@ export class MacrosCalcRenderer {
       }
     }, 200);
 
-    // FIXED: Clean quantity cell (no comments)
     const quantityCell = foodRow.insertCell();
     quantityCell.textContent = quantity;
 
-    // Enhanced calories cell with kJ support
     const caloriesCell = foodRow.insertCell();
     const currentEnergyUnit = this.plugin.settings.energyUnit;
     if (currentEnergyUnit === 'kJ') {
@@ -1011,7 +1298,6 @@ export class MacrosCalcRenderer {
     const proteinCell = foodRow.insertCell();
     proteinCell.textContent = formatGrams(nutritionData.protein);
 
-    // Only add percentage if the setting is enabled and there are macros
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const proteinPercentage = Math.round((nutritionData.protein / totalMacros) * 100);
       proteinCell.createSpan({
@@ -1025,7 +1311,6 @@ export class MacrosCalcRenderer {
     const fatCell = foodRow.insertCell();
     fatCell.textContent = formatGrams(nutritionData.fat);
 
-    // Only add percentage if the setting is enabled and there are macros
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const fatPercentage = Math.round((nutritionData.fat / totalMacros) * 100);
       fatCell.createSpan({
@@ -1039,7 +1324,6 @@ export class MacrosCalcRenderer {
     const carbsCell = foodRow.insertCell();
     carbsCell.textContent = formatGrams(nutritionData.carbs);
 
-    // Only add percentage if the setting is enabled and there are macros
     if (totalMacros > 0 && this.plugin.settings.showCellPercentages) {
       const carbsPercentage = Math.round((nutritionData.carbs / totalMacros) * 100);
       carbsCell.createSpan({
@@ -1051,34 +1335,19 @@ export class MacrosCalcRenderer {
     carbsCell.classList.add('macroscalc-carbs-value');
   }
 
-  /**
-   * Parse comment from a macro line (same as RowRenderer)
-   */
-  private parseCommentFromLine(line: string): string {
-    const commentIndex = line.indexOf('//');
-    if (commentIndex === -1) return '';
-    return line.substring(commentIndex + 2).trim();
-  }
-
   private toggleDetailRow(id: string, toggle: HTMLElement): void {
     const detailRow = this.el.querySelector(`tr[data-parent-id="${id}"]`) as HTMLTableRowElement;
 
     if (!detailRow) return;
 
     if (detailRow.classList.contains('table-row-hidden')) {
-      // Show the row
       detailRow.classList.remove('table-row-hidden');
       detailRow.classList.add('table-row-visible');
-
-      // Use the common collapsed state
       toggle.classList.add('expanded');
       this.expandedRows.add(id);
     } else {
-      // Hide the row
       detailRow.classList.add('table-row-hidden');
       detailRow.classList.remove('table-row-visible');
-
-      // Use the common collapsed state
       toggle.classList.remove('expanded');
       this.expandedRows.delete(id);
     }
@@ -1095,16 +1364,13 @@ export class MacrosCalcRenderer {
 
     const columnIndex = headers[column];
 
-    // Determine sort direction
     let ascending = true;
     if (this.sortConfig.column === column) {
       ascending = !this.sortConfig.ascending;
     }
 
-    // Update sort config
     this.sortConfig = { column, ascending };
 
-    // Update sort indicators in header
     const headerRow = table.rows[0];
     for (let i = 0; i < headerRow.cells.length; i++) {
       const sortIcon = headerRow.cells[i].querySelector(
@@ -1121,42 +1387,34 @@ export class MacrosCalcRenderer {
       }
     }
 
-    // Get all rows except the header row and aggregate row
     const allRows = Array.from(table.rows);
     const dataRowsWithDetails = allRows.slice(1, allRows.length - 1);
     const aggregateRow = allRows[allRows.length - 1];
 
     if (dataRowsWithDetails.length === 0) return;
 
-    // Group main rows with their detail rows
     const rowGroups: { mainRow: HTMLTableRowElement; detailRow?: HTMLTableRowElement }[] = [];
     let currentMainRow: HTMLTableRowElement | null = null;
 
     dataRowsWithDetails.forEach((row) => {
       if (!row.classList.contains('macroscalc-detail-row')) {
-        // This is a main data row
         currentMainRow = row as HTMLTableRowElement;
         rowGroups.push({ mainRow: currentMainRow });
       } else if (currentMainRow && row.classList.contains('macroscalc-detail-row')) {
-        // This is a detail row for the current main row
         const lastGroup = rowGroups[rowGroups.length - 1];
         lastGroup.detailRow = row as HTMLTableRowElement;
       }
     });
 
-    // Enhanced sorting with energy unit support
     rowGroups.sort((a, b) => {
       const aValue = a.mainRow.cells[columnIndex].textContent || '';
       const bValue = b.mainRow.cells[columnIndex].textContent || '';
 
-      // For numeric columns, extract numbers and sort
       if (columnIndex > 0) {
         let aNum = 0;
         let bNum = 0;
 
-        // Enhanced parsing for energy units
         if (columnIndex === 1 && (aValue.includes('kJ') || bValue.includes('kJ'))) {
-          // Handle kJ values - convert to kcal for consistent sorting
           const aKjMatch = aValue.match(/^([\d.]+)\s*kJ/);
           const bKjMatch = bValue.match(/^([\d.]+)\s*kJ/);
 
@@ -1174,7 +1432,6 @@ export class MacrosCalcRenderer {
             bNum = bKcalMatch ? parseFloat(bKcalMatch[1]) : 0;
           }
         } else {
-          // Extract just the numbers, ignoring the (%) parts
           const aNumMatch = aValue.match(/^([\d.]+)/);
           const bNumMatch = bValue.match(/^([\d.]+)/);
 
@@ -1188,7 +1445,6 @@ export class MacrosCalcRenderer {
           return bNum - aNum;
         }
       } else {
-        // For text columns (like Table ID)
         if (ascending) {
           return aValue.localeCompare(bValue);
         } else {
@@ -1197,23 +1453,16 @@ export class MacrosCalcRenderer {
       }
     });
 
-    // Clear tbody and rebuild it
     const tbody = table.tBodies[0];
-
-    // Keep header row
     const headerClone = table.rows[0];
 
-    // Remove all rows
     while (tbody.rows.length > 0) {
       tbody.deleteRow(0);
     }
 
-    // Add the header back
     tbody.appendChild(headerClone);
 
-    // Add sorted rows with their detail rows
     rowGroups.forEach((group, index) => {
-      // Apply alternating background
       if (index % 2 === 1) {
         group.mainRow.classList.add('macroscalc-alt-row');
       } else {
@@ -1222,26 +1471,21 @@ export class MacrosCalcRenderer {
 
       tbody.appendChild(group.mainRow);
 
-      // Add detail row if exists
       if (group.detailRow) {
         tbody.appendChild(group.detailRow);
       }
     });
 
-    // Add aggregate row back
     tbody.appendChild(aggregateRow);
 
-    // Re-attach event listeners to the sort buttons
     for (let i = 0; i < headerRow.cells.length; i++) {
       const sortIcon = headerRow.cells[i].querySelector(
         '.macroscalc-sort-icon'
       ) as HTMLElement | null;
       if (sortIcon) {
-        // Remove existing listeners to avoid duplicates
         const newSortIcon = sortIcon.cloneNode(true) as HTMLElement;
         sortIcon.parentNode?.replaceChild(newSortIcon, sortIcon);
 
-        // Determine which column this header is for
         const headerText = Array.from(Object.keys(headers)).find((key) => headers[key] === i);
 
         if (headerText) {
@@ -1259,7 +1503,6 @@ export class MacrosCalcRenderer {
   ): Promise<void> {
     this.plugin.logger.debug(`renderComparisonChart called with ${breakdown.length} items`);
 
-    // Always show the header, even if we can't render the chart
     const chartSection = container.createDiv({
       cls: 'macroscalc-chart-section macro-dashboard',
     });
@@ -1281,7 +1524,6 @@ export class MacrosCalcRenderer {
       cls: 'macro-dashboard-flex-container',
     });
 
-    // Check if we have enough data for a chart
     if (breakdown.length < 2) {
       chartContent.createEl('p', {
         text: t('calculator.notEnoughData', { count: breakdown.length }),
@@ -1292,23 +1534,18 @@ export class MacrosCalcRenderer {
     }
 
     try {
-      // Clean up any existing charts first
       this.destroyCharts();
 
-      // Debug Chart.js availability
       this.plugin.logger.debug('Chart.js available on window:', !!window.Chart);
 
-      // Load Chart.js through ChartLoader
       await this.chartLoader.loadChart();
 
-      // Check again after loading
       this.plugin.logger.debug('Chart.js available after loading:', !!window.Chart);
 
       if (!window.Chart) {
         throw new Error('Chart.js failed to load');
       }
 
-      // Create the chart wrapper
       const chartWrapper = chartContent.createDiv({
         cls: 'macroscalc-chart-wrapper',
       });
@@ -1343,11 +1580,9 @@ export class MacrosCalcRenderer {
         caloriesData: breakdown.map((item) => item.totals.calories),
       });
 
-      // Enhanced chart configuration with energy unit support
       const currentEnergyUnit = getCurrentEnergyUnitString();
       const isKjUnit = currentEnergyUnit === 'kJ';
 
-      // Convert calorie data if needed for display
       const calorieData = breakdown.map((item) => {
         if (isKjUnit) {
           return convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
@@ -1355,7 +1590,6 @@ export class MacrosCalcRenderer {
         return item.totals.calories;
       });
 
-      // Properly typed chart configuration
       const chartConfig: import('chart.js').ChartConfiguration<'line', number[], string> = {
         type: 'line',
         data: {
@@ -1417,10 +1651,9 @@ export class MacrosCalcRenderer {
             tooltip: {
               callbacks: {
                 label: function (context: import('chart.js').TooltipItem<'line'>) {
-                  let value = context.parsed.y.toFixed(1); // Changed from 'const' to 'let'
+                  let value = context.parsed.y.toFixed(1);
                   let unit = '';
 
-                  // Check if this is a calorie dataset and convert if needed
                   if (context.dataset.label?.includes('calorie') && isKjUnit) {
                     const kjValue = convertEnergyUnit(context.parsed.y, 'kcal', 'kJ');
                     value = kjValue.toFixed(1);
@@ -1470,12 +1703,10 @@ export class MacrosCalcRenderer {
 
       this.plugin.logger.debug('Creating Chart.js instance...');
 
-      // Create the chart with proper typing
       const chart = new window.Chart(ctx, chartConfig);
 
       this.plugin.logger.debug('Chart created successfully:', chart);
 
-      // Save reference for cleanup
       const resizeHandler = () => {
         if (document.contains(chartCanvas)) {
           chart.resize();
@@ -1490,14 +1721,12 @@ export class MacrosCalcRenderer {
     } catch (error) {
       this.plugin.logger.error('Error creating chart:', error);
 
-      // Show error message in UI
       const errorDiv = chartContent.createDiv({ cls: 'macroscalc-chart-error' });
       errorDiv.createEl('p', {
         text: t('calculator.chartError', { error: (error as Error).message }),
         cls: 'error-message',
       });
 
-      // Show fallback table
       this.renderFallbackTable(chartContent, breakdown);
     }
   }
@@ -1510,7 +1739,6 @@ export class MacrosCalcRenderer {
     const table = fallbackDiv.createEl('table', { cls: 'fallback-data-table' });
     const headerRow = table.insertRow();
 
-    // Use localized headers with energy unit support
     const currentEnergyUnit = getCurrentEnergyUnitString();
     [
       t('calculator.tableHeaders.id'),
@@ -1528,13 +1756,12 @@ export class MacrosCalcRenderer {
       const row = table.insertRow();
       row.insertCell().textContent = item.id;
 
-      // Enhanced calorie display with kJ support
-      const calorieCell = row.insertCell();
+      const currentEnergyUnit = this.plugin.settings.energyUnit;
       if (currentEnergyUnit === 'kJ') {
         const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
-        calorieCell.textContent = kjValue.toFixed(1);
+        row.insertCell().textContent = kjValue.toFixed(1) + ' kJ';
       } else {
-        calorieCell.textContent = item.totals.calories.toFixed(1);
+        row.insertCell().textContent = item.totals.calories.toFixed(1) + ' kcal';
       }
 
       row.insertCell().textContent = item.totals.protein.toFixed(1) + 'g';
@@ -1549,12 +1776,10 @@ export class MacrosCalcRenderer {
 
       this.charts.forEach(({ chart, caloriesChart, resizeHandler }) => {
         try {
-          // Remove the resize event listener first
           if (resizeHandler) {
             window.removeEventListener('resize', resizeHandler);
           }
 
-          // Destroy charts using the ChartLoader
           if (chart) {
             const chartId = `macroscalc-${this.ids.join('-')}-chart`;
             this.plugin.logger.debug(`Destroying chart: ${chartId}`);

@@ -2,21 +2,22 @@ import { App, Modal, Component } from 'obsidian';
 import MacrosPlugin from '../../main';
 import { LiveFoodSearchModal } from '../live-search/LiveSearchModal';
 import { ManualFoodEntryModal } from './ManualFoodEntryModal';
+import { UnifiedFoodResult } from '../../core/search';
 import { t } from '../../lang/I18nManager';
 
 /**
- * Modal that presents the user with options to either use FatSecret live search
- * or manually enter food data
+ * Modal that presents the user with options to either use live search
+ * (FatSecret, USDA, and/or Open Food Facts) or manually enter food data
  */
 export class FoodEntrySelectionModal extends Modal {
   private plugin: MacrosPlugin;
-  private onFoodSelected: (item: import('../../core/api').FoodItem) => void;
+  private onFoodSelected: (item: UnifiedFoodResult | import('../../core/api').FoodItem) => void;
   private component: Component;
 
   constructor(
     app: App,
     plugin: MacrosPlugin,
-    onFoodSelected: (item: import('../../core/api').FoodItem) => void
+    onFoodSelected: (item: UnifiedFoodResult | import('../../core/api').FoodItem) => void
   ) {
     super(app);
     this.plugin = plugin;
@@ -58,20 +59,15 @@ export class FoodEntrySelectionModal extends Modal {
 
     const liveSearchFooter = liveSearchOption.createDiv({ cls: 'option-footer' });
 
-    // Check if API credentials are available
-    const hasCredentials = this.plugin.apiService.hasApiCredentials();
+    // Check available data sources
+    const availableSources = this.getAvailableDataSources();
+    const sourceNames = availableSources.map((source) => source.name);
 
-    if (hasCredentials) {
-      liveSearchFooter.createEl('span', {
-        text: t('food.entry.apiConfigured'),
-        cls: 'status-indicator macros-status-indicator status-success',
-      });
-    } else {
-      liveSearchFooter.createEl('span', {
-        text: t('food.entry.apiNotConfigured'),
-        cls: 'status-indicator macros-status-indicator status-warning',
-      });
-    }
+    // Always show as available since Open Food Facts is always available
+    liveSearchFooter.createEl('span', {
+      text: `✅ ${sourceNames.join(' + ')} available`,
+      cls: 'status-indicator macros-status-indicator status-success',
+    });
 
     // Manual Entry Option
     const manualEntryOption = buttonContainer.createDiv({
@@ -119,42 +115,61 @@ export class FoodEntrySelectionModal extends Modal {
       manualEntryOption.removeClass('option-hover');
     });
 
-    // Disable live search option if no credentials
-    if (!hasCredentials) {
-      liveSearchOption.addClass('option-disabled');
+    // Focus on live search by default since it's always available now
+    liveSearchOption.focus();
+  }
+
+  /**
+   * Get available data sources for display
+   */
+  private getAvailableDataSources(): Array<{ name: string; enabled: boolean }> {
+    const sources = [];
+
+    // Open Food Facts is always available (no credentials needed)
+    if (this.plugin.settings.openFoodFactsEnabled !== false) {
+      sources.push({ name: 'Open Food Facts', enabled: true });
     }
 
-    // Focus on manual entry by default (always available)
-    manualEntryOption.focus();
+    // FatSecret (requires credentials)
+    const hasFatSecret =
+      this.plugin.settings.fatSecretEnabled &&
+      this.plugin.settings.fatSecretApiKey &&
+      this.plugin.settings.fatSecretApiSecret;
+    if (hasFatSecret) {
+      sources.push({ name: 'FatSecret', enabled: true });
+    }
+
+    // USDA (requires API key)
+    const hasUsda = this.plugin.settings.usdaEnabled && this.plugin.settings.usdaApiKey;
+    if (hasUsda) {
+      sources.push({ name: 'USDA', enabled: true });
+    }
+
+    // If no sources are configured (shouldn't happen since OFF is default),
+    // still show Open Food Facts as available
+    if (sources.length === 0) {
+      sources.push({ name: 'Open Food Facts', enabled: true });
+    }
+
+    return sources;
   }
 
   private handleLiveSearchClick(): void {
     try {
-      // Check if API credentials are configured
-      const credentials = this.plugin.apiService.getCredentialsSafe();
-      if (!credentials) {
-        // Show error and keep modal open
-        const errorEl = this.contentEl.createDiv({
-          cls: 'api-error-message macros-api-error-message',
-          text: t('notifications.apiCredentialsRequired'),
-        });
-
-        // Remove error message after 5 seconds
-        setTimeout(() => {
-          if (errorEl.parentNode) {
-            errorEl.parentNode.removeChild(errorEl);
-          }
-        }, 5000);
-        return;
-      }
-
+      // Since Open Food Facts is always available, we can always proceed
       // Close this modal and open live search
       this.close();
 
+      // The LiveFoodSearchModal handles multiple APIs internally
+      // We pass the legacy parameters for backward compatibility, but the modal
+      // will use the plugin settings to determine which APIs to use
+      const fallbackKey = this.plugin.settings.fatSecretApiKey || '';
+      const fallbackSecret = this.plugin.settings.fatSecretApiSecret || '';
+
       new LiveFoodSearchModal(
         this.app,
-        credentials.key,
-        credentials.secret,
+        fallbackKey,
+        fallbackSecret,
         this.onFoodSelected,
         this.plugin
       ).open();

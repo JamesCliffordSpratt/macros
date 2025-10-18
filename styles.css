@@ -5752,3 +5752,3245 @@ body:not(.theme-obsidian) .api-credentials-success {
     transform: translateY(-50%);
   }
 }
+
+/* Macros Plugin - USDA Integration Styles */
+
+/* Search Tabs */
+.macros-search-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 8px;
+  max-width: 100%;
+}
+
+.macros-search-tab {
+  padding: 8px 16px;
+  border: none;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex: 0 0 auto;
+  min-width: 120px;
+  max-width: calc(33.333% - 6px);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.macros-search-tab:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.macros-search-tab.active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.macros-search-tab.active:hover {
+  background: var(--interactive-accent-hover);
+}
+
+/* Source Chips */
+.macros-source-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  opacity: 0.85;
+  margin-left: 4px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.macros-source-fatsecret {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-green);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.macros-source-usda {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--color-blue);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.macros-source-foundation {
+  background: rgba(156, 39, 176, 0.15);
+  color: var(--color-purple);
+  border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+.macros-source-branded {
+  background: rgba(255, 152, 0, 0.15);
+  color: var(--color-orange);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* Open Food Facts Source Chip */
+.macros-source-openfoodfacts {
+  background: rgba(255, 87, 34, 0.15);
+  color: var(--color-red);
+  border: 1px solid rgba(255, 87, 34, 0.3);
+}
+
+/* Quality Indicator Chips */
+.macros-quality-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  margin-left: 4px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.macros-foundation-indicator {
+  background: rgba(156, 39, 176, 0.2);
+  color: var(--color-purple);
+  border: 1px solid rgba(156, 39, 176, 0.4);
+}
+
+.macros-off-high-quality {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--color-green);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.macros-off-medium-quality {
+  background: rgba(255, 193, 7, 0.2);
+  color: var(--color-yellow);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+/* Nutrition Grade Chips */
+.macros-nutrition-grade {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 600;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.macros-nutrition-grade-a {
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  border: 1px solid rgba(76, 175, 80, 1);
+}
+
+.macros-nutrition-grade-b {
+  background: rgba(139, 195, 74, 0.9);
+  color: white;
+  border: 1px solid rgba(139, 195, 74, 1);
+}
+
+.macros-nutrition-grade-c {
+  background: rgba(255, 193, 7, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 193, 7, 1);
+}
+
+.macros-nutrition-grade-d {
+  background: rgba(255, 152, 0, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 152, 0, 1);
+}
+
+.macros-nutrition-grade-e {
+  background: rgba(244, 67, 54, 0.9);
+  color: white;
+  border: 1px solid rgba(244, 67, 54, 1);
+}
+
+/* NOVA Processing Level Chips */
+.macros-nova-chip {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.macros-nova-1 {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-green);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.macros-nova-2 {
+  background: rgba(255, 193, 7, 0.15);
+  color: var(--color-yellow);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.macros-nova-3 {
+  background: rgba(255, 152, 0, 0.15);
+  color: var(--color-orange);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.macros-nova-4 {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--color-red);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Food Result Items */
+.food-result-item {
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.food-result-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.food-result-item.highlighted-result {
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.food-result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.food-result-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  color: var(--text-normal);
+  gap: 8px;
+}
+
+.food-name-content {
+  flex: 1;
+  min-width: 0; /* Allow text to truncate */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-brand-name {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.food-result-chips {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.food-result-description {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Product Image for Open Food Facts */
+.food-result-image {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.food-product-image {
+  max-width: 80px;
+  max-height: 60px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--background-modifier-border);
+}
+
+/* Dark theme adjustments */
+.theme-dark .macros-source-fatsecret {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.theme-dark .macros-source-usda {
+  background: rgba(33, 150, 243, 0.2);
+  border-color: rgba(33, 150, 243, 0.4);
+}
+
+.theme-dark .macros-source-foundation {
+  background: rgba(156, 39, 176, 0.2);
+  border-color: rgba(156, 39, 176, 0.4);
+}
+
+.theme-dark .macros-source-branded {
+  background: rgba(255, 152, 0, 0.2);
+  border-color: rgba(255, 152, 0, 0.4);
+}
+
+.theme-dark .macros-source-openfoodfacts {
+  background: rgba(255, 87, 34, 0.2);
+  border-color: rgba(255, 87, 34, 0.4);
+}
+
+.theme-dark .macros-off-high-quality {
+  background: rgba(76, 175, 80, 0.25);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.theme-dark .macros-off-medium-quality {
+  background: rgba(255, 193, 7, 0.25);
+  border-color: rgba(255, 193, 7, 0.5);
+}
+
+.theme-dark .macros-nova-1 {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.theme-dark .macros-nova-2 {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.theme-dark .macros-nova-3 {
+  background: rgba(255, 152, 0, 0.2);
+  border-color: rgba(255, 152, 0, 0.4);
+}
+
+.theme-dark .macros-nova-4 {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+/* Loading and empty states */
+.macros-loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.no-results-message {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Modal adjustments */
+.live-food-search-modal {
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.live-food-search-modal .modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Search input styling */
+.live-search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.live-search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+/* Results container */
+.macros-results-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  scroll-behavior: smooth;
+}
+
+.macros-results-container:empty {
+  display: none;
+}
+
+/* Infinite scroll loading indicator */
+.infinite-scroll-loading {
+  text-align: center;
+  padding: 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Accessibility improvements */
+.macros-search-tab:focus {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+.food-result-item:focus {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .macros-source-chip {
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  .macros-source-fatsecret {
+    background: var(--color-green);
+    color: var(--background-primary);
+    border: 2px solid var(--color-green);
+  }
+
+  .macros-source-usda {
+    background: var(--color-blue);
+    color: var(--background-primary);
+    border: 2px solid var(--color-blue);
+  }
+
+  .macros-source-foundation {
+    background: var(--color-purple);
+    color: var(--background-primary);
+    border: 2px solid var(--color-purple);
+  }
+
+  .macros-source-branded {
+    background: var(--color-orange);
+    color: var(--background-primary);
+    border: 2px solid var(--color-orange);
+  }
+
+  .macros-source-openfoodfacts {
+    background: var(--color-red);
+    color: var(--background-primary);
+    border: 2px solid var(--color-red);
+  }
+
+  .macros-quality-chip,
+  .macros-nutrition-grade,
+  .macros-nova-chip {
+    opacity: 1;
+    font-weight: 700;
+  }
+}
+
+/* Animation for smooth transitions */
+.food-result-item {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Search tabs container spacing */
+.search-tabs-container {
+  margin: 0 0 16px 0;
+}
+
+/* Ensure proper spacing in modal */
+.live-food-search-modal .modal-header {
+  margin-bottom: 16px;
+}
+
+/* Improve readability of highlighted search terms */
+.food-result-name strong {
+  background: rgba(var(--interactive-accent-rgb), 0.2);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .live-food-search-modal {
+    min-width: 90vw;
+    max-width: 90vw;
+  }
+
+  .macros-search-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .macros-search-tab {
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: calc(50% - 4px);
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .food-result-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .food-name-content {
+    width: 100%;
+  }
+
+  .food-result-chips {
+    align-self: flex-end;
+    max-width: 100%;
+  }
+
+  .food-result-image {
+    margin-top: 4px;
+  }
+
+  .food-product-image {
+    max-width: 60px;
+    max-height: 45px;
+  }
+}
+
+/* Medium screen adjustments for tabs */
+@media (min-width: 601px) and (max-width: 900px) {
+  .macros-search-tab {
+    max-width: calc(50% - 4px);
+    min-width: 140px;
+  }
+}
+
+/* Large screen - allow 3 per row */
+@media (min-width: 901px) {
+  .macros-search-tab {
+    max-width: calc(33.333% - 6px);
+    min-width: 160px;
+  }
+}
+
+.search-container.with-barcode {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-container.with-barcode .live-search-input {
+  padding-right: 45px; /* Make room for barcode button */
+  flex: 1;
+}
+
+/* Barcode Scanner Modal */
+.barcode-scanner-modal {
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.barcode-scanner-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--text-normal);
+}
+
+.barcode-scanner-status {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--background-secondary);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.barcode-scanner-video-container {
+  position: relative;
+  background-color: var(--background-primary-alt);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.barcode-scanner-video {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.barcode-scanner-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.barcode-scanner-controls button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.barcode-scanner-controls button:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.barcode-scanner-controls .mod-cta {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.barcode-scanner-controls .mod-cta:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+/* Manual Barcode Entry Modal */
+.manual-barcode-entry-modal {
+  max-width: 400px;
+}
+
+.barcode-input-container {
+  margin: 1rem 0;
+}
+
+.barcode-manual-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-monospace);
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.barcode-manual-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+/* Enhanced search results for barcode results */
+.food-result-item.barcode-result {
+  border-left: 3px solid var(--interactive-accent);
+  background-color: var(--background-secondary);
+}
+
+.food-result-item.barcode-result::before {
+  content: '📊';
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* Enhanced chips for barcode sources */
+.macros-source-chip.macros-source-openfoodfacts {
+  background-color: var(--color-green);
+  color: white;
+}
+
+.macros-quality-chip.macros-off-high-quality {
+  background-color: var(--color-green);
+  color: white;
+}
+
+.macros-quality-chip.macros-off-medium-quality {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.macros-nutrition-grade {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.macros-nutrition-grade-a {
+  background-color: var(--color-green);
+  color: white;
+}
+
+.macros-nutrition-grade-b {
+  background-color: #8bc34a;
+  color: white;
+}
+
+.macros-nutrition-grade-c {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.macros-nutrition-grade-d {
+  background-color: #ff9800;
+  color: white;
+}
+
+.macros-nutrition-grade-e {
+  background-color: var(--color-red);
+  color: white;
+}
+
+.macros-nova-chip {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.macros-nova-1 {
+  background-color: var(--color-green);
+  color: white;
+}
+
+.macros-nova-2 {
+  background-color: #8bc34a;
+  color: white;
+}
+
+.macros-nova-3 {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.macros-nova-4 {
+  background-color: var(--color-red);
+  color: white;
+}
+
+/* Product images in search results */
+.food-result-image {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.food-product-image {
+  max-width: 60px;
+  max-height: 60px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--background-modifier-border);
+}
+
+/* Loading states */
+.barcode-scanner-button.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .barcode-scanner-modal {
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+
+  .barcode-scanner-controls {
+    flex-direction: column;
+  }
+
+  .barcode-scanner-controls button {
+    width: 100%;
+  }
+
+  .barcode-scanner-video {
+    max-height: 250px;
+  }
+}
+
+/* Dark mode adjustments */
+.theme-dark .barcode-scanner-video-container {
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.theme-dark .barcode-manual-input {
+  background-color: var(--background-primary-alt);
+}
+
+/* Metrics Section Headers */
+.macroscalc-metrics-section-header {
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 24px 0 12px 0; /* 24px top, 12px bottom for proper spacing */
+  padding: 8px 12px 4px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--background-primary-alt);
+  border-radius: 4px;
+  border-left: 3px solid var(--accent-color);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent text overflow */
+  word-wrap: break-word;
+  /* Ensure it stays within bounds */
+  margin-left: 0;
+  margin-right: 0;
+}
+.macroscalc-metrics-section-header:first-child {
+  margin-top: 0; /* No extra margin for first header */
+}
+.macroscalc-metrics-section-header:last-child {
+  margin-bottom: 0; /* Remove bottom margin from last header */
+}
+
+/* Dashboard Container Fix */
+.macroscalc-dashboard-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.macroscalc-dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 16px; /* Add padding around entire content */
+}
+
+/* Dashboard Header - Fix button positioning */
+.macroscalc-dashboard-header .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.macroscalc-dashboard-header .header-label {
+  flex: 1;
+  margin-right: auto;
+}
+
+.macroscalc-dashboard-header .macroscalc-edit-metrics-btn {
+  margin-left: auto; /* Push to the right */
+  order: 1; /* Place before toggle */
+}
+
+.macroscalc-dashboard-header .toggle-icon {
+  order: 2; /* Place after edit button */
+  flex-shrink: 0;
+}
+
+/* Custom Metric Cards - Base styling */
+.macroscalc-custom-metric-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0;
+  min-height: 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  border-left: 3px solid var(--background-modifier-border);
+  width: 100%;
+  max-width: 100%; /* Ensure cards don't exceed container */
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0; /* Allow flex items to shrink below content size */
+}
+.macroscalc-custom-metric-card:hover {
+  background: var(--background-secondary-alt);
+  border-color: var(--background-modifier-border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Colored border for specific metrics */
+.macroscalc-custom-metric-card.colored-metric {
+  border-left-width: 4px;
+}
+
+/* Metric Label */
+.macroscalc-custom-metric-card .metric-label {
+  font-size: 0.75em;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Metric Value Container */
+.macroscalc-custom-metric-card .metric-value {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--text-normal);
+  margin-bottom: 1px;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Metric Unit */
+.macroscalc-custom-metric-card .metric-value .metric-unit {
+  font-size: 0.6em;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 1px;
+}
+
+/* Metric Subtext */
+.macroscalc-custom-metric-card .metric-subtext {
+  font-size: 0.65em;
+  color: var(--text-muted);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Create organized sections for different metric categories */
+.macroscalc-metrics-category-section {
+  margin-bottom: 12px; /* Add spacing between sections */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent any overflow */
+}
+
+/* Consistent bottom margin for last section */
+.macroscalc-metrics-category-section:last-child {
+  margin-bottom: 0;
+}
+
+.macroscalc-metrics-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+
+/* Special grid layouts for different sections */
+.macroscalc-totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+.macroscalc-ratios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+.macroscalc-trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+.macroscalc-extremes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+.macroscalc-adherence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent grid overflow */
+}
+
+/* Mobile Optimizations - Progressive responsive design */
+@media (max-width: 900px) {
+  .macroscalc-totals-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 6px;
+  }
+
+  .macroscalc-ratios-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 6px;
+  }
+
+  .macroscalc-trends-grid,
+  .macroscalc-extremes-grid,
+  .macroscalc-adherence-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 6px;
+  }
+
+  /* Reduce section header margin on tablets */
+  .macroscalc-metrics-section-header {
+    margin: 18px 0 8px 0;
+    padding: 6px 10px 3px 10px;
+  }
+  .macroscalc-metrics-section-header:first-child {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Remove desktop padding on mobile */
+  .macroscalc-dashboard-content {
+    padding: 0;
+  }
+
+  /* Rectangular cards with better proportions */
+  .macroscalc-custom-metric-card {
+    padding: 8px 6px;
+    min-height: 45px;
+    aspect-ratio: 1.4; /* Rectangular - wider than tall */
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .macroscalc-custom-metric-card .metric-value {
+    font-size: 1em;
+    margin-bottom: 2px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .macroscalc-custom-metric-card .metric-label {
+    font-size: 0.6em;
+    margin-bottom: 0;
+    letter-spacing: 0.1px;
+    text-align: center;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.1;
+  }
+
+  .macroscalc-custom-metric-card .metric-subtext {
+    font-size: 0.5em;
+    margin-top: 1px;
+    text-align: center;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.1;
+  }
+
+  /* Consistent 3-column grid with better spacing */
+  .macroscalc-ratios-grid,
+  .macroscalc-totals-grid,
+  .macroscalc-extremes-grid,
+  .macroscalc-trends-grid,
+  .macroscalc-adherence-grid,
+  .macroscalc-metrics-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Reduce section spacing */
+  .macroscalc-metrics-category-section {
+    margin-bottom: 10px;
+  }
+
+  .macroscalc-metrics-section-header {
+    font-size: 0.65em;
+    margin: 12px 0 6px 0;
+    padding: 4px 6px 2px 6px;
+  }
+  .macroscalc-metrics-section-header:first-child {
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Smaller rectangular cards for small phones */
+  .macroscalc-custom-metric-card {
+    padding: 6px 5px;
+    min-height: 40px;
+    aspect-ratio: 1.4;
+  }
+
+  .macroscalc-custom-metric-card .metric-value {
+    font-size: 0.9em;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+
+  .macroscalc-custom-metric-card .metric-label {
+    font-size: 0.55em;
+    line-height: 1;
+  }
+
+  .macroscalc-custom-metric-card .metric-subtext {
+    font-size: 0.45em;
+    line-height: 1;
+  }
+
+  /* Keep 3-column grid with good spacing */
+  .macroscalc-ratios-grid,
+  .macroscalc-totals-grid,
+  .macroscalc-extremes-grid,
+  .macroscalc-trends-grid,
+  .macroscalc-adherence-grid,
+  .macroscalc-metrics-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  /* Section spacing */
+  .macroscalc-metrics-category-section {
+    margin-bottom: 8px;
+  }
+
+  .macroscalc-metrics-section-header {
+    font-size: 0.6em;
+    margin: 10px 0 4px 0;
+    padding: 3px 5px 2px 5px;
+  }
+  .macroscalc-metrics-section-header:first-child {
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Compact rectangular cards for tiny screens */
+  .macroscalc-custom-metric-card {
+    padding: 5px 4px;
+    min-height: 36px;
+    aspect-ratio: 1.4;
+  }
+
+  .macroscalc-custom-metric-card .metric-value {
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+
+  .macroscalc-custom-metric-card .metric-label {
+    font-size: 0.5em;
+    line-height: 1;
+  }
+
+  .macroscalc-custom-metric-card .metric-subtext {
+    font-size: 0.4em;
+    line-height: 1;
+  }
+
+  /* 3-column grid with minimal but visible spacing */
+  .macroscalc-ratios-grid,
+  .macroscalc-totals-grid,
+  .macroscalc-extremes-grid,
+  .macroscalc-trends-grid,
+  .macroscalc-adherence-grid,
+  .macroscalc-metrics-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .macroscalc-metrics-category-section {
+    margin-bottom: 6px;
+  }
+
+  .macroscalc-metrics-section-header {
+    font-size: 0.55em;
+    margin: 8px 0 3px 0;
+    padding: 2px 4px 1px 4px;
+  }
+  .macroscalc-metrics-section-header:first-child {
+    margin-top: 4px;
+  }
+}
+
+/* Special styling for different metric categories */
+.macroscalc-custom-metric-card[data-category='totals'] {
+  background: var(--background-primary-alt);
+}
+.macroscalc-custom-metric-card[data-category='trends'] {
+  background: linear-gradient(
+    135deg,
+    var(--background-secondary) 0%,
+    var(--background-secondary-alt) 100%
+  );
+}
+.macroscalc-custom-metric-card[data-category='adherence'] .metric-value {
+  color: var(--color-green);
+}
+.macroscalc-custom-metric-card[data-category='extremes'] .metric-value {
+  color: var(--color-orange);
+}
+
+/* Animation for new metrics appearing */
+.macroscalc-custom-metric-card {
+  animation: fadeInUp 0.3s ease-out;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark theme specific adjustments */
+.theme-dark .macroscalc-custom-metric-card {
+  background: var(--background-secondary);
+  border-color: var(--background-modifier-border);
+}
+.theme-dark .macroscalc-custom-metric-card:hover {
+  background: var(--background-primary-alt);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Metrics Edit Modal Styles - Fixed scrolling and sizing */
+.macroscalc-metrics-edit-modal {
+  width: 90vw;
+  max-width: 520px;
+  height: 80vh;
+  max-height: 700px;
+  /* Ensure modal itself can't scroll */
+  overflow: hidden;
+}
+
+.macroscalc-metrics-edit-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  /* Fix: Ensure content doesn't overflow */
+  max-height: 100%;
+}
+
+.macroscalc-metrics-edit-modal .modal-header {
+  flex-shrink: 0;
+  padding: 16px 20px 12px 20px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  /* Ensure header doesn't shrink */
+  min-height: auto;
+}
+
+.macroscalc-metrics-edit-modal .modal-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.3em;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.macroscalc-metrics-edit-modal .modal-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.macroscalc-metrics-edit-modal .modal-body {
+  flex: 1;
+  /* Fix: Enable scrolling and prevent overflow */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px;
+  /* Ensure body can shrink */
+  min-height: 0;
+  /* Add scroll behavior */
+  scroll-behavior: smooth;
+}
+
+.macroscalc-metrics-edit-modal .modal-footer {
+  flex-shrink: 0;
+  padding: 12px 20px 16px 20px;
+  border-top: 1px solid var(--background-modifier-border);
+  background: var(--background-primary-alt);
+  /* Ensure footer doesn't shrink */
+  min-height: auto;
+}
+
+/* Metrics Categories Container - Fixed for scrolling */
+.metrics-categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 100%;
+  width: 100%;
+  /* Fix: Remove height constraints that prevent scrolling */
+  min-height: min-content;
+}
+
+.metrics-category {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  /* Fix: Ensure categories can expand naturally */
+  min-height: auto;
+}
+
+.metrics-category:hover {
+  border-color: var(--background-modifier-border-hover);
+  background: var(--background-secondary-alt);
+}
+
+.metrics-category-header {
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* Metrics List Container */
+.metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Scoped Setting Items - Improved for narrow width */
+.metrics-setting-item {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.metrics-setting-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.metrics-setting-item-info {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.metrics-setting-item-name {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--text-normal);
+  margin-bottom: 3px;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.metrics-setting-item-description {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.metrics-setting-item-control {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Metric Toggle Switch - Slightly smaller */
+.metric-toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: var(--background-modifier-border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.metric-toggle::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--background-primary);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.metric-toggle.enabled {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+}
+
+.metric-toggle.enabled::before {
+  transform: translateX(18px);
+  background: white;
+}
+
+.metric-toggle:hover {
+  transform: scale(1.05);
+}
+
+.metric-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Configuration Container - Improved spacing */
+.metric-config-container {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--background-primary-alt);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  animation: slideDown 0.2s ease-out;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
+}
+
+/* Configuration Settings inside the container */
+.metric-config-container .setting-item {
+  margin-bottom: 8px;
+  padding: 0;
+  border: none;
+  width: 100%;
+}
+
+.metric-config-container .setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.metric-config-container .setting-item-info {
+  margin-bottom: 6px;
+}
+
+.metric-config-container .setting-item-name {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.metric-config-container .setting-item-description {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.metric-config-container .setting-item-control {
+  display: flex;
+  align-items: center;
+}
+
+/* Buttons - Improved for narrow modal */
+.modal-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0;
+}
+
+.btn-secondary,
+.btn-primary {
+  padding: 7px 14px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid;
+  min-width: 70px;
+  text-align: center;
+}
+
+.btn-secondary {
+  background: var(--background-secondary);
+  border-color: var(--background-modifier-border);
+  color: var(--text-normal);
+}
+
+.btn-secondary:hover {
+  background: var(--background-secondary-alt);
+  border-color: var(--background-modifier-border-hover);
+}
+
+.btn-primary {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.btn-primary:hover {
+  background: var(--interactive-accent-hover);
+  border-color: var(--interactive-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design - Further improvements for modal */
+@media (max-width: 600px) {
+  .macroscalc-metrics-edit-modal {
+    width: 95vw;
+    height: 90vh;
+    max-width: none;
+  }
+
+  .macroscalc-metrics-edit-modal .modal-header,
+  .macroscalc-metrics-edit-modal .modal-body,
+  .macroscalc-metrics-edit-modal .modal-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .metrics-category {
+    padding: 12px 14px;
+  }
+
+  .metrics-setting-item-header {
+    gap: 10px;
+  }
+
+  .metrics-setting-item-name {
+    font-size: 0.85em;
+  }
+
+  .metrics-setting-item-description {
+    font-size: 0.7em;
+  }
+
+  .modal-button-container {
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Dark theme adjustments */
+.theme-dark .metrics-category {
+  background: var(--background-primary-alt);
+  border-color: var(--background-modifier-border);
+}
+
+.theme-dark .metrics-category:hover {
+  background: var(--background-secondary);
+}
+
+.theme-dark .metric-config-container {
+  background: var(--background-secondary);
+}
+
+/* Loading and disabled states */
+.metric-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.metric-toggle:disabled:hover {
+  transform: none;
+}
+
+/* Focus states for accessibility */
+.metric-toggle:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+/* Ensure all containers respect the modal width */
+.macroscalc-metrics-edit-modal * {
+  box-sizing: border-box;
+}
+
+.macroscalc-metrics-edit-modal .modal-content,
+.macroscalc-metrics-edit-modal .modal-body,
+.metrics-categories-container,
+.metrics-category,
+.metrics-list,
+.metrics-setting-item {
+  max-width: 100%;
+}
+
+/* Custom scrollbar styling for better UX */
+.macroscalc-metrics-edit-modal .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.macroscalc-metrics-edit-modal .modal-body::-webkit-scrollbar-track {
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+}
+
+.macroscalc-metrics-edit-modal .modal-body::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+
+.macroscalc-metrics-edit-modal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-normal);
+}
+
+/* Timestamp Modal Styles */
+.timestamp-modal .modal-content {
+  padding: 20px;
+}
+
+.timestamp-modal-header {
+  margin-bottom: 16px;
+}
+
+.timestamp-modal-title {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.timestamp-modal-description {
+  margin-bottom: 20px;
+}
+
+.timestamp-description-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+/* Timestamp Input Container */
+.timestamp-input-container {
+  margin-bottom: 20px;
+}
+
+.timestamp-input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-normal);
+  font-size: 0.95em;
+}
+
+.timestamp-input-time {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 1em;
+  margin-bottom: 16px;
+}
+
+.timestamp-input-time:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-alpha);
+}
+
+/* Quick Time Selection */
+.quick-time-container {
+  margin-top: 16px;
+}
+
+.quick-time-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-normal);
+  font-size: 0.9em;
+}
+
+.quick-time-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-time-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-time-btn:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.quick-time-btn:active {
+  transform: translateY(1px);
+}
+
+/* Timestamp Button Container */
+.timestamp-button-container {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.timestamp-cancel-btn,
+.timestamp-save-btn,
+.timestamp-remove-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.timestamp-cancel-btn {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.timestamp-cancel-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+.timestamp-save-btn {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.timestamp-save-btn:hover {
+  background: var(--interactive-accent-hover);
+}
+
+.timestamp-remove-btn {
+  background: var(--color-red);
+  color: white;
+}
+
+.timestamp-remove-btn:hover {
+  background: var(--color-red-hover, #d73527);
+}
+
+/* Timestamp Icons in Tables */
+.food-timestamp-icon,
+.meal-timestamp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9em;
+  opacity: 0.8;
+  cursor: help;
+  transition: opacity 0.2s ease;
+}
+
+.food-timestamp-icon:hover,
+.meal-timestamp-icon:hover {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .timestamp-modal .modal-content {
+    padding: 16px;
+  }
+
+  .quick-time-buttons {
+    justify-content: center;
+  }
+
+  .quick-time-btn {
+    flex: 1;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .timestamp-button-container {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .timestamp-cancel-btn,
+  .timestamp-save-btn,
+  .timestamp-remove-btn {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+/* Dark Theme Adjustments */
+.theme-dark .timestamp-input-time {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.theme-dark .quick-time-btn {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.theme-dark .quick-time-btn:hover {
+  background: var(--background-modifier-border);
+}
+
+/* Animation for timestamp icon appearance */
+@keyframes timestampAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+.food-timestamp-icon,
+.meal-timestamp-icon {
+  animation: timestampAppear 0.3s ease-out;
+}
+
+/* Ensure proper spacing between icons */
+.food-name-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.food-name-content .macro-food-name {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.food-comment-icon + .food-tolerance-icon,
+.meal-comment-icon + .food-tolerance-icon {
+  margin-left: 2px;
+}
+
+/* Header name container for meals/groups */
+.header-name-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-icons-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Food name content container */
+.food-name-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.food-icons-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Emoji icon styling for better visibility */
+.meal-timestamp-icon,
+.food-timestamp-icon,
+.food-tolerance-icon,
+.meal-comment-icon,
+.food-comment-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  line-height: 1;
+}
+
+.food-tolerance-icon:hover,
+.meal-timestamp-icon:hover,
+.food-timestamp-icon:hover,
+.meal-comment-icon:hover,
+.food-comment-icon:hover {
+  opacity: 1;
+}
+
+/* Ensure food name doesn't get compressed */
+.macro-food-name {
+  flex: 1;
+  min-width: 0; /* Allow text truncation if needed */
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .header-name-container {
+    gap: 4px;
+  }
+
+  .food-name-content {
+    gap: 4px;
+  }
+
+  .header-icons-container,
+  .food-icons-container {
+    gap: 2px;
+  }
+
+  .food-tolerance-icon .meal-timestamp-icon,
+  .food-timestamp-icon,
+  .meal-comment-icon,
+  .food-comment-icon {
+    font-size: 11px;
+  }
+}
+
+/* Tolerance Modal Styles */
+.tolerance-modal .modal-content {
+  padding: 20px;
+}
+
+.tolerance-modal-header {
+  margin-bottom: 16px;
+}
+
+.tolerance-modal-title {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.tolerance-modal-description {
+  margin-bottom: 20px;
+}
+
+.tolerance-description-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+/* Severity Selection Container */
+.tolerance-severity-container {
+  margin-bottom: 20px;
+}
+
+.tolerance-severity-label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: var(--text-normal);
+  font-size: 0.95em;
+}
+
+.tolerance-severity-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tolerance-severity-option {
+  display: flex;
+  align-items: center;
+}
+
+/* Default state - ensure no selection styling */
+.tolerance-severity-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary) !important;
+  color: var(--text-normal) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  min-height: 60px;
+}
+
+/* Hover state - only when not selected */
+.tolerance-severity-btn:hover:not(.selected) {
+  background: var(--background-modifier-hover) !important;
+  border-color: var(--interactive-accent);
+}
+
+/* Selected state - explicit and high specificity */
+.tolerance-severity-btn.selected {
+  background: var(--interactive-accent) !important;
+  border-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  box-shadow: 0 2px 8px var(--interactive-accent-alpha);
+  transform: translateY(-1px);
+}
+
+/* Ensure selected state takes precedence over hover */
+.tolerance-severity-btn.selected:hover {
+  background: var(--interactive-accent-hover) !important;
+  border-color: var(--interactive-accent-hover) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.severity-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.severity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0; /* Allow text to wrap */
+}
+
+.severity-label {
+  font-weight: 500;
+  font-size: 0.95em;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.severity-description {
+  font-size: 0.82em;
+  opacity: 0.8;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.tolerance-severity-btn.selected .severity-description {
+  opacity: 0.9;
+}
+
+/* Force reset any persistent selected states */
+.tolerance-severity-btn:not(.selected) {
+  background: var(--background-secondary) !important;
+  color: var(--text-normal) !important;
+  border-color: var(--background-modifier-border) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.tolerance-severity-btn:not(.selected) .severity-description {
+  opacity: 0.8;
+}
+
+/* Symptoms Input Container */
+.tolerance-symptoms-container {
+  margin-bottom: 20px;
+}
+
+.tolerance-symptoms-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-normal);
+  font-size: 0.95em;
+}
+
+.tolerance-symptoms-textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 120px;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.95em;
+  line-height: 1.4;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.tolerance-symptoms-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-alpha);
+}
+
+.tolerance-symptoms-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Character Count */
+.tolerance-char-count {
+  text-align: right;
+  margin-top: 4px;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.tolerance-char-count.char-count-warning {
+  color: var(--color-orange);
+  font-weight: 500;
+}
+
+/* Tolerance Button Container */
+.tolerance-button-container {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.tolerance-cancel-btn,
+.tolerance-save-btn,
+.tolerance-remove-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.tolerance-cancel-btn {
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.tolerance-cancel-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+.tolerance-save-btn {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.tolerance-save-btn:hover {
+  background: var(--interactive-accent-hover);
+}
+
+.tolerance-remove-btn {
+  background: var(--color-red);
+  color: white;
+}
+
+.tolerance-remove-btn:hover {
+  background: var(--color-red-hover, #d73527);
+}
+
+/* Tolerance Icons in Tables
+.food-tolerance-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9em;
+  margin-left: 4px;
+  opacity: 0.9;
+  cursor: help;
+  transition: opacity 0.2s ease;
+  line-height: 1;
+}
+
+.food-tolerance-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+*/
+
+/* Settings Page Tolerance Items */
+.tolerances-container {
+  margin-top: 16px;
+}
+
+.no-tolerances-message {
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.tolerance-item {
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.tolerance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tolerance-icon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.tolerance-name {
+  font-weight: 500;
+  color: var(--text-normal);
+  flex: 1;
+}
+
+.tolerance-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.tolerance-actions .mod-button {
+  padding: 4px 8px;
+  font-size: 0.8em;
+}
+
+.tolerance-symptoms {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+.tolerance-date {
+  color: var(--text-faint);
+  font-size: 0.8em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tolerance-modal .modal-content {
+    padding: 16px;
+  }
+
+  .tolerance-severity-btn {
+    padding: 12px 14px;
+    gap: 10px;
+    min-height: 55px;
+  }
+
+  .severity-icon {
+    font-size: 16px;
+  }
+
+  .severity-label {
+    font-size: 0.9em;
+  }
+
+  .severity-description {
+    font-size: 0.78em;
+  }
+
+  .tolerance-symptoms-textarea {
+    min-height: 70px;
+    padding: 10px;
+  }
+
+  .tolerance-button-container {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .tolerance-cancel-btn,
+  .tolerance-save-btn,
+  .tolerance-remove-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .tolerance-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .tolerance-actions {
+    align-self: flex-end;
+  }
+}
+
+/* Dark Theme Adjustments */
+.theme-dark .tolerance-symptoms-textarea {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.theme-dark .tolerance-severity-btn {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.theme-dark .tolerance-severity-btn:hover {
+  background: var(--background-modifier-border);
+}
+
+.theme-dark .tolerance-item {
+  border-color: var(--background-modifier-border-hover);
+}
+
+/* Animation for tolerance icon appearance */
+@keyframes toleranceAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+/* 
+.food-tolerance-icon {
+  animation: toleranceAppear 0.3s ease-out;
+}
+*/
+
+/* Ensure proper icon ordering - tolerance should come first (most important) */
+.food-icons-container .food-timestamp-icon {
+  order: 1;
+}
+
+.food-icons-container .food-tolerance-icon {
+  order: 2;
+}
+
+.food-icons-container .food-comment-icon {
+  order: 3;
+}
+
+/* Enhanced visual feedback for selected severity */
+.tolerance-severity-btn.selected {
+  box-shadow: 0 2px 8px var(--interactive-accent-alpha) !important;
+  transform: translateY(-1px) !important;
+}
+
+.tolerance-severity-btn:active:not(.selected) {
+  transform: translateY(0);
+}
+
+/* Ensure no residual selected state on non-selected buttons */
+.tolerance-severity-btn:not(.selected):active {
+  transform: translateY(1px);
+}
+
+/* Better focus states */
+.tolerance-severity-btn:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+.tolerance-symptoms-textarea:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+/* ===========================================
+   MACROS PLUGIN - TABBED SETTINGS STYLES
+   =========================================== */
+
+/* Tab Navigation */
+.macros-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 20px;
+  border-right: 1px solid var(--background-modifier-border);
+  padding-right: 16px;
+  min-width: 200px;
+  float: left;
+}
+
+/* Individual Tab Button */
+.macros-settings-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+}
+
+.macros-settings-tab:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.macros-settings-tab.active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+/* Tab Icon */
+.macros-settings-tab-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.macros-settings-tab-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Tab Label */
+.macros-settings-tab-label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Tab Content Area */
+.macros-settings-content {
+  margin-left: 220px;
+  min-height: 400px;
+  padding: 0 16px;
+}
+
+/* Support Tab Specific Styles */
+.buy-me-coffee-container {
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.buy-me-coffee-container iframe {
+  border: none;
+  width: 100%;
+  max-width: 400px;
+  height: 400px;
+  border-radius: 8px;
+}
+
+.support-links-container {
+  margin: 20px 0;
+}
+
+.support-links-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.support-links-container li {
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.support-links-container a {
+  text-decoration: none;
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+.support-links-container a:hover {
+  color: var(--text-accent-hover);
+  text-decoration: underline;
+}
+
+.plugin-info-container {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.plugin-info-container p {
+  margin: 8px 0;
+  font-family: var(--font-monospace);
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.thanks-container {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--background-primary-alt);
+  border-radius: 8px;
+  border-left: 4px solid var(--interactive-accent);
+}
+
+.thanks-container p {
+  margin: 0;
+  font-style: italic;
+  color: var(--text-normal);
+}
+
+/* Food Tolerances Tab Styles */
+.tolerances-container {
+  margin: 20px 0;
+}
+
+.tolerance-item {
+  margin: 12px 0;
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.tolerance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.tolerance-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.tolerance-name {
+  font-weight: 600;
+  color: var(--text-normal);
+  flex-grow: 1;
+}
+
+.tolerance-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tolerance-symptoms {
+  margin: 8px 0 4px 36px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.tolerance-date {
+  margin: 4px 0 0 36px;
+  color: var(--text-faint);
+  font-size: 0.85em;
+}
+
+.no-tolerances-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-style: italic;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px dashed var(--background-modifier-border);
+}
+
+/* Meal Templates Tab Styles */
+.meal-templates-container {
+  margin: 20px 0;
+}
+
+.no-templates-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-style: italic;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px dashed var(--background-modifier-border);
+}
+
+/* API Status Indicators */
+.api-credentials-warning {
+  background: var(--background-modifier-error-rgb);
+  border: 1px solid var(--background-modifier-error);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.api-credentials-warning p {
+  margin: 0;
+  color: var(--text-error);
+  font-weight: 500;
+}
+
+.api-credentials-success {
+  background: var(--background-modifier-success-rgb);
+  border: 1px solid var(--background-modifier-success);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.api-credentials-success p {
+  margin: 0;
+  color: var(--text-success);
+  font-weight: 500;
+}
+
+.off-status-container {
+  margin: 12px 0;
+}
+
+/* Macro Templates Dropdown */
+.macro-template-dropdown {
+  margin: 16px 0 24px 0;
+}
+
+.macro-template-dropdown .setting-item-control select {
+  min-width: 300px;
+  font-size: 14px;
+}
+
+.macro-template-info {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--background-primary-alt);
+  border-radius: 4px;
+  border-left: 3px solid var(--interactive-accent);
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+/* Nutrition Targets Section Spacing */
+.nutrition-targets-section {
+  margin-top: 20px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 16px;
+}
+.energy-target-container {
+  margin: 20px 0;
+}
+
+.dual-energy-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.energy-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.energy-input-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.energy-input {
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+}
+
+.energy-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-rgb);
+}
+
+/* Sortable Tab Order Styles */
+.sortable-tab-order-container {
+  margin: 16px 0;
+}
+
+.sortable-instructions {
+  margin: 0 0 12px 0;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.sortable-tab-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+}
+
+.sortable-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.sortable-tab-item:last-child {
+  border-bottom: none;
+}
+
+.sortable-tab-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.sortable-tab-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.sortable-tab-item.drag-over-before {
+  border-top: 2px solid var(--interactive-accent);
+}
+
+.sortable-tab-item.drag-over-after {
+  border-bottom: 2px solid var(--interactive-accent);
+}
+
+.drag-handle {
+  color: var(--text-muted);
+  cursor: grab;
+  user-select: none;
+  font-family: var(--font-monospace);
+}
+
+.tab-content {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-label {
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.position-indicator {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+/* Chart Preview Styles */
+.macrospc-preview-container {
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+  text-align: center;
+}
+
+.settings-preview-canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* API Notice Styles */
+.macrospc-api-notice {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  border-left: 4px solid var(--interactive-accent);
+}
+
+.macrospc-api-notice p {
+  margin: 8px 0;
+  color: var(--text-normal);
+}
+
+.macrospc-api-notice a {
+  color: var(--text-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.macrospc-api-notice a:hover {
+  color: var(--text-accent-hover);
+  text-decoration: underline;
+}
+
+/* Note Text */
+.note-text {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: var(--background-primary-alt);
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .macros-settings-nav {
+    float: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 16px;
+    min-width: auto;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .macros-settings-content {
+    margin-left: 0;
+    padding: 0 8px;
+  }
+
+  .macros-settings-tab {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 8px;
+  }
+
+  .macros-settings-tab-label {
+    font-size: 12px;
+  }
+
+  .dual-energy-inputs {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .energy-input-group {
+    min-width: 100%;
+  }
+
+  .buy-me-coffee-container iframe {
+    height: 300px;
+  }
+
+  .tolerance-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tolerance-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .tolerance-symptoms,
+  .tolerance-date {
+    margin-left: 0;
+  }
+}
+
+/* Small Mobile Screens */
+@media (max-width: 480px) {
+  .macros-settings-nav {
+    flex-direction: column;
+  }
+
+  .macros-settings-tab {
+    min-width: auto;
+    justify-content: flex-start;
+  }
+
+  .macros-settings-tab-label {
+    font-size: 14px;
+  }
+}
+
+/* Dark Mode Specific Adjustments */
+.theme-dark .macros-settings-tab {
+  border-color: transparent;
+}
+
+.theme-dark .macros-settings-tab:hover {
+  background: var(--background-modifier-hover);
+}
+
+.theme-dark .macros-settings-tab.active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .macros-settings-tab {
+    border: 2px solid var(--background-modifier-border);
+  }
+
+  .macros-settings-tab.active {
+    border: 2px solid var(--interactive-accent);
+  }
+
+  .tolerance-item,
+  .buy-me-coffee-container,
+  .plugin-info-container {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .macros-settings-tab,
+  .sortable-tab-item {
+    transition: none;
+  }
+}
+
+/* Live Search Modal Styles */
+.live-food-search-modal {
+  --search-container-height: 28px;
+  --barcode-button-width: 28px;
+}
+
+/* Search container with barcode button */
+.search-container.macros-search-container.with-barcode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Search input styling */
+.live-search-input {
+  flex: 1;
+  height: var(--search-container-height);
+  padding: 6px 12px;
+  padding-right: 32px; /* Space for 24px button + 8px margin */
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  line-height: 1.2;
+}
+
+.live-search-input:focus {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.live-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Barcode button styling - positioned inside the search input */
+.barcode-scanner-button {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--background-modifier-border-hover);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-normal);
+  opacity: 0.9;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.barcode-scanner-button:hover {
+  background: var(--background-modifier-border-hover);
+  opacity: 1;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.barcode-scanner-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Icon sizing within the barcode button - override Obsidian's default SVG size */
+.barcode-scanner-button svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+/* Focus states for accessibility */
+.barcode-scanner-button:focus {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+/* Dark theme adjustments */
+.theme-dark .barcode-scanner-button {
+  background: var(--background-modifier-hover);
+}
+
+.theme-dark .barcode-scanner-button:hover {
+  background: var(--background-modifier-border-hover);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .live-food-search-modal {
+    --search-container-height: 32px;
+    --barcode-button-width: 32px;
+  }
+  
+  .live-search-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 8px 12px;
+    padding-right: 36px; /* Adjusted for mobile button */
+  }
+  
+  .barcode-scanner-button {
+    right: 4px;
+    width: 25px;
+    height: 25px;
+  }
+  
+  .barcode-scanner-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .barcode-scanner-button {
+    border: 1px solid var(--text-normal);
+  }
+  
+  .barcode-scanner-button:hover {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .barcode-scanner-button {
+    transition: none;
+  }
+  
+  .barcode-scanner-button:hover {
+    transform: none;
+  }
+  
+  .barcode-scanner-button:active {
+    transform: none;
+  }
+}
+
+.meals-header-section {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.create-meal-template-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: 1px solid var(--background-modifier-border-hover);
+  background-color: var(--background-modifier-form-field);
+  color: var(--text-muted);
+}
+
+.create-meal-template-button:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-focus);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.create-meal-template-button:active {
+  background-color: var(--background-modifier-active-hover);
+  transform: scale(0.99);
+}
+
+/* Adjust meals container when header is present */
+.meals-container.active {
+  padding-top: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .meals-header-section {
+    padding: 0.75rem;
+  }
+
+  .create-meal-template-button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}

@@ -1,7 +1,7 @@
 import { LocaleData } from '../I18nManager';
 
 /**
- * Spanish translations - COMPLETE ENHANCED VERSION WITH LOCALIZATION
+ * Spanish translations - COMPLETE ENHANCED VERSION WITH ALL MISSING STRINGS
  */
 export const esTranslations: LocaleData = {
   general: {
@@ -28,9 +28,19 @@ export const esTranslations: LocaleData = {
     previous: 'Anterior',
     updating: 'actualizando',
     remaining: 'restante',
+    view: 'Ver',
   },
   settings: {
     title: 'Configuración de Macros',
+    tabs: {
+      general: 'General',
+      display: 'Pantalla',
+      foodSources: 'Fuentes de Alimentos',
+      mealTemplates: 'Plantillas de Comidas',
+      foodTolerances: 'Tolerancias Alimentarias',
+      advanced: 'Avanzado',
+      support: 'Soporte',
+    },
     storage: {
       title: 'Almacenamiento',
       folder: 'Carpeta de almacenamiento',
@@ -38,6 +48,49 @@ export const esTranslations: LocaleData = {
     },
     targets: {
       title: 'Objetivos nutricionales diarios',
+      manualTitle: 'Configuración Manual de Objetivos',
+      templates: {
+        title: 'Plantillas de Macros',
+        description:
+          'Presets rápidos para diferentes enfoques dietéticos y recomendaciones oficiales',
+        custom: '🎯 Personalizado (Valores Actuales)',
+        keto: '🥑 Dieta Cetogénica (70% Grasa, 5% Carbohidratos, 25% Proteína)',
+        lowCarb: '🥩 Bajo en Carbohidratos (40% Grasa, 20% Carbohidratos, 40% Proteína)',
+        mediterranean: '🫒 Dieta Mediterránea (35% Grasa, 45% Carbohidratos, 20% Proteína)',
+        balanced: '⚖️ Dieta Equilibrada (30% Grasa, 40% Carbohidratos, 30% Proteína)',
+        highProtein: '💪 Alta en Proteínas (25% Grasa, 25% Carbohidratos, 50% Proteína)',
+        plantBased: '🌱 Basada en Plantas (25% Grasa, 55% Carbohidratos, 20% Proteína)',
+        usdaMen: '🇺🇸 USDA Hombres (20-35% Grasa, 45-65% Carbohidratos, 10-35% Proteína)',
+        usdaWomen: '🇺🇸 USDA Mujeres (20-35% Grasa, 45-65% Carbohidratos, 10-35% Proteína)',
+        athlete: '🏃 Rendimiento Atlético (25% Grasa, 55% Carbohidratos, 20% Proteína)',
+        cutting: '✂️ Definición/Pérdida de Peso (25% Grasa, 30% Carbohidratos, 45% Proteína)',
+        bulking: '📈 Volumen/Ganancia Muscular (25% Grasa, 45% Carbohidratos, 30% Proteína)',
+        info: '💡 Consejo: Selecciona una plantilla arriba para configurar rápidamente tus objetivos diarios, luego ajusta los valores individuales según sea necesario. Las plantillas se basan en el porcentaje de calorías totales y en las pautas dietéticas establecidas.',
+        notFound: 'Plantilla de macros no encontrada',
+        applied: 'Plantilla de macros {name} aplicada',
+        ketoName: 'Dieta Cetogénica',
+        ketoDesc: 'Dieta muy baja en carbohidratos y alta en grasas para cetosis',
+        lowCarbName: 'Bajo en Carbohidratos',
+        lowCarbDesc: 'Restricción moderada de carbohidratos con mayor proteína',
+        mediterraneanName: 'Dieta Mediterránea',
+        mediterraneanDesc: 'Patrón alimentario mediterráneo tradicional',
+        balancedName: 'Dieta Equilibrada',
+        balancedDesc: 'Distribución equilibrada de macronutrientes',
+        highProteinName: 'Alta en Proteínas',
+        highProteinDesc: 'Alta proteína para construcción/preservación muscular',
+        plantBasedName: 'Basada en Plantas',
+        plantBasedDesc: 'Enfocada en plantas con proteína adecuada',
+        usdaMenName: 'USDA Hombres (Moderado)',
+        usdaMenDesc: 'Recomendaciones del USDA para hombres adultos',
+        usdaWomenName: 'USDA Mujeres (Moderado)',
+        usdaWomenDesc: 'Recomendaciones del USDA para mujeres adultas',
+        athleteName: 'Rendimiento Atlético',
+        athleteDesc: 'Alto en carbohidratos para resistencia y rendimiento',
+        cuttingName: 'Definición/Pérdida de Peso',
+        cuttingDesc: 'Alta proteína, calorías bajas para pérdida de grasa',
+        bulkingName: 'Volumen/Ganancia Muscular',
+        bulkingDesc: 'Más calorías y proteína para crecimiento muscular',
+      },
       calories: 'Objetivo diario de calorías',
       caloriesDesc: 'Tu objetivo diario de calorías en kcal',
       protein: 'Objetivo diario de proteína',
@@ -89,25 +142,111 @@ export const esTranslations: LocaleData = {
       createDesc: 'Crear un nuevo conjunto de alimentos que sueles comer juntos',
       addButton: '+ Añadir plantilla de comida',
       noTemplates: 'Aún no hay plantillas de comidas. Crea una usando el botón de arriba.',
+      noItems: 'No hay elementos en esta plantilla',
+    },
+    tolerances: {
+      title: 'Tolerancias e Intolerancias Alimentarias',
+      description:
+        'Rastrea alimentos que causan reacciones adversas o intolerancias. Estos se resaltarán en tus tablas de macros con indicadores visuales.',
+      noTolerances:
+        'No hay tolerancias alimentarias configuradas. Añade tolerancias para rastrear alimentos que causan reacciones adversas.',
+      dateAdded: 'Añadido el {date}',
+      toleranceRemoved: 'Tolerancia para "{foodName}" eliminada exitosamente',
+      clearAll: 'Limpiar Todas las Tolerancias',
+      clearAllDesc: 'Eliminar todos los datos de tolerancia alimentaria de tu configuración',
+      clearAllButton: 'Limpiar Todo',
+      allTolerancesCleared: 'Todas las tolerancias alimentarias han sido eliminadas',
     },
     api: {
-      title: 'Configuración de API (requerida)',
+      title: 'Configuración de API',
       description:
-        'Para usar la funcionalidad de búsqueda de alimentos, debes registrarte para obtener credenciales gratuitas de la API de FatSecret. Este plugin no incluye claves de API por defecto.',
-      signupText: 'Regístrate para obtener credenciales gratuitas de API en:',
-      securityNote:
-        'Tus credenciales de API se almacenarán de forma segura en la configuración de tu bóveda.',
-      notConfigured:
-        '⚠️ Credenciales de API no configuradas. La búsqueda de alimentos no funcionará hasta que añadas tus credenciales.',
-      configured: '✅ Credenciales de API configuradas correctamente.',
+        'Configura las APIs de bases de datos de alimentos para habilitar la funcionalidad de búsqueda. Puedes usar una o múltiples fuentes.',
+      fatSecretTitle: 'API de FatSecret',
+      fatSecretSignupText: 'Regístrate para obtener credenciales gratuitas de FatSecret en:',
+      fatSecretEnable: 'Habilitar FatSecret',
+      fatSecretEnableDesc: 'Habilitar búsqueda en la base de datos de FatSecret',
+      fatSecretCredentialsRequired:
+        'Por favor configura las credenciales de la API de FatSecret primero.',
+      fatSecretNotConfigured:
+        '⚠️ Credenciales de API de FatSecret no configuradas. Configura las credenciales para habilitar la búsqueda de FatSecret.',
+      fatSecretConfigured: '✅ Credenciales de API de FatSecret configuradas correctamente.',
+      usdaTitle: 'API de USDA FoodData Central',
+      usdaDescription:
+        'El USDA FoodData Central proporciona datos nutricionales completos para alimentos de marca y básicos.',
+      usdaSignupText: 'Obtén tu clave gratuita de API de USDA en:',
+      usdaEnable: 'Habilitar USDA',
+      usdaEnableDesc: 'Habilitar búsqueda en la base de datos de USDA FoodData Central',
+      usdaCredentialsRequired: 'Por favor configura la clave de API de USDA primero.',
+      usdaNotConfigured:
+        '⚠️ Clave de API de USDA no configurada. Configura la clave de API para habilitar la búsqueda de USDA.',
+      usdaConfigured: '✅ Clave de API de USDA configurada correctamente.',
+      usdaKey: 'Clave de API de USDA',
+      usdaKeyDesc: 'Tu clave de API de USDA FoodData Central (registro gratuito requerido)',
+      usdaKeyPlaceholder: 'Ingresa tu clave de API de USDA aquí',
       key: 'Clave de API de FatSecret',
       keyDesc:
-        'Tu clave de API de FatSecret (requerida para la funcionalidad de búsqueda de alimentos)',
+        'Tu clave de API de FatSecret (requerida para la funcionalidad de búsqueda de FatSecret)',
+      keyPlaceholder: 'Ingresa tu clave de API de FatSecret aquí',
       secret: 'Secreto de API de FatSecret',
       secretDesc:
-        'Tu secreto de API de FatSecret (requerido para la funcionalidad de búsqueda de alimentos)',
-      testConnection: 'Probar conexión de API',
-      testConnectionDesc: 'Haz clic para probar tus credenciales de API de FatSecret.',
+        'Tu secreto de API de FatSecret (requerido para la funcionalidad de búsqueda de FatSecret)',
+      secretPlaceholder: 'Ingresa tu secreto de API de FatSecret aquí',
+      testConnection: 'Probar Conexión',
+      testFatSecretConnection: 'Probar conexión de FatSecret',
+      testFatSecretConnectionDesc: 'Haz clic para probar tus credenciales de API de FatSecret.',
+      testUsdaConnection: 'Probar conexión de USDA',
+      testUsdaConnectionDesc: 'Haz clic para probar tu clave de API de USDA.',
+      securityNote:
+        'Tus credenciales de API se almacenarán de forma segura en la configuración de tu bóveda.',
+
+      // Open Food Facts translations
+      openFoodFactsTitle: 'Open Food Facts',
+      openFoodFactsDescription:
+        'Open Food Facts es una base de datos colaborativa y gratuita de productos alimenticios de todo el mundo. ¡No se requiere clave API!',
+      openFoodFactsInfo:
+        'Características: Soporte multiidioma, calificaciones nutricionales, niveles de procesamiento (NOVA), puntuaciones ambientales y listas de ingredientes.',
+      openFoodFactsLearnMore: 'Aprende más sobre Open Food Facts →',
+      openFoodFactsEnable: 'Habilitar Open Food Facts',
+      openFoodFactsEnableDesc:
+        'Buscar en la base de datos colaborativa de alimentos. No se requiere clave API - ¡completamente gratis de usar!',
+      openFoodFactsEnabled: '✅ Open Food Facts está habilitado y listo para usar',
+      openFoodFactsDisabled: '⚠️ Open Food Facts está deshabilitado',
+      openFoodFactsNotEnabled: 'Open Food Facts no está habilitado. Por favor habilítalo primero.',
+      openFoodFactsLanguage: 'Idioma de Búsqueda',
+      openFoodFactsLanguageDesc:
+        'Preferencia de idioma para resultados de búsqueda y nombres de productos. "Auto" usa tu configuración de idioma de Obsidian.',
+      openFoodFactsLanguageAuto: '🌍 Auto (usar idioma de Obsidian)',
+      openFoodFactsLanguageEn: '🇺🇸 English',
+      openFoodFactsLanguageFr: '🇫🇷 Français',
+      openFoodFactsLanguageDe: '🇩🇪 Deutsch',
+      openFoodFactsLanguageEs: '🇪🇸 Español',
+      openFoodFactsLanguageIt: '🇮🇹 Italiano',
+      openFoodFactsLanguagePt: '🇵🇹 Português',
+      openFoodFactsLanguageZh: '🇨🇳 中文',
+      openFoodFactsLanguageJa: '🇯🇵 日本語',
+      openFoodFactsLanguageKo: '🇰🇷 한국어',
+      openFoodFactsLanguageRu: '🇷🇺 Русский',
+      openFoodFactsLanguageAr: '🇸🇦 العربية',
+      openFoodFactsDataQuality: 'Filtro de Calidad de Datos',
+      openFoodFactsDataQualityDesc:
+        'Umbral mínimo de calidad para resultados de búsqueda. Mayor calidad = datos nutricionales más completos pero menos resultados.',
+      openFoodFactsDataQualityAll: '📊 Todos los Resultados (más rápido, más resultados)',
+      openFoodFactsDataQualityMedium: '📈 Calidad Media+ (equilibrado)',
+      openFoodFactsDataQualityHigh: '⭐ Solo Alta Calidad (más preciso)',
+      testOpenFoodFactsConnection: 'Probar Conexión de Open Food Facts',
+      testOpenFoodFactsConnectionDesc:
+        'Probar la conexión a la base de datos de Open Food Facts para asegurar que funciona correctamente.',
+      openFoodFactsTestSuccess:
+        '✅ ¡Conexión de Open Food Facts exitosa! Se encontraron {count} resultados.',
+      openFoodFactsTestNoResults:
+        '⚠️ La conexión de Open Food Facts fue exitosa pero no se encontraron resultados para "apple". Esto podría ser normal.',
+      openFoodFactsTestCORSError:
+        '❌ Conexión bloqueada por política CORS. Esta es una limitación de seguridad del navegador.',
+      openFoodFactsTestNetworkError:
+        '❌ Error de red al conectar con Open Food Facts. Verifica tu conexión a internet.',
+      openFoodFactsTestTimeoutError:
+        '❌ Tiempo de espera de solicitud agotado. Los servidores de Open Food Facts pueden estar lentos.',
+      openFoodFactsTestError: '❌ Prueba de Open Food Facts falló: {error}',
     },
     developer: {
       title: 'Modo desarrollador',
@@ -117,6 +256,43 @@ export const esTranslations: LocaleData = {
       active:
         'El modo desarrollador está activo. Comandos adicionales de desarrollador están disponibles en la paleta de comandos.',
     },
+    rename: {
+      header: 'Seguimiento de Renombrado',
+      followRenamesEnabled: 'Habilitar seguimiento de renombrado',
+      followRenamesEnabledDesc:
+        'Habilitar seguimiento y actualización automática de referencias de nombres de alimentos cuando se renombran archivos',
+      autoConfirmRenames: 'Auto-confirmar renombrados',
+      autoConfirmRenamesDesc:
+        'Aplicar automáticamente cambios de renombrado sin mostrar modal de confirmación',
+      renameScopeFolder: 'Carpeta de alcance de renombrado',
+      renameScopeFolderDesc:
+        'Carpeta para monitorear renombrados de archivos de alimentos (relativo a la raíz de la bóveda)',
+      backupOnRename: 'Crear respaldos al renombrar',
+      backupOnRenameDesc:
+        'Crear copias de respaldo de archivos antes de modificarlos durante operaciones de renombrado',
+      caseSensitiveFoodMatch: 'Coincidencia de alimentos sensible a mayúsculas',
+      caseSensitiveFoodMatchDesc:
+        'Usar coincidencia sensible a mayúsculas al buscar referencias de nombres de alimentos',
+      includeAliasesOnRename: 'Incluir alias en renombrado',
+      includeAliasesOnRenameDesc:
+        'También actualizar alias de archivos que coincidan con el nombre antiguo del alimento (experimental)',
+    },
+    support: {
+      title: '☕ Apoya el Plugin',
+      description: '¡Si encuentras útil este plugin, considera apoyar su desarrollo!',
+      coffeeText: 'Apoya el desarrollo continuo del plugin Macros:',
+      linksTitle: '📚 Documentación y Enlaces',
+      linksDescription: 'Recursos útiles para el plugin Macros:',
+      githubLink: '🔗 Repositorio de GitHub',
+      docsLink: '📖 Documentación del Plugin',
+      issuesLink: '🐛 Reportar Problemas',
+      pluginInfoTitle: 'ℹ️ Información del Plugin',
+      pluginVersion: 'Versión: {version}',
+      pluginAuthor: 'Autor: {author}',
+      pluginDescription: 'Descripción: {description}',
+      thanksMessage:
+        '🙏 ¡Gracias por usar el plugin Macros! Tu apoyo ayuda a mantener este proyecto vivo y en crecimiento.',
+    },
   },
   food: {
     search: {
@@ -125,6 +301,23 @@ export const esTranslations: LocaleData = {
       noResults: 'No se encontraron resultados. Prueba con un término diferente.',
       searching: 'Buscando...',
       results: 'Resultados para "{searchTerm}" (Página {page})',
+      tabs: {
+        all: 'Todos',
+        fatsecret: 'FatSecret',
+        usda: 'USDA',
+        usdaFoundation: 'USDA | Fundación',
+        usdaBranded: 'USDA | Marcas',
+        usdaLegacy: 'USDA | Legado',
+        openfoodfacts: 'Open Food Facts',
+      },
+      source: {
+        fatsecret: 'FatSecret',
+        usda: 'USDA',
+        openfoodfacts: 'Open Food Facts',
+      },
+      error: {
+        fetchFailed: 'Error al obtener resultados de búsqueda. Por favor inténtalo de nuevo.',
+      },
     },
     entry: {
       title: 'Añadir Alimento',
@@ -160,7 +353,7 @@ export const esTranslations: LocaleData = {
       finishAdding: 'Terminar de Agregar',
       itemSavedSuccessfully: '¡Alimento guardado exitosamente!',
       itemSavedReadyForNext: '¡Guardado! Listo para agregar otro.',
-      allItemsSaved: '¡Todos los {{count}} elementos guardados exitosamente!',
+      allItemsSaved: '¡Todos los {count} elementos guardados exitosamente!',
       itemRemoved: 'Elemento eliminado de la lista',
       keyboardShortcuts: 'Tip: Presiona Enter para guardar, Ctrl+Enter para agregar y continuar',
     },
@@ -169,6 +362,17 @@ export const esTranslations: LocaleData = {
       description:
         'La porción por defecto es {defaultServing}g. Introduce un tamaño de porción personalizado en gramos:',
       submit: 'Enviar',
+    },
+    fileName: {
+      title: 'Guardar Alimento',
+      description: 'Por favor ingresa un nombre para este alimento:',
+      label: 'Nombre del Archivo:',
+      placeholder: 'Ingresa el nombre del alimento...',
+      save: 'Guardar',
+      cancel: 'Cancelar',
+      required: 'Por favor ingresa un nombre de archivo.',
+      duplicateError:
+        'Ya existe un alimento con este nombre en tu carpeta de Nutrición. Por favor elige un nombre diferente para evitar conflictos.',
     },
   },
   meals: {
@@ -249,6 +453,7 @@ export const esTranslations: LocaleData = {
       dailyTarget: 'del objetivo diario',
       otherItems: 'Otros Elementos',
     },
+
     actions: {
       addItems: 'Añadir Elementos',
       collapseAll: 'Colapsar Todo',
@@ -308,6 +513,9 @@ export const esTranslations: LocaleData = {
     quantity: 'Cantidad',
     standardQuantity: 'Estándar',
     errorLoadingData: 'Error al cargar datos: {error}',
+    summarySingleDate: 'Resumen de Cálculo: {date}',
+    summaryDateRange: 'Resumen de Cálculo: {startDate} - {endDate}',
+    summaryDateRangeSameMonth: 'Resumen de Cálculo: {month} {startDay} - {endDay}, {year}',
     summaryDays: 'Resumen de Cálculo (últimos {count} día{days})',
     summaryTables: 'Resumen de Cálculo ({count} tabla{tables})',
     chartAxisDate: 'Fecha/ID',
@@ -323,6 +531,173 @@ export const esTranslations: LocaleData = {
       noContent: 'Error: No se proporcionó contenido en el bloque macroscalc.',
       noIds: 'Error: Por favor especifica IDs de tabla usando "id:" o "ids:"',
       noTableIds: 'Error: No se proporcionaron IDs de tabla.',
+    },
+  },
+  metrics: {
+    edit: {
+      title: 'Configurar Métricas',
+      description:
+        'Elige qué métricas mostrar en los paneles macroscalc. Los cambios se aplican globalmente a todos los bloques macroscalc.',
+      saved: 'Configuración de métricas guardada',
+    },
+    categories: {
+      totals: 'Totales y Promedios',
+      ratios: 'Proporciones de Macros',
+      trends: 'Tendencias y Promedios Móviles',
+      extremes: 'Extremos y Récords',
+      adherence: 'Adherencia y Rachas',
+      display: 'Opciones de Visualización',
+    },
+    totalsAverages: {
+      name: 'Totales y Promedios',
+      description: 'Mostrar valores totales y promedio para el período seleccionado',
+      totalCalories: 'Calorías Totales',
+      avgCalories: 'Calorías Promedio',
+      totalProtein: 'Proteína Total',
+      avgProtein: 'Proteína Promedio',
+      totalFat: 'Grasa Total',
+      avgFat: 'Grasa Promedio',
+      totalCarbs: 'Carbohidratos Totales',
+      avgCarbs: 'Carbohidratos Promedio',
+      perDay: 'por día',
+      totalCaloriesTooltip: 'Calorías totales consumidas durante {days} días: {total}',
+      avgCaloriesTooltip: 'Calorías promedio por día durante {days} días: {avg}',
+      totalProteinTooltip: 'Proteína total consumida durante {days} días: {total}g',
+      avgProteinTooltip: 'Proteína promedio por día durante {days} días: {avg}g',
+      totalFatTooltip: 'Grasa total consumida durante {days} días: {total}g',
+      avgFatTooltip: 'Grasa promedio por día durante {days} días: {avg}g',
+      totalCarbsTooltip: 'Carbohidratos totales consumidos durante {days} días: {total}g',
+      avgCarbsTooltip: 'Carbohidratos promedio por día durante {days} días: {avg}g',
+    },
+    ratios: {
+      name: 'Proporciones de Macros',
+      description: 'Mostrar el desglose porcentual de calorías de cada macronutriente',
+      proteinPercent: 'Proteína %',
+      fatPercent: 'Grasa %',
+      carbsPercent: 'Carbohidratos %',
+      proteinPercentTooltip: '{percent}% de calorías de proteína ({grams}g = {calories} kcal)',
+      fatPercentTooltip: '{percent}% de calorías de grasa ({grams}g = {calories} kcal)',
+      carbsPercentTooltip: '{percent}% de calorías de carbohidratos ({grams}g = {calories} kcal)',
+    },
+    trends: {
+      name: 'Tendencias',
+      description: 'Mostrar promedios móviles y tendencias a lo largo del tiempo',
+      descriptionAuto:
+        'Calcula automáticamente promedios móviles basados en el número de fechas proporcionadas',
+      windowSize: 'Ventana de Promedio Móvil',
+      windowSizeDesc: 'Número de días a incluir en el cálculo del promedio móvil',
+      insufficientData: 'Datos Insuficientes',
+      needMoreDays: 'Se necesitan {needed} días mínimo',
+      currentDays: '{current} días disponibles',
+      daysAvailable: 'días disponibles',
+      rollingAvgCalories: 'Promedio {days} Días Calorías',
+      rollingAvgProtein: 'Promedio {days} Días Proteína',
+      rollingAvgFat: 'Promedio {days} Días Grasa',
+      rollingAvgCarbs: 'Promedio {days} Días Carbohidratos',
+      avgCalories: 'promedio {days} días calorías',
+      avgProtein: 'promedio {days} días proteína',
+      avgFat: 'promedio {days} días grasa',
+      avgCarbs: 'promedio {days} días carbohidratos',
+      through: 'hasta',
+      rollingAvgCaloriesTooltip:
+        'Promedio móvil de {days} días de calorías: {value} (hasta {endDate})',
+      rollingAvgProteinTooltip:
+        'Promedio móvil de {days} días de proteína: {value}g (hasta {endDate})',
+      rollingAvgFatTooltip: 'Promedio móvil de {days} días de grasa: {value}g (hasta {endDate})',
+      rollingAvgCarbsTooltip:
+        'Promedio móvil de {days} días de carbohidratos: {value}g (hasta {endDate})',
+      simpleAvgTooltip: 'Promedio durante {days} días: {value}',
+    },
+    extremes: {
+      name: 'Extremos',
+      description: 'Mostrar los valores más altos y más bajos en el conjunto de datos',
+      maxCalories: 'Calorías Máximas',
+      minCalories: 'Calorías Mínimas',
+      maxProtein: 'Proteína Máxima',
+      minProtein: 'Proteína Mínima',
+      maxFat: 'Grasa Máxima',
+      minFat: 'Grasa Mínima',
+      maxCarbs: 'Carbohidratos Máximos',
+      minCarbs: 'Carbohidratos Mínimos',
+      maxCaloriesTooltip: 'Día con más calorías: {value} el {date}',
+      minCaloriesTooltip: 'Día con menos calorías: {value} el {date}',
+      maxProteinTooltip: 'Día con más proteína: {value}g el {date}',
+      minProteinTooltip: 'Día con menos proteína: {value}g el {date}',
+      maxFatTooltip: 'Día con más grasa: {value}g el {date}',
+      minFatTooltip: 'Día con menos grasa: {value}g el {date}',
+      maxCarbsTooltip: 'Día con más carbohidratos: {value}g el {date}',
+      minCarbsTooltip: 'Día con menos carbohidratos: {value}g el {date}',
+    },
+    adherence: {
+      name: 'Adherencia y Rachas',
+      description: 'Seguir qué tan bien estás cumpliendo tus objetivos nutricionales',
+      calorieTolerance: 'Tolerancia de Calorías',
+      calorieToleranceDesc: 'Porcentaje de tolerancia para adherencia al objetivo de calorías (±%)',
+      proteinTolerance: 'Tolerancia de Proteína',
+      proteinToleranceDesc: 'Porcentaje de tolerancia para adherencia al objetivo de proteína (±%)',
+      fatTolerance: 'Tolerancia de Grasa',
+      fatToleranceDesc: 'Porcentaje de tolerancia para adherencia al objetivo de grasa (±%)',
+      carbsTolerance: 'Tolerancia de Carbohidratos',
+      carbsToleranceDesc:
+        'Porcentaje de tolerancia para adherencia al objetivo de carbohidratos (±%)',
+      calorieAdherence: 'Adherencia de Calorías',
+      proteinAdherence: 'Adherencia de Proteína',
+      fatAdherence: 'Adherencia de Grasa',
+      carbsAdherence: 'Adherencia de Carbohidratos',
+      calorieStreak: 'Racha de Calorías',
+      proteinStreak: 'Racha de Proteína',
+      fatStreak: 'Racha de Grasa',
+      carbsStreak: 'Racha de Carbohidratos',
+      withinTolerance: 'dentro de ±{tolerance}%',
+      day: 'día',
+      days: 'días',
+      calorieAdherenceTooltip:
+        '{percent}% de días dentro de ±{tolerance}% del objetivo de {target} calorías ({days} días total)',
+      proteinAdherenceTooltip:
+        '{percent}% de días dentro de ±{tolerance}% del objetivo de {target}g proteína ({days} días total)',
+      fatAdherenceTooltip:
+        '{percent}% de días dentro de ±{tolerance}% del objetivo de {target}g grasa ({days} días total)',
+      carbsAdherenceTooltip:
+        '{percent}% de días dentro de ±{tolerance}% del objetivo de {target}g carbohidratos ({days} días total)',
+      calorieStreakTooltip:
+        'Racha actual de {streak} días cumpliendo el objetivo de {target} calorías',
+      proteinStreakTooltip:
+        'Racha actual de {streak} días cumpliendo el objetivo de {target}g proteína',
+      fatStreakTooltip: 'Racha actual de {streak} días cumpliendo el objetivo de {target}g grasa',
+      carbsStreakTooltip:
+        'Racha actual de {streak} días cumpliendo el objetivo de {target}g carbohidratos',
+      calorieStreakTooltipWithTolerance:
+        'Racha actual de {streak} días dentro de ±{tolerance}% del objetivo de {target} calorías',
+      proteinStreakTooltipWithTolerance:
+        'Racha actual de {streak} días dentro de ±{tolerance}% del objetivo de {target}g proteína',
+      fatStreakTooltipWithTolerance:
+        'Racha actual de {streak} días dentro de ±{tolerance}% del objetivo de {target}g grasa',
+      carbsStreakTooltipWithTolerance:
+        'Racha actual de {streak} días dentro de ±{tolerance}% del objetivo de {target}g carbohidratos',
+      longestCalorieStreak: 'Racha Más Larga de Calorías',
+      longestProteinStreak: 'Racha Más Larga de Proteína',
+      longestFatStreak: 'Racha Más Larga de Grasa',
+      longestCarbsStreak: 'Racha Más Larga de Carbohidratos',
+      longestCalorieStreakTooltip:
+        'Racha más larga de {streak} días consecutivos dentro de ±{tolerance}% del objetivo de {target} kcal ({dateRange})',
+      longestProteinStreakTooltip:
+        'Racha más larga de {streak} días consecutivos dentro de ±{tolerance}% del objetivo de {target}g proteína ({dateRange})',
+      longestFatStreakTooltip:
+        'Racha más larga de {streak} días consecutivos dentro de ±{tolerance}% del objetivo de {target}g grasa ({dateRange})',
+      longestCarbsStreakTooltip:
+        'Racha más larga de {streak} días consecutivos dentro de ±{tolerance}% del objetivo de {target}g carbohidratos ({dateRange})',
+      noStreak: 'Aún no hay racha',
+      noStreakTooltip:
+        'No se encontraron días consecutivos dentro de ±{tolerance}% del objetivo de {target} en el rango de fechas seleccionado',
+    },
+    display: {
+      name: 'Opciones de Visualización',
+      description: 'Configurar qué elementos visuales mostrar en la vista macroscalc',
+      showTable: 'Mostrar Tabla de Datos',
+      showTableDesc: 'Mostrar la tabla de desglose detallado con filas expandibles',
+      showChart: 'Mostrar Gráfico de Tendencias',
+      showChartDesc:
+        'Mostrar la visualización de Chart.js mostrando tendencias a lo largo del tiempo',
     },
   },
   commands: {
@@ -352,6 +727,9 @@ export const esTranslations: LocaleData = {
     itemRemoveError: 'Error al eliminar elemento: {error}',
     removalCancelled: 'Eliminación cancelada',
     quantityUpdateError: 'Error al actualizar cantidad: {error}',
+    offDataIncomplete:
+      'Algunos datos de Open Food Facts pueden estar incompletos. Considera verificar la información nutricional.',
+    offProductSaved: 'Producto de Open Food Facts guardado exitosamente con los datos disponibles',
   },
   validation: {
     required: 'Este campo es requerido',
@@ -389,6 +767,69 @@ export const esTranslations: LocaleData = {
       removeComment: 'Eliminar comentario',
     },
   },
+  timestamps: {
+    addMealTimestamp: 'Agregar Marca de Tiempo de Comida',
+    editMealTimestamp: 'Editar Marca de Tiempo de Comida',
+    addItemTimestamp: 'Agregar Marca de Tiempo de Alimento',
+    editItemTimestamp: 'Editar Marca de Tiempo de Alimento',
+    mealDescription: 'Agregar una marca de tiempo para la comida: {mealName}',
+    itemDescription: 'Agregar una marca de tiempo para: {itemName}',
+    timeLabel: 'Hora:',
+    quickTimes: 'Horas Rápidas:',
+    breakfast: 'Desayuno',
+    lunch: 'Almuerzo',
+    dinner: 'Cena',
+    now: 'Ahora',
+    addTimestamp: 'Agregar Marca de Tiempo',
+    updateTimestamp: 'Actualizar Marca de Tiempo',
+    removeTimestamp: 'Eliminar Marca de Tiempo',
+    timestampAdded: 'Marca de tiempo agregada exitosamente',
+    timestampUpdated: 'Marca de tiempo actualizada exitosamente',
+    timestampRemoved: 'Marca de tiempo eliminada exitosamente',
+    saveError: 'Error al guardar marca de tiempo: {error}',
+    removeError: 'Error al eliminar marca de tiempo: {error}',
+    invalidTime: 'Por favor ingresa una hora válida en formato HH:MM',
+    consumed: 'Consumido a las {time}',
+    contextMenu: {
+      addTimestamp: 'Agregar marca de tiempo',
+      editTimestamp: 'Editar marca de tiempo',
+      removeTimestamp: 'Eliminar marca de tiempo',
+    },
+  },
+  tolerances: {
+    addMealTolerance: 'Agregar Tolerancia de Comida',
+    editMealTolerance: 'Editar Tolerancia de Comida',
+    addItemTolerance: 'Agregar Tolerancia de Alimento',
+    editItemTolerance: 'Editar Tolerancia de Alimento',
+    mealDescription: 'Agregar información de tolerancia para la comida: {mealName}',
+    itemDescription: 'Agregar información de tolerancia para: {itemName}',
+    severityLabel: 'Nivel de Gravedad:',
+    severityMild: 'Leve',
+    severityMildDesc: 'Molestias o síntomas menores',
+    severityModerate: 'Moderado',
+    severityModerateDesc: 'Síntomas notables que afectan las actividades diarias',
+    severitySevere: 'Grave',
+    severitySevereDesc: 'Reacciones graves que requieren atención médica',
+    symptomsLabel: 'Síntomas:',
+    symptomsPlaceholder: 'ej. "Malestar estomacal, hinchazón" o "Reacción alérgica, urticaria"',
+    symptomsRequired: 'Por favor describe los síntomas experimentados',
+    symptomsTooLong: 'Descripción de síntomas demasiado larga (máximo 200 caracteres)',
+    addTolerance: 'Agregar Tolerancia',
+    updateTolerance: 'Actualizar Tolerancia',
+    removeTolerance: 'Eliminar Tolerancia',
+    toleranceAdded: 'Tolerancia alimentaria agregada exitosamente',
+    toleranceUpdated: 'Tolerancia alimentaria actualizada exitosamente',
+    toleranceRemoved: 'Tolerancia alimentaria eliminada exitosamente',
+    saveError: 'Error al guardar tolerancia: {error}',
+    removeError: 'Error al eliminar tolerancia: {error}',
+    severity: 'Gravedad',
+    symptoms: 'Síntomas',
+    contextMenu: {
+      addTolerance: 'Agregar tolerancia',
+      editTolerance: 'Editar tolerancia',
+      removeTolerance: 'Eliminar tolerancia',
+    },
+  },
   tooltips: {
     percentage: '{value}g {macro} • {percent}% del objetivo diario de {macro}',
     remaining: 'restante',
@@ -401,6 +842,14 @@ export const esTranslations: LocaleData = {
     macroComposition: '{value}g {macro} ({percent}% del total de macros)',
     target: 'Objetivo: {target}{unit}',
     dailyTarget: 'del objetivo diario',
+    offHighQuality:
+      'Datos de alta calidad verificados por la comunidad con información nutricional completa',
+    offMediumQuality: 'Datos comunitarios moderadamente completos, puede faltar alguna información',
+    offLowQuality: 'Datos limitados disponibles, la información nutricional puede estar incompleta',
+    nutriScore: 'Nutri-Score: Calificación de calidad nutricional de A (mejor) a E (peor)',
+    novaGroup:
+      'Clasificación NOVA: Nivel de procesamiento de alimentos de 1 (sin procesar) a 4 (ultraprocesado)',
+    offCommunityData: 'Datos obtenidos de la base de datos comunitaria de Open Food Facts',
   },
   errors: {
     fileNotFound: 'Alimento seleccionado no encontrado.',
@@ -484,5 +933,21 @@ export const esTranslations: LocaleData = {
     today: 'hoy',
     yesterday: 'ayer',
     tomorrow: 'mañana',
+  },
+  rename: {
+    title: 'Renombrar Referencias de Alimentos',
+    summary: 'Renombrar "{oldName}" a "{newName}" en referencias de macros',
+    filesAffected: '{count} archivos afectados',
+    replace: 'Reemplazar Todo',
+    skip: 'Omitir Todo',
+    cancel: 'Cancelar',
+    previewBefore: 'Antes',
+    previewAfter: 'Después',
+    backup: 'Crear respaldo antes de modificar archivos',
+    noMatches: 'No se encontraron referencias de macros para el alimento renombrado',
+    success: 'Se actualizaron exitosamente {count} archivos: {oldName} → {newName}',
+    error: 'Error durante la operación de renombrado: {error}',
+    cancelled: 'Renombrado de archivo cancelado. Se revirtió "{fileName}" al nombre original.',
+    revertError: 'Error al revertir el renombrado del archivo: {error}',
   },
 };

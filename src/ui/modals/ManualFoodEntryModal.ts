@@ -14,6 +14,7 @@ export class ManualFoodEntryModal extends Modal {
   // Form elements
   private foodNameInput: HTMLInputElement;
   private servingSizeInput: HTMLInputElement;
+  private defaultServingSizeInput: HTMLInputElement;
   private caloriesInput: HTMLInputElement;
   private kjInput: HTMLInputElement;
   private proteinInput: HTMLInputElement;
@@ -74,7 +75,7 @@ export class ManualFoodEntryModal extends Modal {
       },
     });
 
-    // Serving Size Field
+    // Serving Size Field with 100g default
     const servingGroup = formContainer.createDiv({ cls: 'form-group macros-form-group' });
     servingGroup.createEl('label', {
       text: t('food.manual.servingSize'),
@@ -83,11 +84,36 @@ export class ManualFoodEntryModal extends Modal {
     this.servingSizeInput = servingGroup.createEl('input', {
       type: 'number',
       cls: 'form-input macros-form-input',
+      value: '100', // Pre-populate with 100g as default
       attr: {
         placeholder: '100',
         min: '0',
         step: '0.1',
         required: 'true',
+      },
+    });
+
+    // Default Serving Size Field (NEW)
+    const defaultServingGroup = formContainer.createDiv({ cls: 'form-group macros-form-group' });
+    defaultServingGroup.createEl('label', {
+      text: 'Default Serving Size (grams)',
+      cls: 'form-label macros-form-label',
+    });
+
+    // Add description for default serving size
+    const defaultServingDesc = defaultServingGroup.createDiv({ cls: 'form-description' });
+    defaultServingDesc.createEl('p', {
+      text: 'Optional: Set a custom default serving size for when you add this food to your macros. If not set, it will use the serving size above.',
+      cls: 'form-description-text',
+    });
+
+    this.defaultServingSizeInput = defaultServingGroup.createEl('input', {
+      type: 'number',
+      cls: 'form-input macros-form-input',
+      attr: {
+        placeholder: 'Leave empty to use serving size above',
+        min: '0',
+        step: '0.1',
       },
     });
 
@@ -352,6 +378,7 @@ export class ManualFoodEntryModal extends Modal {
     [
       this.foodNameInput,
       this.servingSizeInput,
+      this.defaultServingSizeInput,
       this.caloriesInput,
       this.kjInput,
       this.proteinInput,
@@ -372,6 +399,15 @@ export class ManualFoodEntryModal extends Modal {
     const servingSize = parseFloat(this.servingSizeInput.value);
     if (isNaN(servingSize) || servingSize <= 0) {
       errors.push(t('validation.invalidServing'));
+    }
+
+    // Validate default serving size if provided
+    const defaultServingStr = this.defaultServingSizeInput.value.trim();
+    if (defaultServingStr) {
+      const defaultServing = parseFloat(defaultServingStr);
+      if (isNaN(defaultServing) || defaultServing <= 0) {
+        errors.push('Invalid default serving size. Must be greater than 0 or left empty.');
+      }
     }
 
     const calories = parseFloat(this.caloriesInput.value);
@@ -470,20 +506,31 @@ export class ManualFoodEntryModal extends Modal {
   private async saveCurrentItem(): Promise<void> {
     const foodName = this.foodNameInput.value.trim();
     const servingSize = parseFloat(this.servingSizeInput.value);
+    const defaultServingStr = this.defaultServingSizeInput.value.trim();
     const calories = parseFloat(this.caloriesInput.value);
     const kj = parseFloat(this.kjInput.value);
     const protein = parseFloat(this.proteinInput.value);
     const fat = parseFloat(this.fatInput.value);
     const carbs = parseFloat(this.carbsInput.value);
 
+    // Parse default serving size if provided
+    const defaultServing = defaultServingStr ? parseFloat(defaultServingStr) : null;
+
     const fileName = `${foodName}.md`;
-    const frontmatter = `---
+    let frontmatter = `---
 calories: ${calories}
 kj: ${kj}
 protein: ${protein}
 fat: ${fat}
 carbs: ${carbs}
-serving_size: ${servingSize}g
+serving_size: ${servingSize}g`;
+
+    // Add default serving size if provided and different from serving size
+    if (defaultServing && defaultServing !== servingSize) {
+      frontmatter += `\ndefault_serving_size: ${defaultServing}g`;
+    }
+
+    frontmatter += `
 source: manual_entry
 created: ${new Date().toISOString()}
 ---
@@ -495,8 +542,12 @@ created: ${new Date().toISOString()}
 - **${t('food.manual.energy')}:** ${kj} kJ
 - **${t('food.manual.protein')}:** ${protein}g
 - **${t('food.manual.fat')}:** ${fat}g
-- **${t('food.manual.carbs')}:** ${carbs}g
-`;
+- **${t('food.manual.carbs')}:** ${carbs}g`;
+
+    // Add default serving size note if different from nutritional serving
+    if (defaultServing && defaultServing !== servingSize) {
+      frontmatter += `\n\n**Default Serving Size:** ${defaultServing}g (when adding to macros)`;
+    }
 
     const folderPath = normalizePath(this.plugin.settings.storageFolder);
     const folder = this.plugin.app.vault.getFolderByPath(folderPath);
@@ -513,7 +564,8 @@ created: ${new Date().toISOString()}
 
   private clearForm(): void {
     this.foodNameInput.value = '';
-    this.servingSizeInput.value = '';
+    this.servingSizeInput.value = '100'; // Reset to default 100g instead of empty
+    this.defaultServingSizeInput.value = '';
     this.caloriesInput.value = '';
     this.kjInput.value = '';
     this.proteinInput.value = '';
