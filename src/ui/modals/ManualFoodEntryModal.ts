@@ -2,6 +2,7 @@ import { App, Modal, Notice, Component, normalizePath } from 'obsidian';
 import MacrosPlugin from '../../main';
 import { convertEnergyUnit } from '../../utils/energyUtils';
 import { t } from '../../lang/I18nManager';
+import { MICRONUTRIENTS, MicronutrientCategory } from '../../utils/nutrition/micronutrients';
 
 /**
  * Modal for manually entering food nutritional data with "Add More" functionality
@@ -24,6 +25,11 @@ export class ManualFoodEntryModal extends Modal {
   // Status elements
   private statusContainer: HTMLElement;
   private addedItemsList: HTMLElement;
+
+  // Micronutrient (optional) elements
+  private microFieldsContainer: HTMLElement;
+  private microSelect: HTMLSelectElement;
+  private micronutrientInputs: Map<string, HTMLInputElement> = new Map();
 
   // Data tracking
   private addedItems: string[] = [];
@@ -212,6 +218,9 @@ export class ManualFoodEntryModal extends Modal {
       },
     });
 
+    // Optional micronutrient section (collapsible)
+    this.createMicronutrientSection(formContainer);
+
     // Add validation info
     const validationInfo = formContainer.createDiv({ cls: 'validation-info' });
     validationInfo.createEl('p', {
@@ -299,6 +308,197 @@ export class ManualFoodEntryModal extends Modal {
     } else {
       this.statusContainer.style.display = 'none';
     }
+  }
+
+  /**
+   * Build the optional, collapsible micronutrient entry section.
+   * Users pick a micronutrient from the dropdown and add an input field for it.
+   */
+  private createMicronutrientSection(formContainer: HTMLElement): void {
+    const section = formContainer.createDiv({ cls: 'micronutrient-entry-section' });
+
+    // Collapsible header
+    const header = section.createDiv({ cls: 'micronutrient-entry-header' });
+    const toggleIcon = header.createSpan({ cls: 'micronutrient-entry-toggle', text: '▶' });
+    header.createSpan({
+      cls: 'micronutrient-entry-title',
+      text: t('food.manual.micronutrients.title'),
+    });
+
+    const body = section.createDiv({ cls: 'micronutrient-entry-body' });
+    body.style.display = 'none';
+
+    let expanded = false;
+    const toggle = () => {
+      expanded = !expanded;
+      body.style.display = expanded ? 'block' : 'none';
+      toggleIcon.textContent = expanded ? '▼' : '▶';
+    };
+    this.component.registerDomEvent(header, 'click', toggle);
+
+    body.createEl('p', {
+      text: t('food.manual.micronutrients.description'),
+      cls: 'form-description-text',
+    });
+
+    // Picker row: dropdown + add button
+    const pickerRow = body.createDiv({ cls: 'micronutrient-picker-row' });
+
+    this.microSelect = pickerRow.createEl('select', {
+      cls: 'form-input macros-form-input micronutrient-select',
+    });
+
+    const addBtn = pickerRow.createEl('button', {
+      text: t('food.manual.micronutrients.addField'),
+      cls: 'mod-button micronutrient-add-btn',
+    });
+
+    this.refreshMicronutrientDropdown();
+
+    this.component.registerDomEvent(addBtn, 'click', () => {
+      const key = this.microSelect.value;
+      if (key) {
+        this.addMicronutrientField(key);
+      }
+    });
+
+    // Container for added micronutrient fields
+    this.microFieldsContainer = body.createDiv({ cls: 'micronutrient-fields-container' });
+  }
+
+  /**
+   * Rebuild the dropdown options to exclude already-added micronutrients,
+   * grouped by category.
+   */
+  private refreshMicronutrientDropdown(): void {
+    if (!this.microSelect) return;
+    this.microSelect.empty();
+
+    const available = MICRONUTRIENTS.filter((def) => !this.micronutrientInputs.has(def.key));
+
+    if (available.length === 0) {
+      const opt = this.microSelect.createEl('option', {
+        text: t('food.manual.micronutrients.allAdded'),
+        value: '',
+      });
+      opt.disabled = true;
+      this.microSelect.disabled = true;
+      return;
+    }
+
+    this.microSelect.disabled = false;
+
+    const categories: { id: MicronutrientCategory; labelKey: string }[] = [
+      { id: 'vitamin', labelKey: 'settings.micronutrients.categoryVitamins' },
+      { id: 'mineral', labelKey: 'settings.micronutrients.categoryMinerals' },
+      { id: 'other', labelKey: 'settings.micronutrients.categoryOther' },
+    ];
+
+    for (const category of categories) {
+      const defs = available.filter((d) => d.category === category.id);
+      if (defs.length === 0) continue;
+
+      const optgroup = this.microSelect.createEl('optgroup');
+      optgroup.label = t(category.labelKey);
+
+      for (const def of defs) {
+        const opt = optgroup.createEl('option', {
+          text: `${def.label} (${def.unit})`,
+          value: def.key,
+        });
+        // Some Obsidian/Electron versions need explicit value assignment
+        opt.value = def.key;
+      }
+    }
+  }
+
+  /**
+   * Add an input row for the given micronutrient key.
+   */
+  private addMicronutrientField(key: string): void {
+    if (this.micronutrientInputs.has(key)) return;
+    const def = MICRONUTRIENTS.find((d) => d.key === key);
+    if (!def) return;
+
+    const row = this.microFieldsContainer.createDiv({
+      cls: 'form-group macros-form-group micronutrient-field-row',
+    });
+    row.dataset.microKey = key;
+
+    row.createEl('label', {
+      text: `${def.label} (${def.unit})`,
+      cls: 'form-label macros-form-label',
+    });
+
+    const inputWrapper = row.createDiv({ cls: 'micronutrient-input-wrapper' });
+
+    const input = inputWrapper.createEl('input', {
+      type: 'number',
+      cls: 'form-input macros-form-input',
+      attr: {
+        placeholder: '0',
+        min: '0',
+        step: '0.01',
+      },
+    });
+
+    const removeBtn = inputWrapper.createEl('button', {
+      text: '×',
+      cls: 'remove-item-btn micronutrient-remove-btn',
+      attr: { title: t('general.remove') },
+    });
+
+    this.component.registerDomEvent(removeBtn, 'click', () => {
+      this.removeMicronutrientField(key);
+    });
+
+    // Support Enter-to-save like the other inputs
+    this.component.registerDomEvent(input, 'keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) {
+          this.handleAddMore();
+        } else {
+          this.handleSave();
+        }
+      }
+    });
+
+    this.micronutrientInputs.set(key, input);
+    this.refreshMicronutrientDropdown();
+    input.focus();
+  }
+
+  /**
+   * Remove the input row for a micronutrient key.
+   */
+  private removeMicronutrientField(key: string): void {
+    const input = this.micronutrientInputs.get(key);
+    if (input) {
+      const row = input.closest('.micronutrient-field-row');
+      if (row) row.remove();
+    }
+    this.micronutrientInputs.delete(key);
+    this.refreshMicronutrientDropdown();
+  }
+
+  /**
+   * Collect the entered micronutrient values (skipping blanks / invalid).
+   */
+  private collectMicronutrients(): { key: string; value: number }[] {
+    const result: { key: string; value: number }[] = [];
+    // Preserve catalogue order for stable output
+    for (const def of MICRONUTRIENTS) {
+      const input = this.micronutrientInputs.get(def.key);
+      if (!input) continue;
+      const raw = input.value.trim();
+      if (raw === '') continue;
+      const value = parseFloat(raw);
+      if (!isNaN(value) && value >= 0) {
+        result.push({ key: def.key, value });
+      }
+    }
+    return result;
   }
 
   private setupEnergyConversion(): void {
@@ -525,6 +725,12 @@ fat: ${fat}
 carbs: ${carbs}
 serving_size: ${servingSize}g`;
 
+    // Collect optional micronutrient values
+    const micronutrients = this.collectMicronutrients();
+    for (const micro of micronutrients) {
+      frontmatter += `\n${micro.key}: ${micro.value}`;
+    }
+
     // Add default serving size if provided and different from serving size
     if (defaultServing && defaultServing !== servingSize) {
       frontmatter += `\ndefault_serving_size: ${defaultServing}g`;
@@ -543,6 +749,17 @@ created: ${new Date().toISOString()}
 - **${t('food.manual.protein')}:** ${protein}g
 - **${t('food.manual.fat')}:** ${fat}g
 - **${t('food.manual.carbs')}:** ${carbs}g`;
+
+    // Add micronutrient details to the body if any were provided
+    if (micronutrients.length > 0) {
+      frontmatter += `\n\n## ${t('food.manual.micronutrients.bodyHeading')} (per ${servingSize}g)`;
+      for (const micro of micronutrients) {
+        const def = MICRONUTRIENTS.find((d) => d.key === micro.key);
+        const label = def ? def.label : micro.key;
+        const unit = def ? def.unit : '';
+        frontmatter += `\n- **${label}:** ${micro.value}${unit}`;
+      }
+    }
 
     // Add default serving size note if different from nutritional serving
     if (defaultServing && defaultServing !== servingSize) {
@@ -571,6 +788,13 @@ created: ${new Date().toISOString()}
     this.proteinInput.value = '';
     this.fatInput.value = '';
     this.carbsInput.value = '';
+
+    // Clear any optional micronutrient fields that were added
+    if (this.microFieldsContainer) {
+      this.microFieldsContainer.empty();
+    }
+    this.micronutrientInputs.clear();
+    this.refreshMicronutrientDropdown();
 
     const errorContainer = this.contentEl.querySelector('.validation-errors');
     if (errorContainer) {

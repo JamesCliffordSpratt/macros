@@ -40,4 +40,12 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   macroscalcMetricsConfigs: [],
   // NEW: Food tolerances/intolerances
   foodTolerances: {},
+  // NEW: Micronutrient tracking
+  micronutrientTrackingEnabled: false,
+  micronutrientProfile: {
+    sex: 'male',
+    age: 30,
+    lifeStage: 'none',
+  },
+  micronutrientTargets: {},
 };

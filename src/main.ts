@@ -130,6 +130,17 @@ export default class MacrosPlugin extends Plugin {
     if (!this.settings.macroscalcMetricsConfigs) {
       this.settings.macroscalcMetricsConfigs = [];
     }
+
+    // Ensure micronutrient settings exist with defaults
+    if (typeof this.settings.micronutrientTrackingEnabled !== 'boolean') {
+      this.settings.micronutrientTrackingEnabled = false;
+    }
+    if (!this.settings.micronutrientProfile) {
+      this.settings.micronutrientProfile = { sex: 'male', age: 30, lifeStage: 'none' };
+    }
+    if (!this.settings.micronutrientTargets) {
+      this.settings.micronutrientTargets = {};
+    }
   }
 
   async calculateMacrosFromLinesAsync(

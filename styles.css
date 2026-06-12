@@ -8994,3 +8994,272 @@ body:not(.theme-obsidian) .api-credentials-success {
     font-size: 0.8125rem;
   }
 }
+/* =========================================================
+   Micronutrients feature
+   ========================================================= */
+
+/* ---- Settings: Micronutrients tab ---- */
+.micronutrient-profile-info {
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--interactive-accent);
+  background-color: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.micronutrient-targets-container {
+  margin-top: 0.5rem;
+}
+
+/* Inputs that are showing a recommended placeholder (no override set) */
+.micronutrient-input-default::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+/* ---- Manual food entry: optional micronutrient section ---- */
+.micronutrient-entry-section {
+  margin: 1rem 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.micronutrient-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  background-color: var(--background-secondary);
+  user-select: none;
+}
+
+.micronutrient-entry-header:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.micronutrient-entry-toggle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 1rem;
+  text-align: center;
+}
+
+.micronutrient-entry-title {
+  font-weight: 600;
+}
+
+.micronutrient-entry-body {
+  padding: 0.75rem;
+}
+
+.micronutrient-picker-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.micronutrient-picker-row .micronutrient-select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The shared form-input styling is tuned for text inputs (large vertical
+   padding, centered text) which clips a native <select>. Restore native
+   select rendering with left-aligned, fully visible text. */
+.micronutrient-select {
+  -webkit-appearance: menulist;
+  appearance: menulist;
+  text-align: left;
+  text-align-last: left;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.95rem;
+  line-height: normal;
+  height: auto;
+  min-height: 2.25rem;
+  box-shadow: none;
+}
+
+.micronutrient-select:focus {
+  transform: none;
+}
+
+.micronutrient-select option,
+.micronutrient-select optgroup {
+  color: var(--text-normal);
+  background-color: var(--background-primary);
+}
+
+.micronutrient-add-btn {
+  white-space: nowrap;
+}
+
+.micronutrient-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.micronutrient-field-row {
+  margin: 0;
+}
+
+.micronutrient-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.micronutrient-input-wrapper input {
+  flex: 1;
+  min-width: 0;
+}
+
+.micronutrient-remove-btn {
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+/* ---- Processor: macrosmicro table ---- */
+.macrosmicro-container {
+  margin: 0.5rem 0;
+}
+
+.macrosmicro-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  margin-top: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  gap: 0.4rem;
+}
+
+.macrosmicro-header:hover .macrosmicro-title {
+  color: var(--text-normal);
+}
+
+.macrosmicro-toggle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  width: 0.9rem;
+  text-align: center;
+}
+
+.macrosmicro-body {
+  margin-top: 0.25rem;
+}
+
+.macrosmicro-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.macrosmicro-loading,
+.macrosmicro-empty {
+  padding: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.macrosmicro-error {
+  padding: 0.75rem;
+  color: var(--text-error);
+}
+
+.macrosmicro-table {
+  width: 100%;
+}
+
+.macrosmicro-table th {
+  text-align: left;
+}
+
+.macrosmicro-category-row td {
+  background-color: var(--background-secondary);
+  font-weight: 600;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.macrosmicro-category-label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.macrosmicro-name {
+  font-weight: 500;
+}
+
+.macrosmicro-limit-badge {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 3px;
+  background-color: var(--background-modifier-border);
+  color: var(--text-muted);
+}
+
+.macrosmicro-amount,
+.macrosmicro-target {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.macrosmicro-percent-cell {
+  min-width: 120px;
+}
+
+.macrosmicro-bar-wrap {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--background-modifier-border);
+  overflow: hidden;
+  margin-bottom: 0.2rem;
+}
+
+.macrosmicro-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  background-color: var(--interactive-accent);
+}
+
+.macrosmicro-bar.is-low {
+  background-color: var(--color-red, #e05252);
+}
+
+.macrosmicro-bar.is-near {
+  background-color: var(--color-orange, #e0a052);
+}
+
+.macrosmicro-bar.is-met {
+  background-color: var(--color-green, #52b788);
+}
+
+.macrosmicro-bar.is-within-limit {
+  background-color: var(--color-green, #52b788);
+}
+
+.macrosmicro-bar.is-over-limit {
+  background-color: var(--color-red, #e05252);
+}
+
+.macrosmicro-percent-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.macrosmicro-footnote {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}

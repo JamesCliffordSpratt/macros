@@ -46,7 +46,10 @@ export function processNutritionalData(
   if (!cache || !cache.frontmatter) return null;
 
   const fm = cache.frontmatter as Record<string, unknown>;
-  const storedServing = (fm['serving_size'] as string) || '';
+  // Frontmatter values can be non-strings (e.g. YAML parses `serving_size: 100`
+  // as a number). A `as string` cast does nothing at runtime, so coerce here to
+  // avoid "toLowerCase is not a function" on numeric/other values.
+  const storedServing = fm['serving_size'] != null ? String(fm['serving_size']) : '';
   if (!storedServing.toLowerCase().includes('g')) return null;
 
   const storedServingGrams = parseGrams(storedServing);
@@ -154,3 +157,6 @@ export function mergeMacroLines(lines: string[]): string[] {
 export function calculateConsistentCalories(data: NutritionData): number {
   return parseFloat(data.calories.toFixed(1));
 }
+
+// Re-export micronutrient definitions and helpers
+export * from './micronutrients';

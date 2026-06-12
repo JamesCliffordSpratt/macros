@@ -65,5 +65,27 @@ export {
   calculateConsistentCalories,
 };
 
+// From nutrition - micronutrient definitions and helpers
+export {
+  MICRONUTRIENTS,
+  MICRONUTRIENT_MAP,
+  MICRONUTRIENT_KEYS,
+  DEFAULT_MICRONUTRIENT_PROFILE,
+  resolveLifeStageGroup,
+  getRecommendedValue,
+  getRecommendedTargets,
+  getEffectiveTarget,
+  extractMicronutrients,
+  formatMicroAmount,
+} from './nutrition';
+export type {
+  MicronutrientCategory,
+  MicronutrientDef,
+  MicronutrientProfile,
+  LifeStage,
+  LifeStageGroup,
+  Sex,
+} from './nutrition';
+
 // Re-export types to maintain backward compatibility
 export type { MacroRow, NutritionData, MacroTotals, DailyTargets, Group } from './types';

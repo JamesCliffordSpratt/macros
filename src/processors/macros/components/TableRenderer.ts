@@ -10,6 +10,7 @@ import {
 import { TableHeader } from '../table-header';
 import { MacrosDashboard } from '../dashboard';
 import { GroupRenderer } from './GroupRenderer';
+import { appendMicronutrientSection } from './MicronutrientRenderer';
 import { processLinesIntoGroups } from '../utils/group-utils';
 import { Notice, debounce, TFile } from 'obsidian';
 
@@ -240,6 +241,10 @@ export class MacrosTableRenderer {
     );
 
     fragment.appendChild(table);
+
+    // Append micronutrient summary after the macros table (when enabled and
+    // the foods carry micronutrient data).
+    appendMicronutrientSection(this.plugin, fragment as unknown as HTMLElement, lines);
 
     // Single DOM update
     this.el.appendChild(fragment);

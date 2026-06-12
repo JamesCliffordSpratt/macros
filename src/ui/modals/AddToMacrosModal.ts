@@ -35,20 +35,20 @@ export class AddToMacrosModal extends Modal {
   private component: Component;
 
   // UI elements
-  private searchInput: HTMLInputElement;
-  private searchClearButton: HTMLElement;
-  private mealsContainer: HTMLElement;
-  private foodsContainer: HTMLElement;
-  private groupContainer: HTMLElement;
-  private selectedItemsContainer: HTMLElement;
-  private confirmButton: HTMLElement;
-  private mealsTab: HTMLElement;
-  private foodsTab: HTMLElement;
-  private groupTab: HTMLElement;
+  private searchInput!: HTMLInputElement;
+  private searchClearButton!: HTMLElement;
+  private mealsContainer!: HTMLElement;
+  private foodsContainer!: HTMLElement;
+  private groupContainer!: HTMLElement;
+  private selectedItemsContainer!: HTMLElement;
+  private confirmButton!: HTMLElement;
+  private mealsTab!: HTMLElement;
+  private foodsTab!: HTMLElement;
+  private groupTab!: HTMLElement;
 
   // Group creation elements
-  private groupNameInput: HTMLInputElement;
-  private groupFoodsContainer: HTMLElement;
+  private groupNameInput!: HTMLInputElement;
+  private groupFoodsContainer!: HTMLElement;
   private groupSelectedItems: string[] = [];
 
   // Data
@@ -71,38 +71,69 @@ export class AddToMacrosModal extends Modal {
     const { contentEl } = this;
     contentEl.addClass('enhanced-add-to-macros-modal');
 
-    // Load and prepare data
-    await this.loadData();
+    try {
+      // Load and prepare data
+      await this.loadData();
 
-    // Create the interface
-    this.createHeader();
-    this.createSearchBar();
-    this.createTabsAndContent();
-    this.createSelectedItemsSection();
-    this.createActionButtons();
+      // Create the interface
+      this.createHeader();
+      this.createSearchBar();
+      this.createTabsAndContent();
+      this.createSelectedItemsSection();
+      this.createActionButtons();
 
-    // Initial render
-    this.filterAndRender('');
-    this.updateSelectedItemsDisplay();
+      // Initial render
+      this.filterAndRender('');
+      this.updateSelectedItemsDisplay();
 
-    // Auto-focus search input
-    setTimeout(() => {
-      if (this.searchInput) {
-        this.searchInput.focus();
-        this.searchInput.setSelectionRange(0, 0);
-      }
-    }, 150);
+      // Auto-focus search input
+      setTimeout(() => {
+        if (this.searchInput) {
+          this.searchInput.focus();
+          this.searchInput.setSelectionRange(0, 0);
+        }
+      }, 150);
+    } catch (error) {
+      // Without this guard, any error thrown above (e.g. while loading a
+      // malformed meal template) leaves a completely blank modal with no
+      // indication of what went wrong. Surface the problem instead.
+      console.error('[Macros] Failed to open "Add to Macros" modal:', error);
+      contentEl.empty();
+      contentEl.addClass('enhanced-add-to-macros-modal');
+      const errorBox = contentEl.createDiv({ cls: 'macros-modal-error' });
+      errorBox.createEl('h2', { text: t('meals.addTo.title') });
+      errorBox.createEl('p', {
+        text: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   private async loadData(): Promise<void> {
-    // Load meal templates
-    this.allMeals = [...this.plugin.settings.mealTemplates].sort((a, b) =>
-      a.name.localeCompare(b.name, 'en-US', {
-        sensitivity: 'base',
-        numeric: true,
-        ignorePunctuation: true,
-      })
-    );
+    // Load meal templates. Normalize each entry defensively: a single malformed
+    // template (a non-object entry, a missing/non-string `name`, or a
+    // missing/`null`/non-array `items`) must not be able to throw and blank the
+    // entire modal. Also guard against `mealTemplates` itself being absent or
+    // not an array (the settings load is only a shallow merge with defaults).
+    const rawMeals = Array.isArray(this.plugin.settings.mealTemplates)
+      ? this.plugin.settings.mealTemplates
+      : [];
+
+    this.allMeals = rawMeals
+      .filter((meal): meal is MealTemplate => meal != null && typeof meal === 'object')
+      .map((meal) => ({
+        ...meal,
+        name: typeof meal.name === 'string' ? meal.name : '',
+        items: Array.isArray(meal.items)
+          ? meal.items.filter((item): item is string => typeof item === 'string')
+          : [],
+      }))
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, 'en-US', {
+          sensitivity: 'base',
+          numeric: true,
+          ignorePunctuation: true,
+        })
+      );
 
     // Calculate nutrition data for each meal
     await this.calculateMealNutrition();

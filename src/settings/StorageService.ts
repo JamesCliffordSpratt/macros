@@ -17,6 +17,13 @@ import { convertEnergyUnit } from '../utils/energyUtils';
 import type { Chart } from 'chart.js';
 import { DEFAULT_SETTINGS } from './settingsSchema';
 import { ToleranceData } from '../ui/modals/ToleranceModal';
+import {
+  MICRONUTRIENTS,
+  MicronutrientCategory,
+  MicronutrientProfile,
+  getRecommendedValue,
+  resolveLifeStageGroup,
+} from '../utils/nutrition/micronutrients';
 export { DEFAULT_SETTINGS };
 
 // Export interfaces and default settings
@@ -67,6 +74,14 @@ export interface PluginSettings {
   macroscalcMetricsConfigs: MetricConfig[];
   // NEW: Food tolerances/intolerances
   foodTolerances: Record<string, ToleranceData>;
+  // NEW: Micronutrient tracking
+  // Master toggle for the micronutrient tracking feature.
+  micronutrientTrackingEnabled: boolean;
+  // Personal profile used to derive default (recommended) micronutrient targets.
+  micronutrientProfile: MicronutrientProfile;
+  // User overrides for individual micronutrient targets (key -> amount). When a
+  // key is absent the recommended value derived from the profile is used.
+  micronutrientTargets: Record<string, number>;
 }
 
 // Sortable component class
@@ -299,6 +314,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
         name: t('settings.tabs.foodTolerances'),
         icon: 'alert-triangle',
         content: (containerEl) => this.renderFoodTolerancesTab(containerEl),
+      },
+      {
+        id: 'micronutrients',
+        name: t('settings.tabs.micronutrients'),
+        icon: 'pill',
+        content: (containerEl) => this.renderMicronutrientsTab(containerEl),
       },
       {
         id: 'advanced',
@@ -1390,6 +1411,275 @@ export class NutritionalSettingTab extends PluginSettingTab {
             });
         });
     }
+  }
+
+  private renderMicronutrientsTab(containerEl: HTMLElement): void {
+    const profile: MicronutrientProfile = this.plugin.settings.micronutrientProfile;
+    const overrides = this.plugin.settings.micronutrientTargets || {};
+
+    new Setting(containerEl).setName(`💊 ${t('settings.micronutrients.title')}`).setHeading();
+
+    containerEl.createEl('p', {
+      text: t('settings.micronutrients.description'),
+      cls: 'setting-item-description',
+    });
+
+    // =======================================
+    // MASTER ENABLE TOGGLE
+    // =======================================
+    new Setting(containerEl)
+      .setName(t('settings.micronutrients.enable'))
+      .setDesc(t('settings.micronutrients.enableDesc'))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.micronutrientTrackingEnabled)
+          .onChange(async (value) => {
+            this.plugin.settings.micronutrientTrackingEnabled = value;
+            await this.plugin.saveSettings();
+            this.plugin.refreshMacrosTables?.();
+            this.display();
+          });
+      });
+
+    // When tracking is disabled, hide the rest of the configuration
+    if (!this.plugin.settings.micronutrientTrackingEnabled) {
+      containerEl.createEl('p', {
+        text: t('settings.micronutrients.disabledNote'),
+        cls: 'setting-item-description',
+      });
+      return;
+    }
+
+    // =======================================
+    // PERSONAL PROFILE
+    // =======================================
+    new Setting(containerEl).setName(t('settings.micronutrients.profileTitle')).setHeading();
+
+    containerEl.createEl('p', {
+      text: t('settings.micronutrients.profileDesc'),
+      cls: 'setting-item-description',
+    });
+
+    new Setting(containerEl)
+      .setName(t('settings.micronutrients.sex'))
+      .setDesc(t('settings.micronutrients.sexDesc'))
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption('male', t('settings.micronutrients.sexMale'))
+          .addOption('female', t('settings.micronutrients.sexFemale'))
+          .setValue(profile.sex)
+          .onChange(async (value: string) => {
+            if (value === 'male' || value === 'female') {
+              profile.sex = value;
+              // Life stage only applies to female profiles
+              if (value === 'male') {
+                profile.lifeStage = 'none';
+              }
+              await this.plugin.saveSettings();
+              this.display();
+            }
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t('settings.micronutrients.age'))
+      .setDesc(t('settings.micronutrients.ageDesc'))
+      .addText((text) => {
+        text
+          .setValue(profile.age.toString())
+          .setPlaceholder('30')
+          .onChange(async (value) => {
+            const numValue = parseFloat(value);
+            if (!isNaN(numValue) && numValue >= 0 && numValue <= 120) {
+              profile.age = numValue;
+              await this.plugin.saveSettings();
+              // Refresh recommended values without losing focus too aggressively
+              this.refreshMicronutrientRecommendations(containerEl);
+            }
+          });
+      });
+
+    // Life stage only relevant for female profiles
+    if (profile.sex === 'female') {
+      new Setting(containerEl)
+        .setName(t('settings.micronutrients.lifeStage'))
+        .setDesc(t('settings.micronutrients.lifeStageDesc'))
+        .addDropdown((dropdown) => {
+          dropdown
+            .addOption('none', t('settings.micronutrients.lifeStageNone'))
+            .addOption('pregnancy', t('settings.micronutrients.lifeStagePregnancy'))
+            .addOption('lactation', t('settings.micronutrients.lifeStageLactation'))
+            .setValue(profile.lifeStage)
+            .onChange(async (value: string) => {
+              if (value === 'none' || value === 'pregnancy' || value === 'lactation') {
+                profile.lifeStage = value;
+                await this.plugin.saveSettings();
+                this.display();
+              }
+            });
+        });
+    }
+
+    // Show the resolved life-stage group so the user understands the basis of defaults
+    const group = resolveLifeStageGroup(profile);
+    const groupInfo = containerEl.createDiv({ cls: 'micronutrient-profile-info' });
+    groupInfo.createEl('p', {
+      text: t('settings.micronutrients.basisNote', { group: this.formatLifeStageGroup(group) }),
+      cls: 'setting-item-description',
+    });
+
+    // =======================================
+    // TARGETS
+    // =======================================
+    new Setting(containerEl).setName(t('settings.micronutrients.targetsTitle')).setHeading();
+
+    containerEl.createEl('p', {
+      text: t('settings.micronutrients.targetsDesc'),
+      cls: 'setting-item-description',
+    });
+
+    // Reset all overrides
+    new Setting(containerEl)
+      .setName(t('settings.micronutrients.resetAll'))
+      .setDesc(t('settings.micronutrients.resetAllDesc'))
+      .addButton((btn) => {
+        btn
+          .setButtonText(t('settings.micronutrients.resetAllButton'))
+          .setWarning()
+          .onClick(async () => {
+            this.plugin.settings.micronutrientTargets = {};
+            await this.plugin.saveSettings();
+            this.plugin.refreshMacrosTables?.();
+            this.display();
+            new Notice(t('settings.micronutrients.resetAllDone'));
+          });
+      });
+
+    const targetsContainer = containerEl.createDiv({ cls: 'micronutrient-targets-container' });
+
+    const categories: { id: MicronutrientCategory; labelKey: string }[] = [
+      { id: 'vitamin', labelKey: 'settings.micronutrients.categoryVitamins' },
+      { id: 'mineral', labelKey: 'settings.micronutrients.categoryMinerals' },
+      { id: 'other', labelKey: 'settings.micronutrients.categoryOther' },
+    ];
+
+    for (const category of categories) {
+      const nutrients = MICRONUTRIENTS.filter((n) => n.category === category.id);
+      if (nutrients.length === 0) continue;
+
+      new Setting(targetsContainer).setName(t(category.labelKey)).setHeading();
+
+      for (const def of nutrients) {
+        const recommended = getRecommendedValue(def, profile);
+        const override = overrides[def.key];
+        const hasOverride = override != null && Number.isFinite(override);
+        const effective = hasOverride ? override : recommended;
+
+        const recommendedText =
+          recommended != null
+            ? t('settings.micronutrients.recommendedValue', {
+                value: recommended.toString(),
+                unit: def.unit,
+              })
+            : t('settings.micronutrients.noRecommendation');
+
+        const limitNote = def.isLimit ? ` ${t('settings.micronutrients.limitNote')}` : '';
+
+        const setting = new Setting(targetsContainer)
+          .setName(`${def.label} (${def.unit})`)
+          .setDesc(recommendedText + limitNote);
+
+        setting.settingEl.dataset.microKey = def.key;
+
+        setting.addText((text) => {
+          text
+            .setPlaceholder(recommended != null ? recommended.toString() : '')
+            .setValue(effective != null && hasOverride ? effective.toString() : '')
+            .onChange(async (value) => {
+              const trimmed = value.trim();
+              if (trimmed === '') {
+                // Empty => revert to recommended default
+                delete this.plugin.settings.micronutrientTargets[def.key];
+              } else {
+                const numValue = parseFloat(trimmed);
+                if (!isNaN(numValue) && numValue >= 0) {
+                  this.plugin.settings.micronutrientTargets[def.key] = numValue;
+                }
+              }
+              await this.plugin.saveSettings();
+              this.plugin.refreshMacrosTables?.();
+            });
+          // When not overridden, show the recommended value as a faint placeholder only
+          if (!hasOverride && recommended != null) {
+            text.inputEl.classList.add('micronutrient-input-default');
+          }
+        });
+
+        // Per-row reset to recommended (only meaningful when overridden)
+        setting.addExtraButton((btn) => {
+          btn
+            .setIcon('rotate-ccw')
+            .setTooltip(t('settings.micronutrients.resetToRecommended'))
+            .onClick(async () => {
+              delete this.plugin.settings.micronutrientTargets[def.key];
+              await this.plugin.saveSettings();
+              this.plugin.refreshMacrosTables?.();
+              this.display();
+            });
+        });
+      }
+    }
+  }
+
+  /**
+   * Update the recommended-value descriptions in the micronutrient targets list
+   * in place (used when the age field changes, to avoid a full re-render that
+   * would steal focus from the age input).
+   */
+  private refreshMicronutrientRecommendations(containerEl: HTMLElement): void {
+    const profile = this.plugin.settings.micronutrientProfile;
+    const overrides = this.plugin.settings.micronutrientTargets || {};
+
+    const rows = containerEl.querySelectorAll('[data-micro-key]');
+    rows.forEach((rowEl) => {
+      const key = (rowEl as HTMLElement).dataset.microKey;
+      if (!key) return;
+      const def = MICRONUTRIENTS.find((n) => n.key === key);
+      if (!def) return;
+
+      const recommended = getRecommendedValue(def, profile);
+      const descEl = rowEl.querySelector('.setting-item-description');
+      if (descEl) {
+        const recommendedText =
+          recommended != null
+            ? t('settings.micronutrients.recommendedValue', {
+                value: recommended.toString(),
+                unit: def.unit,
+              })
+            : t('settings.micronutrients.noRecommendation');
+        const limitNote = def.isLimit ? ` ${t('settings.micronutrients.limitNote')}` : '';
+        descEl.textContent = recommendedText + limitNote;
+      }
+
+      // Update placeholder so the (un-overridden) default reflects the new age
+      const input = rowEl.querySelector('input') as HTMLInputElement | null;
+      if (input && (overrides[key] == null || !Number.isFinite(overrides[key]))) {
+        input.placeholder = recommended != null ? recommended.toString() : '';
+      }
+    });
+  }
+
+  /**
+   * Human-readable label for a resolved DRI life-stage group.
+   */
+  private formatLifeStageGroup(group: string): string {
+    const key = `settings.micronutrients.groups.${group}`;
+    const translated = t(key);
+    // t() returns the key itself when missing; fall back to a tidy version
+    if (translated === key) {
+      return group.replace(/_/g, ' ');
+    }
+    return translated;
   }
 
   private renderAdvancedTab(containerEl: HTMLElement): void {
