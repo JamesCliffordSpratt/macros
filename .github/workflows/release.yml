@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   release:
@@ -32,7 +33,8 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ github.ref_name }}"
-          NOTES=$(awk "/### \[${VERSION}\]/{found=1; next} found && /^###/{exit} found && NF{print}" CHANGELOG.md)
+          BARE="${VERSION#v}"
+          NOTES=$(awk "/### \[v?${BARE}\]/{found=1; next} found && /^###/{exit} found && NF{print}" CHANGELOG.md)
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
