@@ -262,6 +262,7 @@ export class AddMealTemplateModal extends Modal {
         const removeButton = buttonContainer.createEl('button', {
           text: t('meals.create.remove'),
           cls: 'remove-button',
+          attr: { type: 'button' },
         });
 
         // Edit serving button (if nutrition data available)
@@ -269,6 +270,7 @@ export class AddMealTemplateModal extends Modal {
           const editButton = buttonContainer.createEl('button', {
             text: t('meals.create.editServing'),
             cls: 'edit-button',
+            attr: { type: 'button' },
           });
 
           this.component.registerDomEvent(editButton, 'click', () => {
@@ -286,6 +288,7 @@ export class AddMealTemplateModal extends Modal {
         const addButton = buttonContainer.createEl('button', {
           text: t('meals.create.addToMeal'),
           cls: 'add-button',
+          attr: { type: 'button' },
         });
 
         this.component.registerDomEvent(addButton, 'click', () => {
@@ -382,6 +385,7 @@ export class AddMealTemplateModal extends Modal {
         const removeButton = itemTag.createEl('button', {
           text: '×',
           cls: 'remove-item-button',
+          attr: { type: 'button' },
         });
 
         this.component.registerDomEvent(removeButton, 'click', () => {
@@ -415,11 +419,13 @@ export class AddMealTemplateModal extends Modal {
     const cancelButton = buttonContainer.createEl('button', {
       text: t('general.cancel'),
       cls: 'cancel-button',
+      attr: { type: 'button' },
     });
 
     this.createButton = buttonContainer.createEl('button', {
       text: t('meals.create.create'),
       cls: 'create-button disabled',
+      attr: { type: 'button' },
     });
 
     (this.createButton as HTMLButtonElement).disabled = true;
@@ -712,6 +718,7 @@ export class EditMealTemplateModal extends Modal {
         const removeButton = buttonContainer.createEl('button', {
           text: t('meals.create.remove'),
           cls: 'remove-button',
+          attr: { type: 'button' },
         });
 
         // Edit serving button (if nutrition data available)
@@ -719,6 +726,7 @@ export class EditMealTemplateModal extends Modal {
           const editButton = buttonContainer.createEl('button', {
             text: t('meals.create.editServing'),
             cls: 'edit-button',
+            attr: { type: 'button' },
           });
 
           this.component.registerDomEvent(editButton, 'click', () => {
@@ -736,6 +744,7 @@ export class EditMealTemplateModal extends Modal {
         const addButton = buttonContainer.createEl('button', {
           text: t('meals.create.addToMeal'),
           cls: 'add-button',
+          attr: { type: 'button' },
         });
 
         this.component.registerDomEvent(addButton, 'click', () => {
@@ -857,6 +866,7 @@ export class EditMealTemplateModal extends Modal {
         const removeButton = itemTag.createEl('button', {
           text: '×',
           cls: 'remove-item-button',
+          attr: { type: 'button' },
         });
 
         this.component.registerDomEvent(removeButton, 'click', () => {
@@ -886,11 +896,13 @@ export class EditMealTemplateModal extends Modal {
     const cancelButton = buttonContainer.createEl('button', {
       text: t('general.cancel'),
       cls: 'cancel-button',
+      attr: { type: 'button' },
     });
 
     this.saveButton = buttonContainer.createEl('button', {
       text: t('meals.edit.saveChanges'),
       cls: 'save-button',
+      attr: { type: 'button' },
     });
 
     this.component.registerDomEvent(cancelButton, 'click', () => {
