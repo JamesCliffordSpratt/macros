@@ -1276,7 +1276,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
       .setName(t('settings.meals.create'))
       .setDesc(t('settings.meals.createDesc'))
       .addButton((btn) => {
-        btn.setButtonText(t('settings.meals.addButton')).onClick(() => {
+        btn.setButtonText(t('settings.meals.addButton')).onClick((evt) => {
+          evt.preventDefault();
           new AddMealTemplateModal(this.plugin).open();
         });
       });
@@ -1296,7 +1297,8 @@ export class NutritionalSettingTab extends PluginSettingTab {
             editBtn
               .setButtonText(t('general.edit'))
               .setCta()
-              .onClick(() => {
+              .onClick((evt) => {
+                evt.preventDefault();
                 new EditMealTemplateModal(this.plugin, meal).open();
               });
           })

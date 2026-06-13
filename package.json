@@ -17,6 +17,9 @@
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
+	"standard-version": {
+		"tagPrefix": ""
+	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.0",
 		"@types/jest": "^29.5.14",
