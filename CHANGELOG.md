@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.1](https://github.com/JamesCliffordSpratt/macros/compare/v2.5.0...v2.5.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* prevent mobile redirect when opening meal template modals from settings ([5297fc3](https://github.com/JamesCliffordSpratt/macros/commit/5297fc30adb0b9969312abe780dd21d35bf3e221))
+* update release workflow to match v-prefixed tags ([4f85134](https://github.com/JamesCliffordSpratt/macros/commit/4f85134c6c22f10368a80dfb235ba9797e78303e))
+
 ## [2.5.0](https://github.com/JamesCliffordSpratt/macros/compare/v2.4.0...v2.5.0) (2026-06-12)
 
 
