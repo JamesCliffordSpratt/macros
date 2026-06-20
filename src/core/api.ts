@@ -1,6 +1,7 @@
 import { App, requestUrl } from 'obsidian';
 import * as CryptoJS from 'crypto-js';
 import { extractServingSize } from '../utils';
+import { toCanonicalMicronutrient } from '../utils/nutrition/micronutrients';
 /*
  * API Integration for Macros Plugin
  * -------------------------------------------
@@ -9,12 +10,34 @@ import { extractServingSize } from '../utils';
  *  - Constructs OAuth-signed requests using direct requestUrl method.
  *  - Fetches food data using user-provided search terms.
  *  - Filters and processes API responses to ensure valid serving sizes (in grams).
+ *  - Fetches detailed per-serving micronutrient data via food.get.v4.
  */
 
 export interface FoodItem {
+  food_id?: string;
   food_name: string;
   food_description: string;
 }
+
+/**
+ * Mapping of FatSecret serving micronutrient fields to canonical keys, with the
+ * unit FatSecret reports each field in. Values are converted into each
+ * nutrient's canonical unit (most already match).
+ */
+const FATSECRET_FIELD_TO_KEY: Record<string, { key: string; unit: string }> = {
+  vitamin_a: { key: 'vitamin_a', unit: 'µg' },
+  vitamin_c: { key: 'vitamin_c', unit: 'mg' },
+  vitamin_d: { key: 'vitamin_d', unit: 'µg' },
+  calcium: { key: 'calcium', unit: 'mg' },
+  iron: { key: 'iron', unit: 'mg' },
+  potassium: { key: 'potassium', unit: 'mg' },
+  sodium: { key: 'sodium', unit: 'mg' },
+  fiber: { key: 'fiber', unit: 'g' },
+  sugar: { key: 'sugar', unit: 'g' },
+  added_sugars: { key: 'added_sugar', unit: 'g' },
+  saturated_fat: { key: 'saturated_fat', unit: 'g' },
+  cholesterol: { key: 'cholesterol', unit: 'mg' },
+};
 
 export async function fetchFoodData(
   app: App,
@@ -109,4 +132,129 @@ export async function fetchFoodData(
 // Generate a random nonce string
 function generateNonce(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+/**
+ * Build an OAuth 1.0 (HMAC-SHA1) signed FatSecret REST URL for the given
+ * method-specific parameters.
+ */
+function buildSignedFatSecretUrl(
+  methodParams: Record<string, string>,
+  apiKey: string,
+  apiSecret: string
+): string {
+  const baseUrl = 'https://platform.fatsecret.com/rest/server.api';
+  const params: Record<string, string> = {
+    format: 'json',
+    ...methodParams,
+    oauth_consumer_key: apiKey,
+    oauth_nonce: generateNonce(),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_version: '1.0',
+  };
+
+  const sortedParamKeys = Object.keys(params).sort();
+  const paramString = sortedParamKeys
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+    .join('&');
+
+  const signatureBaseString = [
+    'GET',
+    encodeURIComponent(baseUrl),
+    encodeURIComponent(paramString),
+  ].join('&');
+
+  const signingKey = `${encodeURIComponent(apiSecret)}&`;
+  const signature = CryptoJS.HmacSHA1(signatureBaseString, signingKey).toString(
+    CryptoJS.enc.Base64
+  );
+
+  const urlParams = new URLSearchParams();
+  Object.entries({ ...params, oauth_signature: signature }).forEach(([key, value]) => {
+    urlParams.append(key, String(value));
+  });
+
+  return `${baseUrl}?${urlParams.toString()}`;
+}
+
+/**
+ * Result of a FatSecret detail lookup: canonical micronutrient amounts plus the
+ * grams the amounts correspond to (so callers can normalise to their own
+ * serving size).
+ */
+export interface FatSecretMicronutrients {
+  /** Grams of food the amounts below represent (e.g. 100). */
+  servingGrams: number;
+  /** Canonical micronutrient key -> amount in canonical unit. */
+  micronutrients: Record<string, number>;
+}
+
+/** Pick the most suitable gram-based serving for nutrient extraction. */
+function pickGramServing(servings: any[]): any | null {
+  const gramServings = servings.filter(
+    (s) => typeof s?.metric_serving_unit === 'string' && s.metric_serving_unit.toLowerCase() === 'g'
+  );
+  if (gramServings.length === 0) return null;
+
+  // Prefer an exact 100g serving for the cleanest per-100g values.
+  const hundred = gramServings.find((s) => parseFloat(s.metric_serving_amount) === 100);
+  return hundred || gramServings[0];
+}
+
+/**
+ * Fetch detailed micronutrient data for a single FatSecret food via
+ * `food.get.v4`, normalised to a 100g serving when possible.
+ *
+ * Returns `null` when the food has no gram-based serving or no recognised
+ * micronutrient fields (e.g. when the account tier does not expose them).
+ */
+export async function fetchFatSecretMicronutrients(
+  app: App,
+  foodId: string,
+  apiKey: string,
+  apiSecret: string
+): Promise<FatSecretMicronutrients | null> {
+  try {
+    const url = buildSignedFatSecretUrl(
+      { method: 'food.get.v4', food_id: foodId },
+      apiKey,
+      apiSecret
+    );
+
+    const response = await requestUrl({ url, method: 'GET' });
+    if (!response.json || response.json.error) return null;
+
+    const servingsNode = response.json.food?.servings?.serving;
+    if (!servingsNode) return null;
+
+    const servings: any[] = Array.isArray(servingsNode) ? servingsNode : [servingsNode];
+    const serving = pickGramServing(servings);
+    if (!serving) return null;
+
+    const metricAmount = parseFloat(serving.metric_serving_amount);
+    if (isNaN(metricAmount) || metricAmount <= 0) return null;
+
+    // Scale from the serving's metric amount to a 100g basis.
+    const scaleTo100g = 100 / metricAmount;
+
+    const micronutrients: Record<string, number> = {};
+    for (const [field, { key, unit }] of Object.entries(FATSECRET_FIELD_TO_KEY)) {
+      const raw = serving[field];
+      if (raw == null || raw === '') continue;
+      const value = parseFloat(raw);
+      if (isNaN(value)) continue;
+
+      const converted = toCanonicalMicronutrient(key, value * scaleTo100g, unit);
+      if (converted == null) continue;
+      micronutrients[key] = converted;
+    }
+
+    if (Object.keys(micronutrients).length === 0) return null;
+
+    return { servingGrams: 100, micronutrients };
+  } catch (error) {
+    console.error('Error fetching FatSecret micronutrients:', error);
+    return null;
+  }
 }

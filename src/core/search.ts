@@ -34,6 +34,7 @@ export interface UnifiedFoodResult {
   imageUrl?: string; // product image URL
   categories?: string; // food categories
   ingredients?: string; // ingredients list
+  micronutrients?: Record<string, number>; // canonical micronutrient amounts per 100g
   raw?: unknown; // optional raw payload for future drilldowns
 }
 
@@ -71,6 +72,7 @@ export async function searchOpenFoodFactsUnified(
       imageUrl: item.imageUrl,
       categories: item.categories,
       ingredients: item.ingredientsText,
+      micronutrients: item.micronutrients,
       raw: item,
     }));
   } catch (error) {
@@ -152,6 +154,7 @@ export async function searchUsda(
       isBranded: item.isBranded,
       isSrLegacy: item.isSrLegacy,
       dataType: item.dataType,
+      micronutrients: item.micronutrients,
       raw: item,
     }));
   } catch (error) {
@@ -303,7 +306,7 @@ export async function searchAllSources(
   // Prioritize USDA search for better Foundation Food discovery
   if (sources.usda?.enabled && sources.usda.apiKey) {
     searchPromises.push(
-      searchUsda(app, query, page, Math.ceil(pageSize * 0.4), sources.usda.apiKey) // 40% allocation
+      searchUsda(app, query, page, pageSize, sources.usda.apiKey) // full page; merged+deduped below
     );
   }
 
@@ -311,7 +314,7 @@ export async function searchAllSources(
   if (sources.openFoodFacts?.enabled !== false) {
     // Default to enabled
     searchPromises.push(
-      searchOpenFoodFactsUnified(app, query, page, Math.ceil(pageSize * 0.4), userLocale) // 40% allocation
+      searchOpenFoodFactsUnified(app, query, page, pageSize, userLocale) // full page; merged+deduped below
     );
   }
 
@@ -322,7 +325,7 @@ export async function searchAllSources(
         app,
         query,
         page,
-        Math.ceil(pageSize * 0.2), // 20% allocation
+        Math.ceil(pageSize * 0.5), // half page; merged+deduped below
         sources.fatSecret.apiKey,
         sources.fatSecret.apiSecret
       )
@@ -415,6 +418,7 @@ export async function searchOpenFoodFactsByCategory(
       imageUrl: item.imageUrl,
       categories: item.categories,
       ingredients: item.ingredientsText,
+      micronutrients: item.micronutrients,
       raw: item,
     }));
   } catch (error) {

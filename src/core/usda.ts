@@ -1,4 +1,57 @@
 import { App, requestUrl } from 'obsidian';
+import { toCanonicalMicronutrient } from '../utils/nutrition/micronutrients';
+
+/**
+ * Mapping of USDA FoodData Central nutrient numbers to the plugin's canonical
+ * micronutrient keys. Values are converted from the unit reported by the API
+ * (`unitName`) into each nutrient's canonical unit, so copper (reported in mg
+ * by USDA but tracked in µg here) and similar mismatches are handled
+ * automatically.
+ */
+const USDA_NUTRIENT_NUMBER_TO_KEY: Record<string, string> = {
+  // Vitamins
+  '320': 'vitamin_a', // Vitamin A, RAE (µg)
+  '401': 'vitamin_c', // Vitamin C (mg)
+  '328': 'vitamin_d', // Vitamin D (D2 + D3) (µg)
+  '323': 'vitamin_e', // Vitamin E (alpha-tocopherol) (mg)
+  '430': 'vitamin_k', // Vitamin K (phylloquinone) (µg)
+  '404': 'thiamin', // Thiamin (mg)
+  '405': 'riboflavin', // Riboflavin (mg)
+  '406': 'niacin', // Niacin (mg)
+  '415': 'vitamin_b6', // Vitamin B-6 (mg)
+  '435': 'folate', // Folate, DFE (µg)
+  '417': 'folate', // Folate, total (µg) — fallback
+  '418': 'vitamin_b12', // Vitamin B-12 (µg)
+  '410': 'pantothenic_acid', // Pantothenic acid (mg)
+  '416': 'biotin', // Biotin (µg)
+  '421': 'choline', // Choline, total (mg)
+  // Minerals
+  '301': 'calcium', // Calcium (mg)
+  '303': 'iron', // Iron (mg)
+  '304': 'magnesium', // Magnesium (mg)
+  '305': 'phosphorus', // Phosphorus (mg)
+  '306': 'potassium', // Potassium (mg)
+  '307': 'sodium', // Sodium (mg)
+  '309': 'zinc', // Zinc (mg)
+  '312': 'copper', // Copper (mg) -> converted to µg
+  '315': 'manganese', // Manganese (mg)
+  '317': 'selenium', // Selenium (µg)
+  '314': 'iodine', // Iodine (µg)
+  // Other tracked nutrients
+  '291': 'fiber', // Fiber, total dietary (g)
+  '269': 'sugar', // Total sugars (g)
+  '539': 'added_sugar', // Added sugars (g)
+  '606': 'saturated_fat', // Fatty acids, total saturated (g)
+  '601': 'cholesterol', // Cholesterol (mg)
+};
+
+/**
+ * Nutrient numbers for which a more specific source should win when both are
+ * present in a single food (e.g. Folate DFE 435 preferred over total 417).
+ */
+const USDA_KEY_PREFERRED_NUMBER: Record<string, string> = {
+  folate: '435',
+};
 
 /**
  * USDA FoodData Central API Integration - Enhanced Version
@@ -23,6 +76,8 @@ export interface UsdaFoodResult {
   isFoundation: boolean;
   isBranded: boolean;
   isSrLegacy: boolean;
+  /** Canonical micronutrient amounts per 100g (key -> amount in canonical unit). */
+  micronutrients?: Record<string, number>;
 }
 
 interface UsdaApiResponse {
@@ -86,99 +141,50 @@ export async function searchFoods(
     // Strategy: Search Foundation foods first, then supplement with others
     const searchQuery = query.trim();
 
-    const allResults: UsdaFoodResult[] = [];
-
-    // Step 1: Search Foundation foods first
-    const foundationBody = {
+    const buildBody = (dataType: string, size: number) => ({
       query: searchQuery,
-      dataType: ['Foundation'],
-      pageSize: Math.min(pageSize, 50),
+      dataType: [dataType],
+      pageSize: Math.min(size, 50),
       pageNumber: page,
       requireAllWords: false,
-    };
-
-    const foundationResponse = await requestUrl({
-      url: `${baseUrl}?api_key=${apiKey}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(foundationBody),
     });
 
-    if (foundationResponse.json && foundationResponse.status === 200) {
-      const foundationData = foundationResponse.json as UsdaApiResponse;
-
-      if (foundationData.foods && foundationData.foods.length > 0) {
-        const foundationResults = foundationData.foods
-          .map((food) => processFoodItem(food))
-          .filter((food) => food !== null) as UsdaFoodResult[];
-        allResults.push(...foundationResults);
-      }
-    }
-
-    // Step 2: If we don't have enough results, search SR Legacy
-    const remainingSpace = pageSize - allResults.length;
-    if (remainingSpace > 0) {
-      const srLegacyBody = {
-        query: searchQuery,
-        dataType: ['SR Legacy'],
-        pageSize: Math.min(remainingSpace, 25),
-        pageNumber: page,
-        requireAllWords: false,
-      };
-
-      const srResponse = await requestUrl({
-        url: `${baseUrl}?api_key=${apiKey}`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(srLegacyBody),
-      });
-
-      if (srResponse.json && srResponse.status === 200) {
-        const srData = srResponse.json as UsdaApiResponse;
-
-        if (srData.foods && srData.foods.length > 0) {
-          const srResults = srData.foods
-            .map((food) => processFoodItem(food))
-            .filter((food) => food !== null) as UsdaFoodResult[];
-          allResults.push(...srResults);
+    const fetchType = async (dataType: string, size: number): Promise<UsdaFoodResult[]> => {
+      try {
+        const response = await requestUrl({
+          url: `${baseUrl}?api_key=${apiKey}`,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildBody(dataType, size)),
+        });
+        if (response.json && response.status === 200) {
+          const data = response.json as UsdaApiResponse;
+          if (data.foods && data.foods.length > 0) {
+            return data.foods
+              .map((food) => processFoodItem(food))
+              .filter((food) => food !== null) as UsdaFoodResult[];
+          }
         }
+      } catch (typeError) {
+        // Ignore individual data-type failures; other types may still succeed.
       }
-    }
+      return [];
+    };
 
-    // Step 3: If we still don't have enough results, search Branded foods
-    const finalRemainingSpace = pageSize - allResults.length;
-    if (finalRemainingSpace > 0) {
-      const brandedBody = {
-        query: searchQuery,
-        dataType: ['Branded'],
-        pageSize: Math.min(finalRemainingSpace, 25),
-        pageNumber: page,
-        requireAllWords: false,
-      };
+    // Fetch all data types concurrently for speed, then combine in priority
+    // order (Foundation > SR Legacy > Branded) and de-duplicate by fdcId.
+    const [foundation, srLegacy, branded] = await Promise.all([
+      fetchType('Foundation', Math.min(pageSize, 50)),
+      fetchType('SR Legacy', Math.min(pageSize, 25)),
+      fetchType('Branded', Math.min(pageSize, 25)),
+    ]);
 
-      const brandedResponse = await requestUrl({
-        url: `${baseUrl}?api_key=${apiKey}`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(brandedBody),
-      });
-
-      if (brandedResponse.json && brandedResponse.status === 200) {
-        const brandedData = brandedResponse.json as UsdaApiResponse;
-
-        if (brandedData.foods && brandedData.foods.length > 0) {
-          const brandedResults = brandedData.foods
-            .map((food) => processFoodItem(food))
-            .filter((food) => food !== null) as UsdaFoodResult[];
-          allResults.push(...brandedResults);
-        }
-      }
+    const seen = new Set<number>();
+    const allResults: UsdaFoodResult[] = [];
+    for (const item of [...foundation, ...srLegacy, ...branded]) {
+      if (seen.has(item.fdcId)) continue;
+      seen.add(item.fdcId);
+      allResults.push(item);
     }
 
     return allResults.slice(0, pageSize);
@@ -215,10 +221,72 @@ function processFoodItem(food: UsdaFood): UsdaFoodResult | null {
       isFoundation,
       isBranded,
       isSrLegacy,
+      micronutrients: extractUsdaMicronutrients(food),
     };
   } catch (error) {
     return null;
   }
+}
+
+/**
+ * Compute the factor needed to express a food's nutrient values per 100g.
+ * Foundation and SR Legacy foods are already per 100g; branded foods may use a
+ * label serving size and are scaled accordingly. Mirrors the logic used by
+ * `createDisplayDescription` so macros and micronutrients stay consistent.
+ */
+function getUsdaPer100gScaleFactor(food: UsdaFood): number {
+  if (food.dataType === 'Branded' && food.servingSize && food.servingSizeUnit) {
+    const servingGrams = convertToGrams(food.servingSize, food.servingSizeUnit);
+    if (servingGrams && servingGrams > 0 && servingGrams !== 100) {
+      return 100 / servingGrams;
+    }
+  }
+  return 1;
+}
+
+/**
+ * Extract canonical micronutrient amounts (per 100g) from a USDA food's
+ * detailed `foodNutrients` list.
+ */
+function extractUsdaMicronutrients(food: UsdaFood): Record<string, number> | undefined {
+  if (!Array.isArray(food.foodNutrients) || food.foodNutrients.length === 0) {
+    return undefined;
+  }
+
+  const scaleFactor = getUsdaPer100gScaleFactor(food);
+  const result: Record<string, number> = {};
+  // Track which USDA nutrient number populated each key so a preferred source
+  // (e.g. Folate DFE) can override a less specific one (Folate total).
+  const sourceNumber: Record<string, string> = {};
+
+  for (const nutrient of food.foodNutrients) {
+    const key = USDA_NUTRIENT_NUMBER_TO_KEY[nutrient.nutrientNumber];
+    if (!key) continue;
+    if (nutrient.value == null || !Number.isFinite(nutrient.value)) continue;
+
+    // Respect preferred-number resolution for keys with multiple sources.
+    const preferred = USDA_KEY_PREFERRED_NUMBER[key];
+    if (result[key] != null) {
+      if (preferred && sourceNumber[key] === preferred && nutrient.nutrientNumber !== preferred) {
+        continue; // already have the preferred source
+      }
+      if (preferred && nutrient.nutrientNumber !== preferred) {
+        continue; // keep first / preferred
+      }
+    }
+
+    const converted = toCanonicalMicronutrient(
+      key,
+      nutrient.value * scaleFactor,
+      nutrient.unitName || ''
+    );
+    if (converted == null) continue;
+
+    result[key] = converted;
+    sourceNumber[key] = nutrient.nutrientNumber;
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**

@@ -365,6 +365,7 @@ export const esTranslations: LocaleData = {
       noResults: 'No se encontraron resultados. Prueba con un término diferente.',
       searching: 'Buscando...',
       results: 'Resultados para "{searchTerm}" (Página {page})',
+      micronutrients: 'Micronutrientes (por {grams}g)',
       tabs: {
         all: 'Todos',
         fatsecret: 'FatSecret',

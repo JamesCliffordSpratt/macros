@@ -6,6 +6,53 @@
  */
 
 import { App, requestUrl } from 'obsidian';
+import { toCanonicalMicronutrient } from '../utils/nutrition/micronutrients';
+
+/**
+ * Mapping of Open Food Facts nutriment base names to the plugin's canonical
+ * micronutrient keys. OFF reports every `_100g` value in grams (the SI base
+ * unit), so each value is converted from grams into the nutrient's canonical
+ * unit. Niacin uses OFF's `vitamin-pp` key; folate maps from both `vitamin-b9`
+ * and `folates`.
+ */
+const OFF_NUTRIMENT_TO_KEY: Record<string, string> = {
+  // Vitamins
+  'vitamin-a': 'vitamin_a',
+  'vitamin-c': 'vitamin_c',
+  'vitamin-d': 'vitamin_d',
+  'vitamin-e': 'vitamin_e',
+  'vitamin-k': 'vitamin_k',
+  'vitamin-b1': 'thiamin',
+  'vitamin-b2': 'riboflavin',
+  'vitamin-pp': 'niacin',
+  'vitamin-b6': 'vitamin_b6',
+  'vitamin-b9': 'folate',
+  folates: 'folate',
+  'vitamin-b12': 'vitamin_b12',
+  'pantothenic-acid': 'pantothenic_acid',
+  biotin: 'biotin',
+  choline: 'choline',
+  // Minerals
+  calcium: 'calcium',
+  iron: 'iron',
+  magnesium: 'magnesium',
+  phosphorus: 'phosphorus',
+  potassium: 'potassium',
+  sodium: 'sodium',
+  zinc: 'zinc',
+  copper: 'copper',
+  manganese: 'manganese',
+  selenium: 'selenium',
+  iodine: 'iodine',
+  chromium: 'chromium',
+  molybdenum: 'molybdenum',
+  // Other tracked nutrients
+  fiber: 'fiber',
+  sugars: 'sugar',
+  'added-sugars': 'added_sugar',
+  'saturated-fat': 'saturated_fat',
+  cholesterol: 'cholesterol',
+};
 
 export interface OffProduct {
   code: string; // barcode/product ID
@@ -24,6 +71,8 @@ export interface OffProduct {
     fiber_100g?: number;
     salt_100g?: number;
     sodium_100g?: number;
+    // Vitamin / mineral fields (per 100g, reported in grams by OFF).
+    [key: string]: number | undefined;
   };
   // Multi-language fields
   product_name_en?: string;
@@ -106,8 +155,38 @@ export interface OffFoodResult {
   // Metadata
   imageUrl?: string;
   dataQuality: 'high' | 'medium' | 'low';
+  // Canonical micronutrient amounts per 100g (key -> amount in canonical unit).
+  micronutrients?: Record<string, number>;
   // Source identifier
   source: 'openfoodfacts';
+}
+
+/**
+ * Extract canonical micronutrient amounts (per 100g) from an OFF product's
+ * nutriments. All OFF `_100g` values are reported in grams.
+ */
+function extractOffMicronutrients(
+  nutriments: OffProduct['nutriments']
+): Record<string, number> | undefined {
+  if (!nutriments) return undefined;
+
+  const result: Record<string, number> = {};
+
+  for (const [base, key] of Object.entries(OFF_NUTRIMENT_TO_KEY)) {
+    // Prefer the *_100g field; OFF normalises these to grams.
+    const value = nutriments[`${base}_100g`];
+    if (value == null || !Number.isFinite(value)) continue;
+
+    // Don't let a fallback source (e.g. `folates`) overwrite a primary one.
+    if (result[key] != null) continue;
+
+    const converted = toCanonicalMicronutrient(key, value, 'g');
+    if (converted == null) continue;
+
+    result[key] = converted;
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**
@@ -277,6 +356,7 @@ function processOffProduct(product: OffProduct, userLocale = 'en'): OffFoodResul
       ecoscore: product.ecoscore_grade,
       imageUrl: product.image_small_url || product.image_thumb_url,
       dataQuality,
+      micronutrients: extractOffMicronutrients(nutriments),
       source: 'openfoodfacts' as const,
     };
   } catch (error) {
@@ -396,88 +476,85 @@ async function searchOpenFoodFactsCGI(
   pageSize: number,
   languageCode = 'en'
 ): Promise<OffFoodResult[]> {
+  // Open Food Facts instances, ordered by coverage. The primary (world)
+  // instance usually satisfies the request on its own; the regional instances
+  // are only used as a parallel fallback when more results are needed, so the
+  // common case is a single request rather than a sequential chain.
+  const instances = [
+    'https://world.openfoodfacts.org',
+    'https://us.openfoodfacts.org', // United States
+    'https://fr.openfoodfacts.org', // France - many European products
+    'https://uk.openfoodfacts.org', // United Kingdom
+    'https://ci.openfoodfacts.org', // Côte d'Ivoire - African/Middle Eastern products
+  ];
+
+  const fetchInstance = async (baseInstance: string): Promise<OffFoodResult[]> => {
+    try {
+      const searchParams = new URLSearchParams({
+        search_terms: query.trim(),
+        search_simple: '1',
+        action: 'process',
+        json: '1',
+        page_size: Math.min(pageSize, 24).toString(), // OFF CGI max is 24
+        page: (page + 1).toString(), // OFF uses 1-based page numbers
+      });
+      if (languageCode !== 'en') {
+        searchParams.append('lc', languageCode);
+      }
+
+      const response = await requestUrl({
+        url: `${baseInstance}/cgi/search.pl?${searchParams.toString()}`,
+        method: 'GET',
+        headers: {
+          'User-Agent': 'ObsidianMacrosPlugin/1.0 (Nutrition tracking for Obsidian)',
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.json || response.status !== 200) return [];
+
+      const data = response.json;
+      let products: OffProduct[] = [];
+      if (data.products && Array.isArray(data.products)) {
+        products = data.products;
+      } else if (Array.isArray(data)) {
+        products = data;
+      } else {
+        return [];
+      }
+
+      const out: OffFoodResult[] = [];
+      for (const product of products) {
+        const processed = processOffProduct(product, languageCode);
+        if (processed) out.push(processed);
+      }
+      return out;
+    } catch (instanceError) {
+      return [];
+    }
+  };
+
   try {
-    // Try multiple Open Food Facts instances for better coverage
-    const instances = [
-      'https://world.openfoodfacts.org',
-      'https://ci.openfoodfacts.org', // Côte d'Ivoire - has many African/Middle Eastern products
-      'https://fr.openfoodfacts.org', // France - has many European products
-      'https://us.openfoodfacts.org', // United States
-      'https://uk.openfoodfacts.org', // United Kingdom
-    ];
+    const merged = new Map<string, OffFoodResult>();
 
-    const allResults: OffFoodResult[] = [];
+    // Query the primary instance first - this alone is usually enough.
+    for (const result of await fetchInstance(instances[0])) {
+      if (!merged.has(result.code)) merged.set(result.code, result);
+    }
 
-    for (const baseInstance of instances) {
-      try {
-        const baseUrl = `${baseInstance}/cgi/search.pl`;
-
-        const searchParams = new URLSearchParams({
-          search_terms: query.trim(),
-          search_simple: '1',
-          action: 'process',
-          json: '1',
-          page_size: Math.min(pageSize, 24).toString(), // OFF CGI max is 24
-          page: (page + 1).toString(), // OFF uses 1-based page numbers
-        });
-
-        // Add language preference if not English
-        if (languageCode !== 'en') {
-          searchParams.append('lc', languageCode);
+    // Only fan out to the regional instances (in parallel) if we still need more.
+    if (merged.size < pageSize) {
+      const fallbackBatches = await Promise.all(instances.slice(1).map(fetchInstance));
+      for (const batch of fallbackBatches) {
+        for (const result of batch) {
+          if (!merged.has(result.code)) merged.set(result.code, result);
         }
-
-        const url = `${baseUrl}?${searchParams.toString()}`;
-
-        const response = await requestUrl({
-          url,
-          method: 'GET',
-          headers: {
-            'User-Agent': 'ObsidianMacrosPlugin/1.0 (Nutrition tracking for Obsidian)',
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.json || response.status !== 200) {
-          continue; // Try next instance
-        }
-
-        const data = response.json;
-
-        // Handle different possible response structures
-        let products: OffProduct[] = [];
-
-        if (data.products && Array.isArray(data.products)) {
-          products = data.products;
-        } else if (Array.isArray(data)) {
-          products = data;
-        } else {
-          continue; // Try next instance
-        }
-
-        // Process and filter products
-        for (const product of products) {
-          const processed = processOffProduct(product, languageCode);
-          if (processed) {
-            // Check if we already have this product (avoid duplicates across instances)
-            const existingProduct = allResults.find((result) => result.code === processed.code);
-            if (!existingProduct) {
-              allResults.push(processed);
-            }
-          }
-        }
-
-        // If we found results, we can continue to try other instances for more comprehensive results
-        // But limit the total results to avoid too many API calls
-        if (allResults.length >= pageSize) {
-          break;
-        }
-      } catch (instanceError) {
-        continue; // Try next instance
+        if (merged.size >= pageSize) break;
       }
     }
 
-    return allResults.slice(0, pageSize);
+    return Array.from(merged.values()).slice(0, pageSize);
   } catch (error) {
     return [];
   }

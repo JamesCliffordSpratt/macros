@@ -1,6 +1,12 @@
 import { TFolder, TFile, normalizePath } from 'obsidian';
 import MacrosPlugin from '../main';
 import { processNutritionalData } from '../utils/nutritionUtils';
+import { fetchFatSecretMicronutrients } from '../core/api';
+import {
+  MICRONUTRIENT_KEYS,
+  MICRONUTRIENT_MAP,
+  formatMicroAmount,
+} from '../utils/nutrition/micronutrients';
 
 // Constant used for interactive lines in macros blocks.
 const INTERACTIVE_PREFIX = 'interactive:';
@@ -356,6 +362,54 @@ export class DataManager {
           throw new Error('Food name is missing');
         }
 
+        // ---- Resolve micronutrients ----------------------------------------
+        // USDA and Open Food Facts attach canonical micronutrients (per 100g)
+        // directly to the unified result. FatSecret only returns macros from
+        // search, so fetch detailed per-serving data on demand via food.get.v4.
+        let micronutrients: Record<string, number> = {};
+        if (selectedFood.micronutrients && typeof selectedFood.micronutrients === 'object') {
+          micronutrients = { ...selectedFood.micronutrients };
+        }
+
+        if (Object.keys(micronutrients).length === 0 && additionalMetadata.source === 'fatsecret') {
+          const foodId: string | undefined = selectedFood.raw?.food_id || selectedFood.food_id;
+          const fsKey = this.plugin.settings.fatSecretApiKey?.trim();
+          const fsSecret = this.plugin.settings.fatSecretApiSecret?.trim();
+          if (foodId && fsKey && fsSecret) {
+            try {
+              const fsMicros = await fetchFatSecretMicronutrients(
+                this.plugin.app,
+                String(foodId),
+                fsKey,
+                fsSecret
+              );
+              if (fsMicros) {
+                micronutrients = fsMicros.micronutrients;
+              }
+            } catch (microErr) {
+              this.plugin.logger.error('Error fetching FatSecret micronutrients:', microErr);
+            }
+          }
+        }
+
+        // Source micronutrients are expressed per 100g; rescale to the serving
+        // size actually stored in the note so they match the macros and the
+        // scaling done by extractMicronutrients().
+        const storedServingGrams = parseFloat(String(servingSize));
+        if (
+          Object.keys(micronutrients).length > 0 &&
+          Number.isFinite(storedServingGrams) &&
+          storedServingGrams > 0 &&
+          storedServingGrams !== 100
+        ) {
+          const microScale = storedServingGrams / 100;
+          const rescaled: Record<string, number> = {};
+          for (const [k, v] of Object.entries(micronutrients)) {
+            rescaled[k] = v * microScale;
+          }
+          micronutrients = rescaled;
+        }
+
         // Create safe filename for file operations
         const safeFileName = this.createSafeFileName(foodName);
         const fileName = `${safeFileName}.md`;
@@ -377,6 +431,14 @@ serving_size: ${servingSize}`;
         }
         if (nutritionalData.salt) {
           frontmatter += `\nsalt: ${nutritionalData.salt}`;
+        }
+
+        // Add micronutrient keys (vitamins, minerals, other tracked nutrients).
+        // These use the same canonical keys read back by extractMicronutrients().
+        for (const key of MICRONUTRIENT_KEYS) {
+          const value = micronutrients[key];
+          if (value == null || !Number.isFinite(value) || value === 0) continue;
+          frontmatter += `\n${key}: ${formatMicroAmount(value)}`;
         }
 
         // Add source-specific metadata
@@ -479,6 +541,25 @@ serving_size: ${servingSize}`;
         }
         if (nutritionalData.salt) {
           frontmatter += `\n- **Salt:** ${nutritionalData.salt}g`;
+        }
+
+        // Add a readable micronutrient breakdown if any were resolved.
+        const microKeysPresent = MICRONUTRIENT_KEYS.filter(
+          (k) =>
+            micronutrients[k] != null &&
+            Number.isFinite(micronutrients[k]) &&
+            micronutrients[k] !== 0
+        );
+        if (microKeysPresent.length > 0) {
+          frontmatter += `
+
+## Micronutrients (per ${servingSize})`;
+          for (const key of microKeysPresent) {
+            const def = MICRONUTRIENT_MAP[key];
+            const label = def ? def.label : key;
+            const unit = def ? def.unit : '';
+            frontmatter += `\n- **${label}:** ${formatMicroAmount(micronutrients[key])}${unit}`;
+          }
         }
 
         // Add ingredients if available

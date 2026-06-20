@@ -329,6 +329,7 @@ export const zhCNTranslations: LocaleData = {
       noResults: '未找到结果，请尝试其他关键词。',
       searching: '搜索中...',
       results: '"{searchTerm}" 的结果（共 {page} 页）',
+      micronutrients: '微量营养素（每 {grams}克）',
       tabs: {
         all: '全部',
         fatsecret: 'FatSecret',

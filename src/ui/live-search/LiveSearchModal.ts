@@ -12,6 +12,12 @@ import {
   generateSearchVariants,
   FoodDoc,
 } from '../../core/fuseSearch';
+import {
+  MICRONUTRIENT_KEYS,
+  MICRONUTRIENT_MAP,
+  formatMicroAmount,
+} from '../../utils/nutrition/micronutrients';
+import { fetchFatSecretMicronutrients } from '../../core/api';
 
 type SearchTab =
   | 'all'
@@ -45,6 +51,11 @@ export class LiveFoodSearchModal extends Modal {
   private scrollHandler?: (event: Event) => void;
   private currentSearchAbortController: AbortController | null = null;
   private isBarcodeSearch = false; // Track if current search is from barcode
+  // Cache of fetched results keyed by tab+query so re-visiting a tab is instant.
+  private resultCache: Map<
+    string,
+    { results: UnifiedFoodResult[]; page: number; hasMore: boolean }
+  > = new Map();
 
   // Tab elements
   private allTab?: HTMLElement;
@@ -234,6 +245,38 @@ export class LiveFoodSearchModal extends Modal {
     }
   }
 
+  private getCacheKey(searchTerm: string): string {
+    return `${this.currentTab}::${searchTerm.toLowerCase()}`;
+  }
+
+  private storeResultsInCache(searchTerm: string): void {
+    if (!searchTerm) return;
+    this.resultCache.set(this.getCacheKey(searchTerm), {
+      results: this.allResults.slice(),
+      page: this.currentPage,
+      hasMore: this.hasMoreResults,
+    });
+  }
+
+  private restoreResultsFromCache(searchTerm: string): boolean {
+    const cached = this.resultCache.get(this.getCacheKey(searchTerm));
+    if (!cached || cached.results.length === 0) return false;
+
+    this.allResults = cached.results.slice();
+    this.results = this.allResults;
+    this.currentPage = cached.page;
+    this.hasMoreResults = cached.hasMore;
+    this.isBarcodeSearch = false;
+
+    // Rebuild the Fuse index for this tab so subsequent keystrokes filter locally.
+    const foodDocs: FoodDoc[] = this.allResults.map(unifiedResultToFoodDoc);
+    buildFuseIndex(this.currentTab, foodDocs);
+
+    this.loadingIndicator.classList.add('is-hidden');
+    this.renderResults(searchTerm);
+    return true;
+  }
+
   private switchTab(tab: SearchTab): void {
     if (tab === this.currentTab) return;
 
@@ -250,9 +293,14 @@ export class LiveFoodSearchModal extends Modal {
     // Re-run search with current query if there is one
     const currentQuery = this.searchInput.value.trim();
     if (currentQuery) {
+      // Cancel any in-flight search so it can't overwrite this tab's results.
+      if (this.currentSearchAbortController) {
+        this.currentSearchAbortController.abort();
+        this.currentSearchAbortController = null;
+      }
       if (this.isBarcodeSearch) {
         this.performBarcodeSearch(currentQuery);
-      } else {
+      } else if (!this.restoreResultsFromCache(currentQuery)) {
         this.performSearch(currentQuery);
       }
     }
@@ -623,7 +671,7 @@ export class LiveFoodSearchModal extends Modal {
 
       this.allResults = newResults;
       this.results = newResults;
-      this.hasMoreResults = newResults.length === this.maxResults;
+      this.hasMoreResults = newResults.length > 0;
 
       // Build Fuse index for the results
       if (newResults.length > 0) {
@@ -633,6 +681,7 @@ export class LiveFoodSearchModal extends Modal {
 
       this.loadingIndicator.classList.add('is-hidden');
       this.renderResults(requestSearchTerm);
+      this.storeResultsInCache(requestSearchTerm);
 
       // Ensure search input maintains focus after results are rendered
       setTimeout(() => {
@@ -723,6 +772,7 @@ export class LiveFoodSearchModal extends Modal {
             imageUrl: item.imageUrl,
             categories: item.categories,
             ingredients: item.ingredientsText,
+            micronutrients: item.micronutrients,
             raw: item,
           }));
 
@@ -772,6 +822,7 @@ export class LiveFoodSearchModal extends Modal {
             isBranded: item.isBranded,
             isSrLegacy: item.isSrLegacy,
             dataType: item.dataType,
+            micronutrients: item.micronutrients,
             raw: item,
           }));
       }
@@ -798,6 +849,7 @@ export class LiveFoodSearchModal extends Modal {
             isBranded: item.isBranded,
             isSrLegacy: item.isSrLegacy,
             dataType: item.dataType,
+            micronutrients: item.micronutrients,
             raw: item,
           }));
       }
@@ -888,6 +940,40 @@ export class LiveFoodSearchModal extends Modal {
 
   escapeRegExp(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\');
+  }
+
+  /**
+   * Render a compact micronutrient summary for a result, when the food carries
+   * per-100g micronutrient data. Foods whose source has no recorded
+   * micronutrients (e.g. many Open Food Facts entries, or FatSecret results
+   * before the food is selected) simply render nothing.
+   */
+  private renderMicronutrientSummary(container: HTMLElement, food: UnifiedFoodResult) {
+    const micros = food.micronutrients;
+    if (!micros) return;
+
+    const presentKeys = MICRONUTRIENT_KEYS.filter(
+      (key) => micros[key] != null && Number.isFinite(micros[key]) && micros[key] !== 0
+    );
+    if (presentKeys.length === 0) return;
+
+    const grams = food.gramsServing || 100;
+    const microsDiv = container.createDiv({ cls: 'food-result-micros' });
+    microsDiv.createSpan({
+      cls: 'food-result-micros-label',
+      text: t('food.search.micronutrients', { grams: String(grams) }),
+    });
+
+    const chipsWrap = microsDiv.createDiv({ cls: 'food-result-micros-chips' });
+    for (const key of presentKeys) {
+      const def = MICRONUTRIENT_MAP[key];
+      const label = def ? def.label : key;
+      const unit = def ? def.unit : '';
+      chipsWrap.createSpan({
+        cls: 'food-result-micro-chip',
+        text: `${label} ${formatMicroAmount(micros[key])}${unit}`,
+      });
+    }
   }
 
   renderResults(searchTerm: string) {
@@ -1030,6 +1116,10 @@ export class LiveFoodSearchModal extends Modal {
         cls: 'food-result-description',
         text: food.description,
       });
+
+      // Micronutrient summary (only for foods whose source provided per-100g
+      // micronutrient data; many database entries have none recorded).
+      this.renderMicronutrientSummary(contentDiv, food);
 
       // Add product image for Open Food Facts if available
       if (food.source === 'openfoodfacts' && food.imageUrl) {
@@ -1201,6 +1291,45 @@ export class LiveFoodSearchModal extends Modal {
 
     const servingSize = food.gramsServing || 100;
 
+    // Resolve micronutrients for this food. USDA and Open Food Facts attach
+    // canonical per-100g data to the search result; FatSecret only exposes it
+    // via a detail lookup, so fetch it on demand here.
+    let micronutrients: Record<string, number> = {};
+    if (food.micronutrients && typeof food.micronutrients === 'object') {
+      micronutrients = { ...food.micronutrients };
+    }
+    if (
+      Object.keys(micronutrients).length === 0 &&
+      food.source === 'fatsecret' &&
+      food.raw &&
+      typeof food.raw === 'object'
+    ) {
+      const foodId = (food.raw as Record<string, unknown>).food_id;
+      const fsKey = this.plugin.settings.fatSecretApiKey?.trim();
+      const fsSecret = this.plugin.settings.fatSecretApiSecret?.trim();
+      if (foodId && fsKey && fsSecret) {
+        try {
+          const fsMicros = await fetchFatSecretMicronutrients(
+            this.app,
+            String(foodId),
+            fsKey,
+            fsSecret
+          );
+          if (fsMicros) micronutrients = fsMicros.micronutrients;
+        } catch (microErr) {
+          this.plugin.logger.error('Error fetching FatSecret micronutrients:', microErr);
+        }
+      }
+    }
+    // Source values are per 100g; rescale to the stored serving size so they
+    // match the macros and the scaling done by extractMicronutrients().
+    if (Object.keys(micronutrients).length > 0 && servingSize !== 100) {
+      const microScale = servingSize / 100;
+      const rescaled: Record<string, number> = {};
+      for (const [k, v] of Object.entries(micronutrients)) rescaled[k] = v * microScale;
+      micronutrients = rescaled;
+    }
+
     // Create the markdown content
     const fdcId =
       food.source === 'usda' && food.raw && typeof food.raw === 'object' && 'fdcId' in food.raw
@@ -1238,6 +1367,13 @@ source: ${food.source}`;
     if (food.novaGroup) frontmatter += `\nnova_group: ${food.novaGroup}`;
     if (food.dataQuality) frontmatter += `\ndata_quality: ${food.dataQuality}`;
 
+    // Add micronutrient keys (read back by extractMicronutrients()).
+    for (const microKey of MICRONUTRIENT_KEYS) {
+      const microValue = micronutrients[microKey];
+      if (microValue == null || !Number.isFinite(microValue) || microValue === 0) continue;
+      frontmatter += `\n${microKey}: ${formatMicroAmount(microValue)}`;
+    }
+
     frontmatter += `\ncreated: ${new Date().toISOString()}
 ---
 
@@ -1254,6 +1390,21 @@ ${food.description}
     if (fiber) frontmatter += `\n- **Fiber:** ${fiber}g`;
     if (sugars) frontmatter += `\n- **Sugars:** ${sugars}g`;
     if (salt) frontmatter += `\n- **Salt:** ${salt}g`;
+
+    // Readable micronutrient breakdown for any nutrients that were resolved.
+    const microKeysPresent = MICRONUTRIENT_KEYS.filter(
+      (k) =>
+        micronutrients[k] != null && Number.isFinite(micronutrients[k]) && micronutrients[k] !== 0
+    );
+    if (microKeysPresent.length > 0) {
+      frontmatter += `\n\n## Micronutrients (per ${servingSize}g)`;
+      for (const microKey of microKeysPresent) {
+        const def = MICRONUTRIENT_MAP[microKey];
+        const microLabel = def ? def.label : microKey;
+        const microUnit = def ? def.unit : '';
+        frontmatter += `\n- **${microLabel}:** ${formatMicroAmount(micronutrients[microKey])}${microUnit}`;
+      }
+    }
 
     let sourceText = '';
     if (food.source === 'usda') {
@@ -1396,6 +1547,7 @@ ${food.description}
             imageUrl: item.imageUrl,
             categories: item.categories,
             ingredients: item.ingredientsText,
+            micronutrients: item.micronutrients,
             raw: item,
           }));
         }
@@ -1426,6 +1578,7 @@ ${food.description}
               isBranded: item.isBranded,
               isSrLegacy: item.isSrLegacy,
               dataType: item.dataType,
+              micronutrients: item.micronutrients,
               raw: item,
             }));
         }
@@ -1452,6 +1605,7 @@ ${food.description}
               isBranded: item.isBranded,
               isSrLegacy: item.isSrLegacy,
               dataType: item.dataType,
+              micronutrients: item.micronutrients,
               raw: item,
             }));
         }
@@ -1519,7 +1673,7 @@ ${food.description}
         if (uniqueNewResults.length > 0) {
           this.allResults.push(...uniqueNewResults);
           this.results = this.allResults;
-          this.hasMoreResults = newResults.length === this.maxResults;
+          this.hasMoreResults = newResults.length > 0;
 
           // Update Fuse index with new results
           const allFoodDocs: FoodDoc[] = this.allResults.map(unifiedResultToFoodDoc);
@@ -1527,6 +1681,7 @@ ${food.description}
 
           // Re-render with new results
           this.renderResults(searchTerm);
+          this.storeResultsInCache(searchTerm);
         } else {
           // No new unique results, stop pagination
           this.hasMoreResults = false;

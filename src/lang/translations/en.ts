@@ -353,6 +353,7 @@ export const enTranslations: LocaleData = {
       noResults: 'No results found. Try a different search term.',
       searching: 'Searching...',
       results: 'Results for "{searchTerm}" (Page {page})',
+      micronutrients: 'Micronutrients (per {grams}g)',
       tabs: {
         all: 'All',
         fatsecret: 'FatSecret',

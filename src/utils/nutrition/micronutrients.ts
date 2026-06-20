@@ -948,6 +948,71 @@ export function extractMicronutrients(
 }
 
 /**
+ * Mass-unit conversion factors expressed in grams.
+ * Used to normalise micronutrient amounts returned by the various food APIs
+ * (which report in g / mg / µg) into the canonical unit each nutrient is
+ * tracked in (see `MicronutrientDef.unit`).
+ */
+const MASS_UNIT_TO_GRAMS: Record<string, number> = {
+  g: 1,
+  gram: 1,
+  grams: 1,
+  mg: 1e-3,
+  milligram: 1e-3,
+  milligrams: 1e-3,
+  // Micrograms: both the MICRO SIGN (U+00B5) and GREEK MU (U+03BC) spellings,
+  // plus the ASCII fallbacks used by various APIs (USDA reports "UG").
+  µg: 1e-6,
+  μg: 1e-6,
+  ug: 1e-6,
+  mcg: 1e-6,
+  microgram: 1e-6,
+  micrograms: 1e-6,
+};
+
+/**
+ * Normalise a unit string for table lookup (trim + lower-case).
+ */
+function normalizeUnit(unit: string): string {
+  return unit.trim().toLowerCase();
+}
+
+/**
+ * Convert a nutrient amount between mass units (g / mg / µg).
+ *
+ * Returns `null` when either unit is not a recognised mass unit (e.g. `IU`),
+ * so callers can skip values they cannot safely normalise.
+ */
+export function convertNutrientAmount(
+  value: number,
+  fromUnit: string,
+  toUnit: string
+): number | null {
+  if (!Number.isFinite(value)) return null;
+
+  const from = MASS_UNIT_TO_GRAMS[normalizeUnit(fromUnit)];
+  const to = MASS_UNIT_TO_GRAMS[normalizeUnit(toUnit)];
+  if (from == null || to == null) return null;
+
+  return (value * from) / to;
+}
+
+/**
+ * Convert a single source value (in `fromUnit`) into the canonical unit for the
+ * micronutrient identified by `key`. Returns `null` if the key is unknown or
+ * the units are not compatible.
+ */
+export function toCanonicalMicronutrient(
+  key: string,
+  value: number,
+  fromUnit: string
+): number | null {
+  const def = MICRONUTRIENT_MAP[key];
+  if (!def) return null;
+  return convertNutrientAmount(value, fromUnit, def.unit);
+}
+
+/**
  * Format a micronutrient amount for display with a sensible number of decimals.
  */
 export function formatMicroAmount(value: number): string {

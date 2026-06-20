@@ -6010,6 +6010,35 @@ body:not(.theme-obsidian) .api-credentials-success {
   line-height: 1.4;
 }
 
+/* Micronutrient summary shown for results whose source provided per-100g data */
+.food-result-micros {
+  margin-top: 6px;
+}
+
+.food-result-micros-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.food-result-micros-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.food-result-micro-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  white-space: nowrap;
+}
+
 /* Product Image for Open Food Facts */
 .food-result-image {
   margin-top: 8px;
