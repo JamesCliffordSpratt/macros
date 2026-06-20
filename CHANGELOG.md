@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/JamesCliffordSpratt/macros/compare/2.5.0...2.6.0) (2026-06-20)
+
+
+### Features
+
+* fetch micronutrients from USDA/OFF/FatSecret, display & save in notes; speed up and fix search pagination/caching ([fc54b29](https://github.com/JamesCliffordSpratt/macros/commit/fc54b29870dafe3293e0c41d325de41b6ee7d33e))
+
+
+### Bug Fixes
+
+* prevent mobile redirect when opening meal template modals from settings ([4a69e84](https://github.com/JamesCliffordSpratt/macros/commit/4a69e84e98b8bddccecca711fca5800693d96f8e))
+
 ### [2.5.1](https://github.com/JamesCliffordSpratt/macros/compare/v2.5.0...v2.5.1) (2026-06-13)
 
 
