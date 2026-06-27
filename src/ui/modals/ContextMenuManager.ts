@@ -237,7 +237,7 @@ export class ContextMenuManager {
     menu.showAtMouseEvent(adjustedEvent);
     this.applyMenuStyling();
 
-    const originalHide = menu.hide.bind(menu);
+    const originalHide = menu.hide.bind(menu) as () => void;
     (menu as Menu & { hide: () => void }).hide = () => {
       this.restoreTooltips();
       return originalHide();
@@ -396,7 +396,7 @@ export class ContextMenuManager {
     menu.showAtMouseEvent(adjustedEvent);
     this.applyMenuStyling();
 
-    const originalHide = menu.hide.bind(menu);
+    const originalHide = menu.hide.bind(menu) as () => void;
     (menu as Menu & { hide: () => void }).hide = () => {
       this.restoreTooltips();
       return originalHide();
@@ -582,7 +582,7 @@ export class ContextMenuManager {
     menu.showAtMouseEvent(adjustedEvent);
     this.applyMenuStyling();
 
-    const originalHide = menu.hide.bind(menu);
+    const originalHide = menu.hide.bind(menu) as () => void;
     (menu as Menu & { hide: () => void }).hide = () => {
       this.restoreTooltips();
       return originalHide();

@@ -45,11 +45,11 @@ export class CustomServingSizeModal extends Modal {
       if (foodFile) {
         const cache = this.plugin.app.metadataCache.getFileCache(foodFile);
         if (cache?.frontmatter) {
-          const defaultServingSize = cache.frontmatter['default_serving_size'];
+          const defaultServingSize: unknown = cache.frontmatter['default_serving_size'];
           if (defaultServingSize) {
             // Parse the default serving size (remove 'g' suffix if present)
             const parsedDefaultServing = parseFloat(
-              defaultServingSize.toString().replace(/g$/i, '')
+              String(defaultServingSize).replace(/g$/i, '')
             );
             if (!isNaN(parsedDefaultServing) && parsedDefaultServing > 0) {
               suggestedServing = parsedDefaultServing;

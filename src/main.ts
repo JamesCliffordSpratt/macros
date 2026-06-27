@@ -100,7 +100,10 @@ export default class MacrosPlugin extends Plugin {
    * Loads plugin settings.
    */
   async loadSettings() {
-    this.settings = { ...structuredClone(DEFAULT_SETTINGS), ...(await this.loadData()) };
+    this.settings = {
+      ...structuredClone(DEFAULT_SETTINGS),
+      ...((await this.loadData()) as Partial<PluginSettings>),
+    };
 
     // Ensure uiCollapseStates exists after loading
     if (!this.settings.uiCollapseStates) {
