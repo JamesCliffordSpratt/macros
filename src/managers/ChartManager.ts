@@ -54,7 +54,7 @@ export class ChartManager {
           .map((i) => i.trim())
           .filter((i) => i.length > 0);
       } else {
-        ids = [id as string];
+        ids = [id];
       }
 
       ids = ids.filter((i) => i && i.trim() !== '');
@@ -90,10 +90,10 @@ export class ChartManager {
           // Force fresh data load with timeout
           const freshDataPromise = this.plugin.dataManager.getFullMacrosData(currentId);
           const timeoutPromise = new Promise<string[]>((_, reject) =>
-            setTimeout(() => reject(new Error('Data load timeout')), 5000)
+            window.setTimeout(() => reject(new Error('Data load timeout')), 5000)
           );
 
-          const freshData = (await Promise.race([freshDataPromise, timeoutPromise])) as string[];
+          const freshData = (await Promise.race([freshDataPromise, timeoutPromise]));
 
           if (freshData && Array.isArray(freshData) && freshData.length > 0) {
             this.plugin.dataManager.macroTables.set(currentId, freshData);
@@ -300,7 +300,7 @@ export class ChartManager {
       canvas.id = chartId;
 
       // Add a small delay to ensure DOM is ready
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
 
       // Verify Chart.js is still available
       if (!window.Chart) {
@@ -478,7 +478,7 @@ export class ChartManager {
               borderWidth: 1,
               hoverBorderWidth: 2,
               hoverBorderColor: 'rgba(255, 255, 255, 0.9)',
-            } as ChartDataset<'pie', number[]>,
+            },
           ],
         },
         options: {
@@ -583,7 +583,7 @@ export class ChartManager {
               fill: false,
               pointRadius: 4,
               pointHoverRadius: 6,
-            }) as ChartDataset<'line', number[]>
+            })
         ),
       },
       options: {

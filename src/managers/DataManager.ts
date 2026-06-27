@@ -280,7 +280,7 @@ export class DataManager {
 
             // Extract nutrition from description or raw data
             if (selectedFood.raw && typeof selectedFood.raw === 'object') {
-              const offData = selectedFood.raw as any;
+              const offData = selectedFood.raw;
               nutritionalData = {
                 calories: offData.calories?.toString() || '0',
                 protein: offData.protein?.toString() || '0',
@@ -870,7 +870,7 @@ ${additionalMetadata.ingredients}`;
 
         // Set up a timeout for the update
         const timeoutPromise = new Promise<void>((_resolve, reject) => {
-          setTimeout(() => reject(new Error('Update timed out')), 30000);
+          window.setTimeout(() => reject(new Error('Update timed out')), 30000);
         });
 
         // Race the update function against the timeout

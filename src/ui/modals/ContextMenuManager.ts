@@ -56,7 +56,7 @@ export class ContextMenuManager {
    * Apply plugin-specific styling to the menu element
    */
   private applyMenuStyling(): void {
-    setTimeout(() => {
+    window.setTimeout(() => {
       const menuElement = document.querySelector('.menu');
       if (menuElement) {
         menuElement.setAttribute('data-macros-plugin', 'true');
@@ -243,7 +243,7 @@ export class ContextMenuManager {
       return originalHide();
     };
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
@@ -253,7 +253,7 @@ export class ContextMenuManager {
       mutations.forEach((mutation) => {
         mutation.removedNodes.forEach((node) => {
           if (
-            node instanceof HTMLElement &&
+            node.instanceOf(HTMLElement) &&
             node.classList.contains('menu') &&
             node.getAttribute('data-macros-plugin') === 'true'
           ) {
@@ -266,7 +266,7 @@ export class ContextMenuManager {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       observer.disconnect();
       this.restoreTooltips();
     }, 5000);
@@ -402,7 +402,7 @@ export class ContextMenuManager {
       return originalHide();
     };
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
@@ -412,7 +412,7 @@ export class ContextMenuManager {
       mutations.forEach((mutation) => {
         mutation.removedNodes.forEach((node) => {
           if (
-            node instanceof HTMLElement &&
+            node.instanceOf(HTMLElement) &&
             node.classList.contains('menu') &&
             node.getAttribute('data-macros-plugin') === 'true'
           ) {
@@ -425,7 +425,7 @@ export class ContextMenuManager {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       observer.disconnect();
       this.restoreTooltips();
     }, 5000);
@@ -588,7 +588,7 @@ export class ContextMenuManager {
       return originalHide();
     };
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
@@ -598,7 +598,7 @@ export class ContextMenuManager {
       mutations.forEach((mutation) => {
         mutation.removedNodes.forEach((node) => {
           if (
-            node instanceof HTMLElement &&
+            node.instanceOf(HTMLElement) &&
             node.classList.contains('menu') &&
             node.getAttribute('data-macros-plugin') === 'true'
           ) {
@@ -611,7 +611,7 @@ export class ContextMenuManager {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       observer.disconnect();
       this.restoreTooltips();
     }, 5000);

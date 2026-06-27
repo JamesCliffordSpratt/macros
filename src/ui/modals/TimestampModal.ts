@@ -198,7 +198,7 @@ export class TimestampModal extends Modal {
     });
 
     // Focus and select the time input
-    setTimeout(() => {
+    window.setTimeout(() => {
       timeInput.focus();
       timeInput.select();
     }, 100);

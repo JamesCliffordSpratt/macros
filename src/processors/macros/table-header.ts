@@ -43,7 +43,7 @@ export class TableHeader {
     this.toggleButton.addClass(CLASS_NAMES.ICONS.COLLAPSE_ALL);
 
     // Find dashboard elements after rendering
-    setTimeout(() => {
+    window.setTimeout(() => {
       let macrosContainer = this.container;
       let parent = this.container.parentElement;
       while (parent) {
@@ -123,7 +123,7 @@ export class TableHeader {
 
     this.plugin.registerDomListener(addBtn, 'click', addBtnClickHandler);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.initializeButtonState();
     }, 50);
   }

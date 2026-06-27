@@ -162,7 +162,7 @@ export async function searchFoods(
           if (data.foods && data.foods.length > 0) {
             return data.foods
               .map((food) => processFoodItem(food))
-              .filter((food) => food !== null) as UsdaFoodResult[];
+              .filter((food) => food !== null);
           }
         }
       } catch (typeError) {

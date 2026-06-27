@@ -233,7 +233,7 @@ export class RefreshManager {
         this.plugin.app.metadataCache.trigger('changed', activeFile);
 
         // Add a short delay and refresh markdown views
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.refreshMarkdownViews();
         }, 100);
       }

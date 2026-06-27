@@ -128,7 +128,7 @@ export class CustomServingSizeModal extends Modal {
     }
 
     // Focus input after a small delay to ensure proper rendering
-    setTimeout(() => {
+    window.setTimeout(() => {
       inputEl.focus();
       inputEl.select();
     }, 100);

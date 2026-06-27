@@ -181,7 +181,7 @@ export class FoodEntrySelectionModal extends Modal {
         text: t('errors.apiConnectionFailed'),
       });
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (errorEl.parentNode) {
           errorEl.parentNode.removeChild(errorEl);
         }

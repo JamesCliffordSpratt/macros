@@ -239,7 +239,7 @@ export class ZXingLoader {
           throw new Error('Decode method not available on reader');
         }
 
-        return reader.decode(binaryBitmap) as Promise<ZXingResult>;
+        return reader.decode(binaryBitmap);
       };
 
       // Add decodeFromImageData method
@@ -504,7 +504,7 @@ export class MobilePermissionHandler {
       if (navigator.permissions && !isObsidianDesktop) {
         try {
           const permission = await navigator.permissions.query({
-            name: 'camera' as PermissionName,
+            name: 'camera',
           });
 
           if (permission.state === 'denied') {

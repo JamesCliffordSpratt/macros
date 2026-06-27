@@ -863,7 +863,7 @@ export function getRecommendedValue(
   profile: MicronutrientProfile
 ): number | null {
   const group = resolveLifeStageGroup(profile);
-  if (def.dri[group] != null) return def.dri[group] as number;
+  if (def.dri[group] != null) return def.dri[group];
 
   // Fallback chain: same-sex adult brackets, then any value.
   const fallbackOrder: LifeStageGroup[] =
@@ -872,11 +872,11 @@ export function getRecommendedValue(
       : ['male_31_50', 'male_19_30', 'male_51_70', 'male_14_18'];
 
   for (const g of fallbackOrder) {
-    if (def.dri[g] != null) return def.dri[g] as number;
+    if (def.dri[g] != null) return def.dri[g];
   }
 
   const anyValue = Object.values(def.dri).find((v) => v != null);
-  return anyValue != null ? (anyValue as number) : null;
+  return anyValue != null ? (anyValue) : null;
 }
 
 /**

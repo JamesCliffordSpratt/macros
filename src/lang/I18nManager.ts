@@ -297,8 +297,8 @@ export class I18nManager {
       }
 
       // Check global moment
-      if (typeof (globalThis as GlobalWithMoment).moment !== 'undefined') {
-        const momentInstance = (globalThis as GlobalWithMoment).moment;
+      if (typeof (window as GlobalWithMoment).moment !== 'undefined') {
+        const momentInstance = (window as GlobalWithMoment).moment;
         if (momentInstance?.locale && typeof momentInstance.locale === 'function') {
           return momentInstance.locale();
         }

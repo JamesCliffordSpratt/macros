@@ -307,7 +307,7 @@ export class RowRenderer {
       tableRow.classList.add('long-press-active');
 
       // Start long press timer
-      longPressTimer = setTimeout(() => {
+      longPressTimer = window.setTimeout(() => {
         if (!hasMovedTooMuch) {
           // Haptic feedback if available
           if ('vibrate' in navigator) {
@@ -436,7 +436,7 @@ export class RowRenderer {
    * Cancels an active long press
    */
   private cancelLongPress(tableRow: HTMLTableRowElement, timer: NodeJS.Timeout): void {
-    clearTimeout(timer);
+    window.clearTimeout(timer);
     tableRow.classList.remove('long-press-active');
   }
 
@@ -743,7 +743,7 @@ export class RowRenderer {
     // Better truncation detection and tooltip handling
     nameSpan.removeAttribute('title');
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       const isOverflowing = nameSpan.scrollWidth > nameSpan.clientWidth + 2;
 
       if (isOverflowing) {
@@ -808,7 +808,7 @@ export class RowRenderer {
             quantityCell.classList.remove('quantity-updating');
             quantityCell.classList.add('quantity-error');
             quantityCell.textContent = `${servingValue}g (${t('general.error').toLowerCase()})`;
-            setTimeout(() => {
+            window.setTimeout(() => {
               quantityCell.classList.remove('quantity-error');
               quantityCell.textContent = row.serving;
             }, 2000);

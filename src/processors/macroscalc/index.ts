@@ -37,7 +37,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
   // Also listen for file modifications
   plugin.registerEvent(
     plugin.app.vault.on('modify', () => {
-      setTimeout(() => forceRefreshAllRenderers(plugin), 300);
+      window.setTimeout(() => forceRefreshAllRenderers(plugin), 300);
     })
   );
 

@@ -144,7 +144,7 @@ export class LiveFoodSearchModal extends Modal {
     this.createNoResultsMessage();
 
     // Auto-focus search input with a slight delay to ensure proper rendering
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.searchInput.focus();
     }, 50);
 
@@ -155,7 +155,7 @@ export class LiveFoodSearchModal extends Modal {
   onClose() {
     // Clean up search timeout
     if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
+      window.clearTimeout(this.searchTimeout);
       this.searchTimeout = null;
     }
 
@@ -306,7 +306,7 @@ export class LiveFoodSearchModal extends Modal {
     }
 
     // Maintain focus on search input after tab switch
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.searchInput.focus();
     }, 10);
   }
@@ -395,7 +395,7 @@ export class LiveFoodSearchModal extends Modal {
     await this.performBarcodeSearch(barcode);
 
     // Focus back on input for potential manual editing
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.searchInput.focus();
       this.searchInput.select();
     }, 100);
@@ -461,7 +461,7 @@ export class LiveFoodSearchModal extends Modal {
         this.noResultsMessage.classList.remove('is-hidden');
 
         // Clear search input and reset for text search after a delay
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.searchInput.value = '';
           this.isBarcodeSearch = false;
           this.searchInput.placeholder = t('food.search.placeholder');
@@ -511,7 +511,7 @@ export class LiveFoodSearchModal extends Modal {
     }
 
     if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
+      window.clearTimeout(this.searchTimeout);
     }
 
     // Cancel any ongoing search
@@ -540,7 +540,7 @@ export class LiveFoodSearchModal extends Modal {
     this.loadingIndicator.classList.remove('is-hidden');
     this.noResultsMessage.classList.add('is-hidden');
 
-    this.searchTimeout = setTimeout(() => {
+    this.searchTimeout = window.setTimeout(() => {
       const currentSearchTerm = this.searchInput.value.trim();
       if (currentSearchTerm === searchTerm) {
         // Detect if this looks like a barcode (all numbers, 8-14 digits)
@@ -684,7 +684,7 @@ export class LiveFoodSearchModal extends Modal {
       this.storeResultsInCache(requestSearchTerm);
 
       // Ensure search input maintains focus after results are rendered
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.searchInput.focus();
       }, 10);
     } catch (error) {
@@ -1819,7 +1819,7 @@ class FileNameModal extends Modal {
     );
 
     // Auto-focus and select text
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.fileNameInput.focus();
       this.fileNameInput.select();
     }, 50);

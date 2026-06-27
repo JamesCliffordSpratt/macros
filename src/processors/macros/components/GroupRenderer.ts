@@ -396,7 +396,7 @@ export class GroupRenderer {
   }
 
   private setRowsVisibility(table: HTMLTableElement, sectionName: string, visible: boolean): void {
-    setTimeout(() => {
+    window.setTimeout(() => {
       const rows = table.querySelectorAll(`tr[data-parent="${sectionName}"]`);
 
       rows.forEach((row) => {

@@ -87,7 +87,7 @@ export class AddToMacrosModal extends Modal {
       this.updateSelectedItemsDisplay();
 
       // Auto-focus search input
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (this.searchInput) {
           this.searchInput.focus();
           this.searchInput.setSelectionRange(0, 0);
@@ -444,7 +444,7 @@ export class AddToMacrosModal extends Modal {
     this.groupContainer.classList.toggle('active', activeTab === 'group');
 
     // Handle search input focus and filtering
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (this.searchInput) {
         if (activeTab === 'group') {
           // For group tab, focus on group name input instead
@@ -512,7 +512,7 @@ export class AddToMacrosModal extends Modal {
       const tabKey = tabOrder[tabIndex];
       this.switchTab(tabKey);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (tabKey === 'group') {
           this.groupNameInput.focus();
         } else {

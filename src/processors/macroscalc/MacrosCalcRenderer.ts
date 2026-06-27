@@ -1275,7 +1275,7 @@ export class MacrosCalcRenderer {
       safeAttachTooltip(commentIcon, comment, this.plugin);
     }
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       const isOverflowing = nameSpan.scrollWidth > nameSpan.clientWidth + 2;
       if (isOverflowing) {
         nameSpan.removeAttribute('title');
@@ -1375,7 +1375,7 @@ export class MacrosCalcRenderer {
     for (let i = 0; i < headerRow.cells.length; i++) {
       const sortIcon = headerRow.cells[i].querySelector(
         '.macroscalc-sort-icon'
-      ) as HTMLElement | null;
+      );
       if (sortIcon) {
         if (i === columnIndex) {
           sortIcon.textContent = ascending ? '↑' : '↓';
@@ -1398,11 +1398,11 @@ export class MacrosCalcRenderer {
 
     dataRowsWithDetails.forEach((row) => {
       if (!row.classList.contains('macroscalc-detail-row')) {
-        currentMainRow = row as HTMLTableRowElement;
+        currentMainRow = row;
         rowGroups.push({ mainRow: currentMainRow });
       } else if (currentMainRow && row.classList.contains('macroscalc-detail-row')) {
         const lastGroup = rowGroups[rowGroups.length - 1];
-        lastGroup.detailRow = row as HTMLTableRowElement;
+        lastGroup.detailRow = row;
       }
     });
 
@@ -1481,7 +1481,7 @@ export class MacrosCalcRenderer {
     for (let i = 0; i < headerRow.cells.length; i++) {
       const sortIcon = headerRow.cells[i].querySelector(
         '.macroscalc-sort-icon'
-      ) as HTMLElement | null;
+      );
       if (sortIcon) {
         const newSortIcon = sortIcon.cloneNode(true) as HTMLElement;
         sortIcon.parentNode?.replaceChild(newSortIcon, sortIcon);

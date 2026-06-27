@@ -252,7 +252,7 @@ export class ToleranceModal extends Modal {
     });
 
     // Focus the textarea
-    setTimeout(() => {
+    window.setTimeout(() => {
       textarea.focus();
       if (this.isEditing) {
         textarea.select();

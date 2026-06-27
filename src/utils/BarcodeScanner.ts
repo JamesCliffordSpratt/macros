@@ -177,7 +177,7 @@ export class BarcodeScanner extends Component {
     this.plugin.logger.debug('Starting barcode scan loop');
     let scanAttempts = 0;
 
-    this.scanInterval = setInterval(async () => {
+    this.scanInterval = window.setInterval(async () => {
       if (!this.scanning || !this.video || !this.canvas || !this.context) {
         return;
       }
@@ -321,7 +321,7 @@ export class BarcodeScanner extends Component {
     this.scanning = false;
 
     if (this.scanInterval) {
-      clearInterval(this.scanInterval);
+      window.clearInterval(this.scanInterval);
       this.scanInterval = null;
     }
 
@@ -358,13 +358,13 @@ export class BarcodeScanner extends Component {
         const img = new Image();
         const imageUrl = URL.createObjectURL(file);
 
-        const timeoutId = setTimeout(() => {
+        const timeoutId = window.setTimeout(() => {
           URL.revokeObjectURL(imageUrl);
           reject(new Error('Image loading timed out'));
         }, 15000);
 
         img.onload = async () => {
-          clearTimeout(timeoutId);
+          window.clearTimeout(timeoutId);
           URL.revokeObjectURL(imageUrl);
 
           try {
@@ -381,7 +381,7 @@ export class BarcodeScanner extends Component {
         };
 
         img.onerror = () => {
-          clearTimeout(timeoutId);
+          window.clearTimeout(timeoutId);
           URL.revokeObjectURL(imageUrl);
           reject(new Error('Failed to load image file. Please try a different image format.'));
         };
@@ -713,7 +713,7 @@ export class BarcodeScannerModal extends Modal {
     this.cameraButton = this.controlsContainer.createEl('button', {
       text: diagnostics.hasCamera ? '📷 Start Camera Scan' : '📷 Camera Not Available',
       cls: 'mod-cta barcode-scan-camera-btn',
-    }) as HTMLButtonElement;
+    });
 
     // Disable camera button if no camera detected
     if (!diagnostics.hasCamera) {
@@ -737,7 +737,7 @@ export class BarcodeScannerModal extends Modal {
     this.uploadButton = this.controlsContainer.createEl('button', {
       text: '🖼️ Upload Image',
       cls: 'barcode-scan-upload-btn',
-    }) as HTMLButtonElement;
+    });
 
     this.uploadInput = document.createElement('input');
     this.uploadInput.type = 'file';
@@ -966,7 +966,7 @@ class ManualBarcodeEntryModal extends Modal {
       }
     });
 
-    setTimeout(() => this.barcodeInput.focus(), 50);
+    window.setTimeout(() => this.barcodeInput.focus(), 50);
   }
 
   private handleSubmit(): void {

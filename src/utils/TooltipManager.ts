@@ -104,12 +104,12 @@ export class TooltipManager {
     }
 
     if (TooltipManager.timer !== null) {
-      clearTimeout(TooltipManager.timer);
+      window.clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
     if (TooltipManager.mobileHideTimer !== null) {
-      clearTimeout(TooltipManager.mobileHideTimer);
+      window.clearTimeout(TooltipManager.mobileHideTimer);
       TooltipManager.mobileHideTimer = null;
     }
 
@@ -127,12 +127,12 @@ export class TooltipManager {
   static show(targetEl: HTMLElement, text: string): void {
     // Clear any existing timers
     if (TooltipManager.timer !== null) {
-      clearTimeout(TooltipManager.timer);
+      window.clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
     if (TooltipManager.mobileHideTimer !== null) {
-      clearTimeout(TooltipManager.mobileHideTimer);
+      window.clearTimeout(TooltipManager.mobileHideTimer);
       TooltipManager.mobileHideTimer = null;
     }
 
@@ -142,7 +142,7 @@ export class TooltipManager {
     // Show immediately on mobile, with delay on desktop
     const delay = isMobileDevice ? 0 : TooltipManager.SHOW_DELAY;
 
-    TooltipManager.timer = setTimeout(() => {
+    TooltipManager.timer = window.setTimeout(() => {
       TooltipManager.displayTooltip();
       TooltipManager.timer = null;
     }, delay);
@@ -214,7 +214,7 @@ export class TooltipManager {
 
     // Auto-hide on mobile after 3 seconds
     if (isMobileDevice) {
-      TooltipManager.mobileHideTimer = setTimeout(() => {
+      TooltipManager.mobileHideTimer = window.setTimeout(() => {
         TooltipManager.forceHide();
       }, 3000);
     }
@@ -222,7 +222,7 @@ export class TooltipManager {
 
   static hide(): void {
     if (TooltipManager.timer !== null) {
-      clearTimeout(TooltipManager.timer);
+      window.clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
@@ -231,7 +231,7 @@ export class TooltipManager {
     // Hide immediately on mobile
     const hideDelay = isMobileDevice ? 0 : TooltipManager.HIDE_DELAY;
 
-    TooltipManager.timer = setTimeout(() => {
+    TooltipManager.timer = window.setTimeout(() => {
       TooltipManager.hideTooltip();
       TooltipManager.timer = null;
     }, hideDelay);
@@ -242,7 +242,7 @@ export class TooltipManager {
 
     el.classList.remove('tooltip-visible');
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (!el.classList.contains('tooltip-visible')) {
         el.classList.add('macro-tooltip-hidden');
         el.classList.remove('macro-tooltip-positioned');
@@ -260,12 +260,12 @@ export class TooltipManager {
 
   static forceHide(): void {
     if (TooltipManager.timer !== null) {
-      clearTimeout(TooltipManager.timer);
+      window.clearTimeout(TooltipManager.timer);
       TooltipManager.timer = null;
     }
 
     if (TooltipManager.mobileHideTimer !== null) {
-      clearTimeout(TooltipManager.mobileHideTimer);
+      window.clearTimeout(TooltipManager.mobileHideTimer);
       TooltipManager.mobileHideTimer = null;
     }
 

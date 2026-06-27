@@ -177,7 +177,7 @@ export class CommentModal extends Modal {
     });
 
     // Focus and select text
-    setTimeout(() => {
+    window.setTimeout(() => {
       textarea.focus();
       if (this.isEditing) {
         textarea.select();

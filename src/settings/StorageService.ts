@@ -461,7 +461,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             if (value !== 'custom') {
               await this.applyMacroTemplate(value);
               // Refresh the display to show updated values
-              setTimeout(() => this.display(), 100);
+              window.setTimeout(() => this.display(), 100);
             }
           });
       });
@@ -854,7 +854,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     previewCanvas.height = 300;
     previewCanvas.id = this.chartId;
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.initChartPreview(previewCanvas);
     }, 50);
 
@@ -903,7 +903,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             }
             this.plugin.settings.fatSecretEnabled = value;
             await this.plugin.saveSettings();
-            setTimeout(() => this.display(), 100);
+            window.setTimeout(() => this.display(), 100);
           })
       );
 
@@ -934,7 +934,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             this.plugin.settings.fatSecretApiKey = value;
             await this.plugin.saveSettings();
             // Refresh the settings display to update the status
-            setTimeout(() => this.display(), 100);
+            window.setTimeout(() => this.display(), 100);
           });
       });
 
@@ -949,7 +949,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             this.plugin.settings.fatSecretApiSecret = value;
             await this.plugin.saveSettings();
             // Refresh the settings display to update the status
-            setTimeout(() => this.display(), 100);
+            window.setTimeout(() => this.display(), 100);
           });
       });
 
@@ -1025,7 +1025,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             }
             this.plugin.settings.usdaEnabled = value;
             await this.plugin.saveSettings();
-            setTimeout(() => this.display(), 100);
+            window.setTimeout(() => this.display(), 100);
           })
       );
 
@@ -1056,7 +1056,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
             this.plugin.settings.usdaApiKey = value;
             await this.plugin.saveSettings();
             // Refresh the settings display to update the status
-            setTimeout(() => this.display(), 100);
+            window.setTimeout(() => this.display(), 100);
           });
       });
 
@@ -1141,7 +1141,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         toggle.setValue(this.plugin.settings.openFoodFactsEnabled).onChange(async (value) => {
           this.plugin.settings.openFoodFactsEnabled = value;
           await this.plugin.saveSettings();
-          setTimeout(() => this.display(), 100);
+          window.setTimeout(() => this.display(), 100);
         })
       );
 
@@ -1311,7 +1311,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
                   (m) => m.name !== meal.name
                 );
                 await this.plugin.saveSettings();
-                setTimeout(() => this.display(), 300);
+                window.setTimeout(() => this.display(), 300);
               });
           });
       });
@@ -1664,7 +1664,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
       }
 
       // Update placeholder so the (un-overridden) default reflects the new age
-      const input = rowEl.querySelector('input') as HTMLInputElement | null;
+      const input = rowEl.querySelector('input');
       if (input && (overrides[key] == null || !Number.isFinite(overrides[key]))) {
         input.placeholder = recommended != null ? recommended.toString() : '';
       }
