@@ -67,7 +67,7 @@ export class TimestampModal extends Modal {
     // Create input container
     const inputContainer = contentEl.createDiv({ cls: 'timestamp-input-container' });
 
-    const inputLabel = inputContainer.createEl('label', {
+    inputContainer.createEl('label', {
       text: t('timestamps.timeLabel'),
       cls: 'timestamp-input-label',
     });

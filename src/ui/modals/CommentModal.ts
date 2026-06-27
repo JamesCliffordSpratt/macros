@@ -67,7 +67,7 @@ export class CommentModal extends Modal {
     // Create input container
     const inputContainer = contentEl.createDiv({ cls: 'comment-input-container' });
 
-    const _inputLabel = inputContainer.createEl('label', {
+    inputContainer.createEl('label', {
       text: t('comments.commentLabel'),
       cls: 'comment-input-label',
     });

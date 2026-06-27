@@ -1,5 +1,5 @@
 import MacrosPlugin from '../main';
-import { Chart, ChartConfiguration, ChartDataset, TooltipItem, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, TooltipItem, registerables } from 'chart.js';
 import { ChartLoader, MacrosState, DOMUtils } from '../utils';
 import { formatChartTitle, getCurrentEnergyUnitString } from '../utils/formatters';
 import { t } from '../lang/I18nManager';
@@ -122,14 +122,6 @@ export class ChartManager {
       loadingEl.remove();
 
       // Create header with better state management
-      const _allDates = ids
-        .map((id) => {
-          const parsed = Date.parse(id);
-          return isNaN(parsed) ? null : { id, date: new Date(parsed) };
-        })
-        .filter((d): d is { id: string; date: Date } => d !== null)
-        .sort((a, b) => b.date.getTime() - a.date.getTime());
-
       const dashboardHeader = dashboardContainer.createDiv({
         cls: 'macroscalc-dashboard-header macro-dashboard-header',
       });
@@ -649,7 +641,7 @@ export class ChartManager {
     try {
       const idsToRefresh = new Set([...this.plugin.dataManager.macroTables.keys()]);
 
-      for (const [id, _] of this.plugin.dataManager.macrospcContainers.entries()) {
+      for (const [id] of this.plugin.dataManager.macrospcContainers.entries()) {
         if (typeof id === 'string') {
           if (id.includes(',')) {
             id.split(',')

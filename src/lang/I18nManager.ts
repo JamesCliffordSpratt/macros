@@ -505,7 +505,7 @@ export class I18nManager {
 export function t(key: string, interpolations?: Record<string, string | number>): string {
   try {
     return I18nManager.getInstance().t(key, interpolations);
-  } catch (error) {
+  } catch {
     // If I18nManager is not initialized, return the key
     return key;
   }

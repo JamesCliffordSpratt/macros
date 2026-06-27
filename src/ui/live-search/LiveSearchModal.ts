@@ -1112,7 +1112,7 @@ export class LiveFoodSearchModal extends Modal {
 
       // Food description
       // Fixed: Prefix unused variable with underscore
-      const _descDiv = contentDiv.createDiv({
+      contentDiv.createDiv({
         cls: 'food-result-description',
         text: food.description,
       });
@@ -1689,7 +1689,7 @@ ${food.description}
       } else {
         this.hasMoreResults = false;
       }
-    } catch (error) {
+    } catch {
       this.hasMoreResults = false;
     } finally {
       this.isLoadingMore = false;
@@ -1721,12 +1721,12 @@ class FileNameModal extends Modal {
     contentEl.addClass('file-name-modal');
 
     // Fixed: Prefix unused variables with underscore
-    const _header = contentEl.createEl('h2', {
+    contentEl.createEl('h2', {
       text: 'Save Food Item',
       cls: 'modal-title',
     });
 
-    const _description = contentEl.createEl('p', {
+    contentEl.createEl('p', {
       text: 'Please enter a name and default serving size for this food item:',
       cls: 'modal-description',
     });

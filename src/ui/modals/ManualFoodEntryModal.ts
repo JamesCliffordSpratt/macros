@@ -76,7 +76,7 @@ export class ManualFoodEntryModal extends Modal {
       type: 'text',
       cls: 'form-input macros-form-input',
       attr: {
-        placeholder: 'e.g., Chicken Breast',
+        placeholder: 'e.g., chicken breast',
         required: 'true',
       },
     });
@@ -102,7 +102,7 @@ export class ManualFoodEntryModal extends Modal {
     // Default Serving Size Field (NEW)
     const defaultServingGroup = formContainer.createDiv({ cls: 'form-group macros-form-group' });
     defaultServingGroup.createEl('label', {
-      text: 'Default Serving Size (grams)',
+      text: 'Default serving size (grams)',
       cls: 'form-label macros-form-label',
     });
 
@@ -641,7 +641,7 @@ export class ManualFoodEntryModal extends Modal {
       if (existingFile) {
         errors.push(t('validation.duplicateName', { name: foodName }));
       }
-    } catch (error) {
+    } catch {
       // File doesn't exist, which is expected
     }
 

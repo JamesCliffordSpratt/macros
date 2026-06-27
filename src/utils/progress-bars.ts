@@ -56,7 +56,7 @@ export class ProgressBarFactory {
     const roundedWidth = Math.round(displayWidth / 5) * 5;
     const widthClass = `progress-width-${roundedWidth}`;
 
-    const _progressBar = progressContainer.createDiv({
+    progressContainer.createDiv({
       cls: `${CLASS_NAMES.PROGRESS.TARGET_BAR} ${statusClass} ${macroClass} ${widthClass}`,
     });
 

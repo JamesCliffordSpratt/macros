@@ -42,7 +42,7 @@ export function registerCommands(plugin: MacrosPlugin): void {
   // Command: Direct access to Live Search modal (API search)
   plugin.addCommand({
     id: 'open-live-search',
-    name: 'Search food databases (Live Search)',
+    name: 'Search food databases (live search)',
     callback: () => {
       try {
         // Get API credentials for backward compatibility with LiveFoodSearchModal
@@ -66,7 +66,7 @@ export function registerCommands(plugin: MacrosPlugin): void {
   // Command: Direct access to Manual Entry modal
   plugin.addCommand({
     id: 'open-manual-entry',
-    name: 'Add food item manually (Manual Entry)',
+    name: 'Add food item manually (manual entry)',
     callback: () => {
       try {
         new ManualFoodEntryModal(

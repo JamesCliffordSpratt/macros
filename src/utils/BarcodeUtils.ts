@@ -203,7 +203,7 @@ export class ZXingLoader {
         if (reader) {
           return reader;
         }
-      } catch (error) {
+      } catch {
         // Continue to next constructor
       }
     }
@@ -222,7 +222,7 @@ export class ZXingLoader {
         const ctx = canvas.getContext('2d');
         if (!ctx) throw new Error('Cannot get canvas context');
 
-        const _imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         if (
           !ZXing.HTMLCanvasElementLuminanceSource ||
@@ -493,7 +493,7 @@ export class MobilePermissionHandler {
             };
             const stream = await navigator.mediaDevices.getUserMedia(minimalConstraints);
             return { granted: true, stream };
-          } catch (_minimalError: unknown) {
+          } catch {
             // Fall through to error handling
             throw basicError; // Use the original error for better debugging
           }
@@ -514,7 +514,7 @@ export class MobilePermissionHandler {
                 'Camera permission was previously denied. Please reset permissions or enable camera access in your browser/system settings.',
             };
           }
-        } catch (_permError) {
+        } catch {
           // Permission query not supported or failed - continue anyway
         }
       }

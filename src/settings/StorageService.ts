@@ -1343,12 +1343,12 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
         const toleranceHeader = toleranceItem.createDiv({ cls: 'tolerance-header' });
 
-        const toleranceIcon = toleranceHeader.createSpan({
+        toleranceHeader.createSpan({
           cls: 'tolerance-icon',
           text: toleranceData.severity,
         });
 
-        const toleranceName = toleranceHeader.createSpan({
+        toleranceHeader.createSpan({
           cls: 'tolerance-name',
           text: foodName.charAt(0).toUpperCase() + foodName.slice(1),
         });
@@ -1367,14 +1367,14 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
         // Add symptoms display
         if (toleranceData.symptoms) {
-          const toleranceSymptoms = toleranceItem.createDiv({
+          toleranceItem.createDiv({
             cls: 'tolerance-symptoms',
             text: toleranceData.symptoms,
           });
         }
 
         // Add date added
-        const toleranceDate = toleranceItem.createDiv({
+        toleranceItem.createDiv({
           cls: 'tolerance-date',
           text: t('settings.tolerances.dateAdded', {
             date: new Date(toleranceData.dateAdded).toLocaleDateString(),
@@ -1790,7 +1790,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     // Create the buy me a coffee button using an iframe
-    const coffeeIframe = coffeeContainer.createEl('iframe', {
+    coffeeContainer.createEl('iframe', {
       attr: {
         src: 'https://www.buymeacoffee.com/widget/page/jamescliffordspratt?description=Support%20the%20Macros%20Plugin&color=%23FFDD00',
         width: '100%',

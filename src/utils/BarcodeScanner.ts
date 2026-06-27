@@ -475,7 +475,7 @@ export class BarcodeScanner extends Component {
           format: result.getBarcodeFormat().toString(),
         };
       }
-    } catch (error) {
+    } catch {
       // Direct method failed, this is normal
     }
     return null;
@@ -538,7 +538,7 @@ export class BarcodeScanner extends Component {
           format: result.getBarcodeFormat().toString(),
         };
       }
-    } catch (error) {
+    } catch {
       // This method didn't work
     }
 

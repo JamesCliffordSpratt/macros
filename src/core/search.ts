@@ -75,7 +75,7 @@ export async function searchOpenFoodFactsUnified(
       micronutrients: item.micronutrients,
       raw: item,
     }));
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -118,7 +118,7 @@ export async function searchFatSecret(
         raw: item,
       };
     });
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -157,7 +157,7 @@ export async function searchUsda(
       micronutrients: item.micronutrients,
       raw: item,
     }));
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -377,7 +377,7 @@ export async function searchFoundationFoodsOnly(
       }));
 
     return foundationResults;
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -421,7 +421,7 @@ export async function searchOpenFoodFactsByCategory(
       micronutrients: item.micronutrients,
       raw: item,
     }));
-  } catch (error) {
+  } catch {
     return [];
   }
 }

@@ -43,7 +43,7 @@ export class RefreshManager {
       const allIds = new Set<string>();
 
       // Process macrospc containers
-      for (const [id, _] of this.plugin.dataManager.macrospcContainers.entries()) {
+      for (const [id] of this.plugin.dataManager.macrospcContainers.entries()) {
         if (typeof id === 'string') {
           // Handle comma in string ID
           if (id.includes(',')) {

@@ -167,11 +167,11 @@ export class RenameConfirmationModal extends Modal {
       .onClick(() => this.handleReplace());
 
     // Fixed: Prefix unused variables with underscore
-    const _skipButton = new ButtonComponent(buttonContainer)
+    new ButtonComponent(buttonContainer)
       .setButtonText(t('rename.skip'))
       .onClick(() => this.close());
 
-    const _cancelButton = new ButtonComponent(buttonContainer)
+    new ButtonComponent(buttonContainer)
       .setButtonText(t('rename.cancel'))
       .onClick(() => this.handleCancel());
 

@@ -76,7 +76,7 @@ export class ToleranceModal extends Modal {
     const severityContainer = contentEl.createDiv({ cls: 'tolerance-severity-container' });
 
     // Fixed: Prefix unused variable with underscore
-    const _severityLabel = severityContainer.createEl('label', {
+    severityContainer.createEl('label', {
       text: t('tolerances.severityLabel'),
       cls: 'tolerance-severity-label',
     });
@@ -113,7 +113,7 @@ export class ToleranceModal extends Modal {
       });
 
       // Fixed: Prefix unused variable with underscore
-      const _iconSpan = option.createSpan({ cls: 'severity-icon', text: value });
+      option.createSpan({ cls: 'severity-icon', text: value });
       const textContainer = option.createDiv({ cls: 'severity-text' });
       textContainer.createSpan({ cls: 'severity-label', text: label });
       textContainer.createSpan({ cls: 'severity-description', text: description });
@@ -134,7 +134,7 @@ export class ToleranceModal extends Modal {
     const symptomsContainer = contentEl.createDiv({ cls: 'tolerance-symptoms-container' });
 
     // Fixed: Prefix unused variable with underscore
-    const _symptomsLabel = symptomsContainer.createEl('label', {
+    symptomsContainer.createEl('label', {
       text: t('tolerances.symptomsLabel'),
       cls: 'tolerance-symptoms-label',
     });

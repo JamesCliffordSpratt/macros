@@ -117,7 +117,7 @@ export class AddMealTemplateModal extends Modal {
   private createMealNameSection(): void {
     const nameSection = this.contentEl.createDiv({ cls: 'meal-name-section' });
 
-    const _label = nameSection.createEl('label', {
+    nameSection.createEl('label', {
       text: t('meals.create.nameLabel'),
       cls: 'meal-name-label',
     });
