@@ -19,6 +19,41 @@ export interface FoodItem {
   food_description: string;
 }
 
+/** Shape of the FatSecret error object returned on failed requests. */
+interface FatSecretError {
+  code?: string;
+  message?: string;
+}
+
+/** Response shape for the `foods.search` endpoint. */
+interface FatSecretFoodsSearchResponse {
+  error?: FatSecretError;
+  foods?: {
+    food?: FoodItem | FoodItem[];
+  };
+}
+
+/**
+ * A single FatSecret serving node. Known fields are typed explicitly; the
+ * index signature covers the per-serving micronutrient fields (all reported as
+ * strings) listed in FATSECRET_FIELD_TO_KEY.
+ */
+interface FatSecretServing {
+  metric_serving_unit?: string;
+  metric_serving_amount?: string;
+  [field: string]: string | undefined;
+}
+
+/** Response shape for the `food.get.v4` endpoint. */
+interface FatSecretFoodGetResponse {
+  error?: FatSecretError;
+  food?: {
+    servings?: {
+      serving?: FatSecretServing | FatSecretServing[];
+    };
+  };
+}
+
 /**
  * Mapping of FatSecret serving micronutrient fields to canonical keys, with the
  * unit FatSecret reports each field in. Values are converted into each
@@ -53,7 +88,7 @@ export async function fetchFoodData(
     const nonce = generateNonce();
 
     // Base parameters for the request
-    const params = {
+    const params: Record<string, string> = {
       method: 'foods.search',
       format: 'json',
       search_expression: foodName,
@@ -107,11 +142,12 @@ export async function fetchFoodData(
     // Make the request
     const fullUrl = `${baseUrl}?${urlParams.toString()}`;
     const response = await requestUrl({ url: fullUrl, method: 'GET' });
+    const json = response.json as FatSecretFoodsSearchResponse;
 
-    if (response.json && response.json.error) return [];
+    if (json?.error) return [];
 
-    if (response.json.foods?.food) {
-      const foods = response.json.foods.food;
+    const foods = json?.foods?.food;
+    if (foods) {
       if (Array.isArray(foods)) {
         return foods.filter((food) => {
           const s = extractServingSize(food.food_description);
@@ -191,14 +227,14 @@ export interface FatSecretMicronutrients {
 }
 
 /** Pick the most suitable gram-based serving for nutrient extraction. */
-function pickGramServing(servings: any[]): any | null {
+function pickGramServing(servings: FatSecretServing[]): FatSecretServing | null {
   const gramServings = servings.filter(
     (s) => typeof s?.metric_serving_unit === 'string' && s.metric_serving_unit.toLowerCase() === 'g'
   );
   if (gramServings.length === 0) return null;
 
   // Prefer an exact 100g serving for the cleanest per-100g values.
-  const hundred = gramServings.find((s) => parseFloat(s.metric_serving_amount) === 100);
+  const hundred = gramServings.find((s) => parseFloat(s.metric_serving_amount ?? '') === 100);
   return hundred || gramServings[0];
 }
 
@@ -223,16 +259,19 @@ export async function fetchFatSecretMicronutrients(
     );
 
     const response = await requestUrl({ url, method: 'GET' });
-    if (!response.json || response.json.error) return null;
+    const json = response.json as FatSecretFoodGetResponse;
+    if (!json || json.error) return null;
 
-    const servingsNode = response.json.food?.servings?.serving;
+    const servingsNode = json.food?.servings?.serving;
     if (!servingsNode) return null;
 
-    const servings: any[] = Array.isArray(servingsNode) ? servingsNode : [servingsNode];
+    const servings: FatSecretServing[] = Array.isArray(servingsNode)
+      ? servingsNode
+      : [servingsNode];
     const serving = pickGramServing(servings);
     if (!serving) return null;
 
-    const metricAmount = parseFloat(serving.metric_serving_amount);
+    const metricAmount = parseFloat(serving.metric_serving_amount ?? '');
     if (isNaN(metricAmount) || metricAmount <= 0) return null;
 
     // Scale from the serving's metric amount to a 100g basis.
