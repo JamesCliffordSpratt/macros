@@ -41,7 +41,7 @@ export class ZXingLoader {
       return this.instance;
     }
 
-    if (this.loading) {
+    if (this.loading !== null) {
       return this.loading;
     }
 

@@ -30,7 +30,7 @@ export function registerCommands(plugin: MacrosPlugin): void {
         new FoodEntrySelectionModal(
           plugin.app,
           plugin,
-          plugin.dataManager.createFoodItemCallback()
+          (food) => void plugin.dataManager.createFoodItemCallback()(food)
         ).open();
       } catch (error) {
         plugin.logger.error('Error opening food entry selection:', error);
@@ -53,7 +53,7 @@ export function registerCommands(plugin: MacrosPlugin): void {
           plugin.app,
           fallbackKey,
           fallbackSecret,
-          plugin.dataManager.createFoodItemCallback(),
+          (food) => void plugin.dataManager.createFoodItemCallback()(food),
           plugin
         ).open();
       } catch (error) {
@@ -72,7 +72,7 @@ export function registerCommands(plugin: MacrosPlugin): void {
         new ManualFoodEntryModal(
           plugin.app,
           plugin,
-          plugin.dataManager.createFoodItemCallback()
+          (food) => void plugin.dataManager.createFoodItemCallback()(food)
         ).open();
       } catch (error) {
         plugin.logger.error('Error opening manual entry modal:', error);

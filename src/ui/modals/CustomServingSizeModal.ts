@@ -5,7 +5,7 @@ import { t } from '../../lang/I18nManager';
 export class CustomServingSizeModal extends Modal {
   foodName: string;
   defaultServing: number;
-  onSubmit: (customServing: number) => void;
+  onSubmit: (customServing: number) => void | Promise<void>;
   private component: Component;
   private plugin?: MacrosPlugin;
 
@@ -13,7 +13,7 @@ export class CustomServingSizeModal extends Modal {
     app: App,
     foodName: string,
     defaultServing: number,
-    onSubmit: (customServing: number) => void,
+    onSubmit: (customServing: number) => void | Promise<void>,
     plugin?: MacrosPlugin
   ) {
     super(app);
@@ -89,7 +89,7 @@ export class CustomServingSizeModal extends Modal {
       if (isNaN(value) || value <= 0) {
         new Notice(t('validation.invalidServing'));
       } else {
-        this.onSubmit(value);
+        void this.onSubmit(value);
         this.close();
       }
     };

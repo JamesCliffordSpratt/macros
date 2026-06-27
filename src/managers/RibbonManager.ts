@@ -15,7 +15,7 @@ export function setupRibbon(plugin: MacrosPlugin): void {
       new FoodEntrySelectionModal(
         plugin.app,
         plugin,
-        plugin.dataManager.createFoodItemCallback()
+        (food) => void plugin.dataManager.createFoodItemCallback()(food)
       ).open();
     } catch (error) {
       plugin.logger.error('Error opening food entry selection:', error);

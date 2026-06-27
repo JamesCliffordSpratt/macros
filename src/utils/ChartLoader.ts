@@ -20,7 +20,7 @@ export class ChartLoader {
 
   public async loadChart(): Promise<typeof Chart> {
     // If we have a cached promise, return it
-    if (this.loadPromise) return this.loadPromise;
+    if (this.loadPromise !== null) return this.loadPromise;
 
     // Create a new promise for loading
     this.loadPromise = new Promise<typeof Chart>((resolve) => {
