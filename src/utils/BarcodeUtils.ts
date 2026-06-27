@@ -1,3 +1,5 @@
+import { Platform } from 'obsidian';
+
 // Define proper types for ZXing library components
 interface ZXingLibrary {
   BrowserMultiFormatReader?: new () => ZXingCodeReader;
@@ -10,7 +12,7 @@ interface ZXingLibrary {
 }
 
 interface ZXingCodeReader {
-  decode?(target: HTMLCanvasElement | ImageData | unknown): Promise<ZXingResult>;
+  decode?(target: unknown): Promise<ZXingResult>;
   decodeFromCanvas?(canvas: HTMLCanvasElement): Promise<ZXingResult>;
   decodeFromImageData?(imageData: ImageData): Promise<ZXingResult>;
   decodeFromImageElement?(img: HTMLImageElement): Promise<ZXingResult>;
@@ -457,15 +459,13 @@ export class MobilePermissionHandler {
     error?: string;
   }> {
     try {
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
+      const isMobile = Platform.isMobile;
       const isDesktop = !isMobile;
 
       // Check if we're in Obsidian desktop environment
       const isObsidianDesktop =
         !!(window as Window & { require?: unknown }).require ||
-        navigator.userAgent.includes('Electron');
+        Platform.isDesktopApp;
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -567,7 +567,7 @@ export class MobilePermissionHandler {
   private static getDesktopPermissionError(): string {
     const isObsidianDesktop =
       !!(window as Window & { require?: unknown }).require ||
-      navigator.userAgent.includes('Electron');
+      Platform.isDesktopApp;
 
     if (isObsidianDesktop) {
       return `Camera permission denied in Obsidian. Possible solutions:
@@ -593,22 +593,20 @@ export class MobilePermissionHandler {
   }
 
   static shouldShowPermissionInstructions(): boolean {
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+    const isMobile = Platform.isMobile;
     const isObsidianDesktop =
       !!(window as Window & { require?: unknown }).require ||
-      navigator.userAgent.includes('Electron');
+      Platform.isDesktopApp;
 
     return isMobile || isObsidianDesktop;
   }
 
   static getPermissionInstructions(): string {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = Platform.isIosApp;
+    const isAndroid = Platform.isAndroidApp;
     const isObsidianDesktop =
       !!(window as Window & { require?: unknown }).require ||
-      navigator.userAgent.includes('Electron');
+      Platform.isDesktopApp;
 
     if (isObsidianDesktop) {
       return `📱 Desktop: Check Windows camera settings (Settings > Privacy & Security > Camera) and ensure camera access is enabled for apps.`;
