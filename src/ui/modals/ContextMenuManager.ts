@@ -179,7 +179,7 @@ export class ContextMenuManager {
           .setTitle(t('comments.contextMenu.removeComment'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeComment(target, onCommentUpdate);
+            void this.removeComment(target, onCommentUpdate);
           })
       );
     } else {
@@ -210,7 +210,7 @@ export class ContextMenuManager {
           .setTitle(t('timestamps.contextMenu.removeTimestamp'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeTimestamp(target, onCommentUpdate);
+            void this.removeTimestamp(target, onCommentUpdate);
           })
       );
     } else {
@@ -307,7 +307,7 @@ export class ContextMenuManager {
           .setTitle(t('comments.contextMenu.removeComment'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeComment(target, onCommentUpdate);
+            void this.removeComment(target, onCommentUpdate);
           })
       );
     } else {
@@ -338,7 +338,7 @@ export class ContextMenuManager {
           .setTitle(t('timestamps.contextMenu.removeTimestamp'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeTimestamp(target, onCommentUpdate);
+            void this.removeTimestamp(target, onCommentUpdate);
           })
       );
     } else {
@@ -369,7 +369,7 @@ export class ContextMenuManager {
           .setTitle(t('tolerances.contextMenu.removeTolerance'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeTolerance(target, onCommentUpdate);
+            void this.removeTolerance(target, onCommentUpdate);
           })
       );
     } else {
@@ -469,7 +469,7 @@ export class ContextMenuManager {
           .setTitle(t('comments.contextMenu.removeComment'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeComment(target, onCommentUpdate);
+            void this.removeComment(target, onCommentUpdate);
           })
       );
     } else {
@@ -500,7 +500,7 @@ export class ContextMenuManager {
           .setTitle(t('timestamps.contextMenu.removeTimestamp'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeTimestamp(target, onCommentUpdate);
+            void this.removeTimestamp(target, onCommentUpdate);
           })
       );
     } else {
@@ -531,7 +531,7 @@ export class ContextMenuManager {
           .setTitle(t('tolerances.contextMenu.removeTolerance'))
           .setIcon('trash-2')
           .onClick(() => {
-            this.removeTolerance(target, onCommentUpdate);
+            void this.removeTolerance(target, onCommentUpdate);
           })
       );
     } else {
@@ -956,8 +956,4 @@ export class ContextMenuManager {
         };
       }
     } catch (error) {
-      this.plugin.logger.error('Error creating comment target:', error);
-      return null;
-    }
-  }
-}
+      this.plugin.logger.error('Error creating comment target:', error)

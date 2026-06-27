@@ -30,7 +30,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
   // Add a global event listener for refresh events
   plugin.registerEvent(
     plugin.app.workspace.on('layout-change', () => {
-      forceRefreshAllRenderers(plugin);
+      void forceRefreshAllRenderers(plugin);
     })
   );
 

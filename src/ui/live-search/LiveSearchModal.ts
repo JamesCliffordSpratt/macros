@@ -299,9 +299,9 @@ export class LiveFoodSearchModal extends Modal {
         this.currentSearchAbortController = null;
       }
       if (this.isBarcodeSearch) {
-        this.performBarcodeSearch(currentQuery);
+        void this.performBarcodeSearch(currentQuery);
       } else if (!this.restoreResultsFromCache(currentQuery)) {
-        this.performSearch(currentQuery);
+        void this.performSearch(currentQuery);
       }
     }
 
@@ -546,9 +546,9 @@ export class LiveFoodSearchModal extends Modal {
         // Detect if this looks like a barcode (all numbers, 8-14 digits)
         if (/^\d{8,14}$/.test(searchTerm)) {
           this.isBarcodeSearch = true;
-          this.performBarcodeSearch(searchTerm);
+          void this.performBarcodeSearch(searchTerm);
         } else {
-          this.performSearch(searchTerm);
+          void this.performSearch(searchTerm);
         }
       }
     }, 300);
@@ -569,7 +569,7 @@ export class LiveFoodSearchModal extends Modal {
       this.scrollToSelectedResult();
     } else if (event.key === 'Enter' && this.selectedIndex >= 0) {
       event.preventDefault();
-      this.handleFoodSelection(this.results[this.selectedIndex]);
+      void this.handleFoodSelection(this.results[this.selectedIndex]);
     }
   };
 
@@ -1144,7 +1144,7 @@ export class LiveFoodSearchModal extends Modal {
       }
 
       this.component.registerDomEvent(foodDiv, 'click', () => {
-        this.handleFoodSelection(food);
+        void this.handleFoodSelection(food);
       });
 
       this.component.registerDomEvent(foodDiv, 'mouseenter', () => {
@@ -1485,7 +1485,7 @@ ${food.description}
     // Create new scroll handler
     // Fixed: Prefix unused parameter with underscore
     this.scrollHandler = (_event: Event) => {
-      this.handleScroll();
+      void this.handleScroll();
     };
 
     // Add new scroll listener
@@ -1872,3 +1872,4 @@ class FileNameModal extends Modal {
     this.contentEl.empty();
   }
 }
+                                            

@@ -91,7 +91,7 @@ export class MacrosCalcRenderer {
 
   private saveMetricsConfig(): void {
     this.plugin.settings.macroscalcMetricsConfigs = this.metricsConfigs;
-    this.plugin.saveSettings();
+    void this.plugin.saveSettings();
   }
 
   // Add this method to get display options from metrics config
@@ -590,7 +590,7 @@ export class MacrosCalcRenderer {
     this.setNeedsRefresh();
 
     // Force re-render the entire component with fresh calculations
-    this.render(this.lastCalculatedTotals, this.lastBreakdownData);
+    void this.render(this.lastCalculatedTotals, this.lastBreakdownData);
   }
 
   private refreshDashboard(): void {
@@ -979,7 +979,7 @@ export class MacrosCalcRenderer {
 
     const loadingMessage = detailCell.createEl('p', { text: t('general.loading') });
 
-    (async () => {
+    void (async () => {
       try {
         const context = await this.plugin.dataManager.getDocumentContext(item.id);
         const detailContent = detailCell.createDiv();
@@ -1793,11 +1793,4 @@ export class MacrosCalcRenderer {
             this.chartLoader.destroyChart(caloriesChartId);
           }
         } catch (e) {
-          this.plugin.logger.error('Error destroying chart:', e);
-        }
-      });
-
-      this.charts = [];
-    }
-  }
-}
+          this.plugin.logger.er

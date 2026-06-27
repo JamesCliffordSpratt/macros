@@ -855,10 +855,10 @@ export class NutritionalSettingTab extends PluginSettingTab {
     previewCanvas.id = this.chartId;
 
     window.setTimeout(() => {
-      this.initChartPreview(previewCanvas);
+      void this.initChartPreview(previewCanvas);
     }, 50);
 
-    this.initChartPreview(previewCanvas);
+    void this.initChartPreview(previewCanvas);
   }
 
   private renderFoodSourcesTab(containerEl: HTMLElement): void {
@@ -1987,7 +1987,4 @@ export class NutritionalSettingTab extends PluginSettingTab {
         this.previewChart.update();
       }
     } catch (error) {
-      console.error('Error creating preview chart:', error);
-    }
-  }
-}
+      console.error('Error creating previ

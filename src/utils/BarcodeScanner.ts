@@ -655,8 +655,8 @@ export class BarcodeScannerModal extends Modal {
       cls: 'barcode-scanner-controls',
     });
 
-    this.createControlsWithDiagnostics();
-    this.initializeScanner();
+    void this.createControlsWithDiagnostics();
+    void this.initializeScanner();
   }
 
   private async createControlsWithDiagnostics(): Promise<void> {

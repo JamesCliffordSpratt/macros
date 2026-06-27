@@ -214,7 +214,7 @@ export class RefreshManager {
       if (view.previewMode && typeof view.previewMode.rerender === 'function') {
         view.previewMode.rerender(true);
       } else {
-        leaf.setViewState(leaf.getViewState());
+        void leaf.setViewState(leaf.getViewState());
       }
     });
   }

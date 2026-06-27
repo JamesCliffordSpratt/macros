@@ -573,7 +573,7 @@ export class AddToMacrosModal extends Modal {
       // When the modal closes, refresh the meals list
       addMealModal.onClose = () => {
         // Reload meal data and re-render
-        this.loadData().then(() => {
+        void this.loadData().then(() => {
           this.filterAndRender(this.searchInput.value);
         });
       };
@@ -664,7 +664,7 @@ export class AddToMacrosModal extends Modal {
       });
 
       this.component.registerDomEvent(addButton, 'click', () => {
-        this.addMeal(meal);
+        void this.addMeal(meal);
       });
 
       // Add selection state
@@ -744,7 +744,7 @@ export class AddToMacrosModal extends Modal {
       });
 
       this.component.registerDomEvent(addButton, 'click', () => {
-        this.addFood(food);
+        void this.addFood(food);
       });
 
       // Check if already selected
@@ -837,7 +837,7 @@ export class AddToMacrosModal extends Modal {
           new Notice(t('meals.addTo.enterGroupNameFirst'));
           return;
         }
-        this.addFoodToGroup(food);
+        void this.addFoodToGroup(food);
       });
 
       // Check if already selected for group

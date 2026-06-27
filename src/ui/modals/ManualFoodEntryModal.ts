@@ -457,9 +457,9 @@ export class ManualFoodEntryModal extends Modal {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         if (e.ctrlKey || e.metaKey) {
-          this.handleAddMore();
+          void this.handleAddMore();
         } else {
-          this.handleSave();
+          void this.handleSave();
         }
       }
     });
@@ -555,11 +555,11 @@ export class ManualFoodEntryModal extends Modal {
     });
 
     this.component.registerDomEvent(addMoreBtn, 'click', () => {
-      this.handleAddMore();
+      void this.handleAddMore();
     });
 
     this.component.registerDomEvent(saveBtn, 'click', () => {
-      this.handleSave();
+      void this.handleSave();
     });
 
     // Handle Enter key submission
@@ -567,9 +567,9 @@ export class ManualFoodEntryModal extends Modal {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         if (e.ctrlKey || e.metaKey) {
-          this.handleAddMore();
+          void this.handleAddMore();
         } else {
-          this.handleSave();
+          void this.handleSave();
         }
       }
     };

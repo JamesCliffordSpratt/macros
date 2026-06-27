@@ -252,12 +252,12 @@ export class EditMealTemplateModal extends Modal {
         });
 
           this.component.registerDomEvent(editButton, 'click', () => {
-            this.editFoodServing(food);
+            void this.editFoodServing(food);
           });
         }
 
         this.component.registerDomEvent(removeButton, 'click', () => {
-          this.removeFood(food);
+          void this.removeFood(food);
         });
 
         foodCard.addClass('selected');
@@ -270,7 +270,7 @@ export class EditMealTemplateModal extends Modal {
         });
 
         this.component.registerDomEvent(addButton, 'click', () => {
-          this.addFood(food);
+          void this.addFood(food);
         });
       }
     });
@@ -392,7 +392,7 @@ export class EditMealTemplateModal extends Modal {
         });
 
         this.component.registerDomEvent(removeButton, 'click', () => {
-          this.removeFood(food);
+          void this.removeFood(food);
         });
       });
     }

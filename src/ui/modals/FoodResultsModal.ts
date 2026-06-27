@@ -39,7 +39,7 @@ export class FoodResultsModal extends Modal {
   }
 
   onOpen() {
-    this.loadPage(0);
+    void this.loadPage(0);
 
     // Add document-level event handling - register with component for cleanup
     this.component.registerDomEvent(activeDocument, 'keydown', this.handleKeyNav);
