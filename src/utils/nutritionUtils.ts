@@ -98,7 +98,7 @@ export function processNutritionalData(
   const fm = cache.frontmatter as Record<string, unknown>;
   // Coerce to string: YAML may parse `serving_size: 100` as a number, and a
   // runtime number would throw on `.toLowerCase()`.
-  const storedServing = fm['serving_size'] != null ? String(fm['serving_size']) : '';
+  const storedServing = fm['serving_size'] != null ? String(fm['serving_size'] as string | number) : '';
   if (!storedServing.toLowerCase().includes('g')) return null;
 
   const storedServingGrams = parseGrams(storedServing);

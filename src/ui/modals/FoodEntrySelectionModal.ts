@@ -49,7 +49,7 @@ export class FoodEntrySelectionModal extends Modal {
     });
 
     const liveSearchIcon = liveSearchOption.createDiv({ cls: 'option-icon' });
-    liveSearchIcon.innerHTML = '🔍'; // Search icon
+    liveSearchIcon.setText('🔍'); // Search icon
 
     const liveSearchContent = liveSearchOption.createDiv({ cls: 'option-content' });
     liveSearchContent.createEl('h3', { text: t('food.entry.liveSearch') });
@@ -75,7 +75,7 @@ export class FoodEntrySelectionModal extends Modal {
     });
 
     const manualEntryIcon = manualEntryOption.createDiv({ cls: 'option-icon' });
-    manualEntryIcon.innerHTML = '✏️'; // Edit icon
+    manualEntryIcon.setText('✏️'); // Edit icon
 
     const manualEntryContent = manualEntryOption.createDiv({ cls: 'option-content' });
     manualEntryContent.createEl('h3', { text: t('food.entry.manualEntry') });

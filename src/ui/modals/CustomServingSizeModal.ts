@@ -49,7 +49,7 @@ export class CustomServingSizeModal extends Modal {
           if (defaultServingSize) {
             // Parse the default serving size (remove 'g' suffix if present)
             const parsedDefaultServing = parseFloat(
-              String(defaultServingSize).replace(/g$/i, '')
+              String(defaultServingSize as string | number).replace(/g$/i, '')
             );
             if (!isNaN(parsedDefaultServing) && parsedDefaultServing > 0) {
               suggestedServing = parsedDefaultServing;
