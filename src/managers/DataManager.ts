@@ -1,7 +1,9 @@
 import { TFolder, TFile, normalizePath } from 'obsidian';
 import MacrosPlugin from '../main';
 import { processNutritionalData } from '../utils/nutritionUtils';
-import { fetchFatSecretMicronutrients } from '../core/api';
+import { fetchFatSecretMicronutrients, FoodItem } from '../core/api';
+import { UnifiedFoodResult } from '../core/search';
+import { OffFoodResult } from '../core/openFoodFacts';
 import {
   MICRONUTRIENT_KEYS,
   MICRONUTRIENT_MAP,
@@ -242,7 +244,7 @@ export class DataManager {
    * FIXED: Proper file existence checking and error handling
    */
   createFoodItemCallback() {
-    return async (selectedFood: any) => {
+    return async (selectedFood: UnifiedFoodResult | FoodItem) => {
       try {
         let foodName: string;
         let servingSize: string;
@@ -270,8 +272,9 @@ export class DataManager {
           source: 'unknown',
         };
 
-        // Check if this is a UnifiedFoodResult (from the new search system)
-        if (selectedFood.source) {
+        // Check if this is a UnifiedFoodResult (from the new search system).
+        // The legacy FatSecret FoodItem has no `source` field.
+        if ('source' in selectedFood) {
           foodName = selectedFood.name;
 
           if (selectedFood.source === 'openfoodfacts') {
@@ -280,7 +283,7 @@ export class DataManager {
 
             // Extract nutrition from description or raw data
             if (selectedFood.raw && typeof selectedFood.raw === 'object') {
-              const offData = selectedFood.raw;
+              const offData = selectedFood.raw as OffFoodResult;
               nutritionalData = {
                 calories: offData.calories?.toString() || '0',
                 protein: offData.protein?.toString() || '0',
@@ -333,9 +336,10 @@ export class DataManager {
             };
           } else {
             // Handle FatSecret format (existing code)
-            if (selectedFood.raw && selectedFood.raw.food_description) {
-              servingSize = this.extractServingSize(selectedFood.raw.food_description);
-              nutritionalData = this.extractNutritionalData(selectedFood.raw.food_description);
+            const fsRaw = selectedFood.raw as { food_description?: string } | undefined;
+            if (fsRaw && fsRaw.food_description) {
+              servingSize = this.extractServingSize(fsRaw.food_description);
+              nutritionalData = this.extractNutritionalData(fsRaw.food_description);
             } else {
               servingSize = `${selectedFood.gramsServing}g`;
               nutritionalData = this.extractNutritionalDataFromDescription(
@@ -362,17 +366,24 @@ export class DataManager {
           throw new Error('Food name is missing');
         }
 
+        // Narrowed views for the branches below (selectedFood is a union here).
+        const unified: UnifiedFoodResult | undefined =
+          'source' in selectedFood ? selectedFood : undefined;
+        const legacyItem: FoodItem | undefined =
+          'source' in selectedFood ? undefined : selectedFood;
+
         // ---- Resolve micronutrients ----------------------------------------
         // USDA and Open Food Facts attach canonical micronutrients (per 100g)
         // directly to the unified result. FatSecret only returns macros from
         // search, so fetch detailed per-serving data on demand via food.get.v4.
         let micronutrients: Record<string, number> = {};
-        if (selectedFood.micronutrients && typeof selectedFood.micronutrients === 'object') {
-          micronutrients = { ...selectedFood.micronutrients };
+        if (unified?.micronutrients && typeof unified.micronutrients === 'object') {
+          micronutrients = { ...unified.micronutrients };
         }
 
         if (Object.keys(micronutrients).length === 0 && additionalMetadata.source === 'fatsecret') {
-          const foodId: string | undefined = selectedFood.raw?.food_id || selectedFood.food_id;
+          const foodId: string | undefined =
+            (unified?.raw as { food_id?: string } | undefined)?.food_id ?? legacyItem?.food_id;
           const fsKey = this.plugin.settings.fatSecretApiKey?.trim();
           const fsSecret = this.plugin.settings.fatSecretApiSecret?.trim();
           if (foodId && fsKey && fsSecret) {
@@ -446,8 +457,8 @@ serving_size: ${servingSize}`;
 
         if (additionalMetadata.source === 'openfoodfacts') {
           // Add Open Food Facts specific fields
-          if (selectedFood.id) {
-            frontmatter += `\noff_code: ${selectedFood.id.replace('off_', '')}`;
+          if (unified?.id) {
+            frontmatter += `\noff_code: ${unified.id.replace('off_', '')}`;
           }
           if (additionalMetadata.brands) {
             frontmatter += `\nbrands: "${additionalMetadata.brands}"`;
@@ -475,17 +486,17 @@ serving_size: ${servingSize}`;
           }
         } else if (additionalMetadata.source === 'usda') {
           // Add USDA specific fields (existing code)
-          if (selectedFood.id) {
-            frontmatter += `\nfdc_id: ${selectedFood.id.replace('usda_', '')}`;
+          if (unified?.id) {
+            frontmatter += `\nfdc_id: ${unified.id.replace('usda_', '')}`;
           }
-          if (selectedFood.dataType) {
-            frontmatter += `\ndata_type: ${selectedFood.dataType}`;
+          if (unified?.dataType) {
+            frontmatter += `\ndata_type: ${unified.dataType}`;
           }
-          if (selectedFood.isFoundation) {
+          if (unified?.isFoundation) {
             frontmatter += `\nfoundation_food: true`;
           }
-          if (selectedFood.brandName) {
-            frontmatter += `\nbrand_name: "${selectedFood.brandName}"`;
+          if (unified?.brandName) {
+            frontmatter += `\nbrand_name: "${unified.brandName}"`;
           }
         }
 
@@ -608,7 +619,7 @@ ${additionalMetadata.ingredients}`;
           await this.plugin.app.vault.create(filePath, frontmatter);
           this.invalidateFileCache();
         } catch (createError) {
-          if (createError.message?.includes('already exists')) {
+          if (createError instanceof Error && createError.message.includes('already exists')) {
             throw new Error(
               'File was created by another process. Please try again with a different name.'
             );
@@ -899,7 +910,7 @@ ${additionalMetadata.ingredients}`;
         const processedIds = new Set<string>();
 
         // Process each macros block in the file
-        let match;
+        let match: RegExpExecArray | null;
         while ((match = regex.exec(content)) !== null) {
           const id = match[1];
           const blockContent = match[2];
@@ -1196,7 +1207,7 @@ ${additionalMetadata.ingredients}`;
   updateGlobalMacroTableFromContent(content: string): void {
     try {
       const regex = /```[\t ]*macros[\t ]+id:[\t ]*(\S+)[\t ]*\n([\s\S]*?)```/g;
-      let match;
+      let match: RegExpExecArray | null;
 
       while ((match = regex.exec(content)) !== null) {
         const id = match[1];
