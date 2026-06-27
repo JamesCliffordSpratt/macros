@@ -12,8 +12,8 @@ import { ManualFoodEntryModal } from '../ui/modals/ManualFoodEntryModal';
 export function registerCommands(plugin: MacrosPlugin): void {
   // Command: Force reload macros (always available)
   plugin.addCommand({
-    id: 'force-reload-macros',
-    name: 'Force reload all macros',
+    id: 'force-reload',
+    name: 'Force reload all tables',
     callback: async () => {
       new Notice('Forcing complete reload of all macros data...');
       await plugin.forceCompleteReload();
