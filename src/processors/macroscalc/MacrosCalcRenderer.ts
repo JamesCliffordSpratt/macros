@@ -1793,4 +1793,11 @@ export class MacrosCalcRenderer {
             this.chartLoader.destroyChart(caloriesChartId);
           }
         } catch (e) {
-          this.plugin.logger.er
+          this.plugin.logger.error('Error destroying chart:', e);
+        }
+      });
+
+      this.charts = [];
+    }
+  }
+}

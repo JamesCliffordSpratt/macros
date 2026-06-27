@@ -956,4 +956,8 @@ export class ContextMenuManager {
         };
       }
     } catch (error) {
-      this.plugin.logger.error('Error creating comment target:', error)
+      this.plugin.logger.error('Error creating comment target:', error);
+      return null;
+    }
+  }
+}

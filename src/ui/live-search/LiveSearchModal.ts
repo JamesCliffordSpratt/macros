@@ -1872,4 +1872,3 @@ class FileNameModal extends Modal {
     this.contentEl.empty();
   }
 }
-                                            

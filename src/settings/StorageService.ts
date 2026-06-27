@@ -1987,4 +1987,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         this.previewChart.update();
       }
     } catch (error) {
-      console.error('Error creating previ
+      console.error('Error creating preview chart:', error);
+    }
+  }
+}
