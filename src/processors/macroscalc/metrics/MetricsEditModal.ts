@@ -124,8 +124,8 @@ export class MetricsEditModal extends Modal {
     return categoryNames[categoryKey] || categoryKey.toUpperCase();
   }
 
-  private groupMetricsByCategory(): Record<string, any[]> {
-    const categories: Record<string, any[]> = {};
+  private groupMetricsByCategory(): Record<string, unknown[]> {
+    const categories: Record<string, unknown[]> = {};
 
     this.registry.getAll().forEach((metric) => {
       const category = metric.category || 'other';
@@ -138,7 +138,7 @@ export class MetricsEditModal extends Modal {
     return categories;
   }
 
-  private renderMetricSetting(container: HTMLElement, metric: any): void {
+  private renderMetricSetting(container: HTMLElement, metric: unknown): void {
     // Find the working config for this metric (should always exist now)
     const config = this.workingConfigs.find((c) => c.id === metric.id);
     if (!config) {
@@ -211,7 +211,7 @@ export class MetricsEditModal extends Modal {
   private updateConfigVisibility(
     settingItem: HTMLElement,
     enabled: boolean,
-    metric: any,
+    metric: unknown,
     config: MetricConfig
   ): void {
     // Remove existing config container
@@ -227,7 +227,7 @@ export class MetricsEditModal extends Modal {
 
       if (configUI) {
         // Create change handler for config updates
-        const onChange = (newSettings: Record<string, any>) => {
+        const onChange = (newSettings: Record<string, unknown>) => {
           const workingConfig = this.workingConfigs.find((c) => c.id === metric.id);
           if (workingConfig) {
             workingConfig.settings = { ...workingConfig.settings, ...newSettings };

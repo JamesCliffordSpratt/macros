@@ -455,7 +455,7 @@ export class MacrosCalcRenderer {
     const metricResults = registry.calculateMetrics(metricsData, this.metricsConfigs);
 
     // Group metrics by category
-    const categorizedMetrics = new Map<string, { metric: any; values: any[] }[]>();
+    const categorizedMetrics = new Map<string, { metric: unknown; values: unknown[] }[]>();
 
     for (const [metricId, values] of metricResults) {
       const metric = registry.get(metricId);
@@ -465,7 +465,7 @@ export class MacrosCalcRenderer {
       if (!categorizedMetrics.has(category)) {
         categorizedMetrics.set(category, []);
       }
-      categorizedMetrics.get(category)!.push({ metric, values });
+      categorizedMetrics.get(category).push({ metric, values });
     }
 
     // Render categories in a specific order (excluding display since it doesn't show metrics)
@@ -527,7 +527,7 @@ export class MacrosCalcRenderer {
 
   private createCustomMetricCard(
     container: HTMLElement,
-    metricValue: any,
+    metricValue: unknown,
     category?: string
   ): void {
     const card = container.createDiv({
@@ -606,10 +606,10 @@ export class MacrosCalcRenderer {
   private toggleDashboard(container: HTMLElement, toggleButton: HTMLElement): void {
     this.isDashboardCollapsed = !this.isDashboardCollapsed;
 
-    const dashboardHeader = container.querySelector('.macroscalc-dashboard-header') as HTMLElement;
-    const content = container.querySelector('.macroscalc-dashboard-content') as HTMLElement;
-    const tableContainer = this.el.querySelector('.macroscalc-container') as HTMLElement;
-    const chartSection = this.el.querySelector('.macroscalc-chart-section') as HTMLElement;
+    const dashboardHeader = container.querySelector('.macroscalc-dashboard-header');
+    const content = container.querySelector('.macroscalc-dashboard-content');
+    const tableContainer = this.el.querySelector('.macroscalc-container');
+    const chartSection = this.el.querySelector('.macroscalc-chart-section');
 
     // Update the toggle button and header state
     toggleButton.classList.toggle('collapsed', this.isDashboardCollapsed);
@@ -1336,7 +1336,7 @@ export class MacrosCalcRenderer {
   }
 
   private toggleDetailRow(id: string, toggle: HTMLElement): void {
-    const detailRow = this.el.querySelector(`tr[data-parent-id="${id}"]`) as HTMLTableRowElement;
+    const detailRow = this.el.querySelector(`tr[data-parent-id="${id}"]`);
 
     if (!detailRow) return;
 

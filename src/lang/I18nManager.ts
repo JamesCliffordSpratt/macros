@@ -74,7 +74,7 @@ export class I18nManager {
    * Clean up resources when plugin is unloaded
    */
   static unload(): void {
-    this.instance = null as unknown as I18nManager;
+    this.instance = null;
   }
 
   /**

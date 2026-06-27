@@ -60,13 +60,13 @@ export class ZXingLoader {
       // Method 1: Try browser-specific import first
       async (): Promise<ZXingLibrary> => {
         const ZXing = await import('@zxing/browser');
-        return ZXing as unknown as ZXingLibrary;
+        return ZXing as unknown;
       },
 
       // Method 2: Try ES module import
       async (): Promise<ZXingLibrary> => {
         const ZXing = await import('@zxing/library');
-        return ZXing as unknown as ZXingLibrary;
+        return ZXing as unknown;
       },
 
       // Method 3: Try browser-specific CDN with full browser support

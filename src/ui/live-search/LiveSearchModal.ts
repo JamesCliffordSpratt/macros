@@ -931,7 +931,7 @@ export class LiveFoodSearchModal extends Modal {
             }
             return result;
           })
-          .filter(Boolean) as typeof newResults;
+          .filter(Boolean);
       }
     }
 

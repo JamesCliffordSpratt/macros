@@ -48,7 +48,7 @@ export class MacroService {
    * Clean up resources when plugin is unloaded
    */
   static unload(): void {
-    this.instance = null as unknown as MacroService;
+    this.instance = null;
   }
 
   /**

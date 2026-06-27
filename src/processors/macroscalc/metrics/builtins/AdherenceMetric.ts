@@ -15,8 +15,8 @@ export class AdherenceMetric implements MacroscalcMetric {
     return {
       render: (
         container: HTMLElement,
-        config: Record<string, any>,
-        onChange: (config: Record<string, any>) => void
+        config: Record<string, unknown>,
+        onChange: (config: Record<string, unknown>) => void
       ) => {
         new Setting(container)
           .setName(t('metrics.adherence.calorieTolerance'))

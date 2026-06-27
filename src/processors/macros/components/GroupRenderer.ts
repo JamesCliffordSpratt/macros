@@ -345,7 +345,7 @@ export class GroupRenderer {
     headerRow: HTMLTableRowElement,
     table: HTMLTableElement
   ): void {
-    const sectionName = headerRow.dataset.section as string;
+    const sectionName = headerRow.dataset.section;
 
     let isCollapsed = false;
 

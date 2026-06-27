@@ -35,7 +35,7 @@ export interface MealTemplate {
 export interface MetricConfig {
   id: string;
   enabled: boolean;
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export interface PluginSettings {
@@ -163,7 +163,7 @@ class SortableTabOrder extends Component {
   private setupEventListeners(): void {
     this.registerDomEvent(this.listEl, 'dragstart', (e: DragEvent) => {
       const target = e.target as HTMLElement;
-      const listItem = target.closest('.sortable-tab-item') as HTMLElement;
+      const listItem = target.closest('.sortable-tab-item');
 
       if (listItem) {
         this.draggedItem = listItem;
@@ -194,7 +194,7 @@ class SortableTabOrder extends Component {
       e.preventDefault();
 
       const target = e.target as HTMLElement;
-      const listItem = target.closest('.sortable-tab-item') as HTMLElement;
+      const listItem = target.closest('.sortable-tab-item');
 
       if (listItem && listItem !== this.draggedItem) {
         this.listEl.querySelectorAll('.sortable-tab-item').forEach((item) => {
@@ -218,7 +218,7 @@ class SortableTabOrder extends Component {
       if (!this.draggedItem) return;
 
       const target = e.target as HTMLElement;
-      const dropTarget = target.closest('.sortable-tab-item') as HTMLElement;
+      const dropTarget = target.closest('.sortable-tab-item');
 
       if (dropTarget && dropTarget !== this.draggedItem) {
         const dropIndex = parseInt(dropTarget.dataset.index || '0');
@@ -386,7 +386,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     }
 
     // Re-render content
-    const contentEl = this.containerEl.querySelector('.macros-settings-content') as HTMLElement;
+    const contentEl = this.containerEl.querySelector('.macros-settings-content');
     if (contentEl) {
       this.renderActiveTab(contentEl);
     }

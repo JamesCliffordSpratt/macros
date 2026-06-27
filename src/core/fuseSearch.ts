@@ -23,7 +23,7 @@ export interface FoodDoc {
 /**
  * Fuse.js search configuration optimized for food search
  */
-const FUSE_OPTIONS: any = {
+const FUSE_OPTIONS: unknown = {
   keys: [
     { name: 'food_name', weight: 0.7 },
     { name: 'brandOwner', weight: 0.2 },

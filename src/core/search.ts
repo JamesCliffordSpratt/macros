@@ -184,7 +184,7 @@ export function mergeAndDedupeResults(...results: UnifiedFoodResult[][]): Unifie
 
     // If we already have a result with this normalized name, prefer based on enhanced priority
     if (resultMap.has(normalizedKey)) {
-      const existing = resultMap.get(normalizedKey)!;
+      const existing = resultMap.get(normalizedKey);
 
       // Enhanced priority order including Open Food Facts
       const getResultPriority = (r: UnifiedFoodResult): number => {
