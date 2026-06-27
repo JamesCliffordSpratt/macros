@@ -165,7 +165,7 @@ export async function searchFoods(
               .filter((food) => food !== null);
           }
         }
-      } catch (typeError) {
+      } catch {
         // Ignore individual data-type failures; other types may still succeed.
       }
       return [];
@@ -188,7 +188,7 @@ export async function searchFoods(
     }
 
     return allResults.slice(0, pageSize);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -223,7 +223,7 @@ function processFoodItem(food: UsdaFood): UsdaFoodResult | null {
       isSrLegacy,
       micronutrients: extractUsdaMicronutrients(food),
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -375,7 +375,7 @@ function createDisplayDescription(food: UsdaFood, gramsServing: number): string 
     }
 
     return `Per ${standardGrams}g - Calories: ${scaledCalories}kcal | Fat: ${scaledFat}g | Carbs: ${scaledCarbs}g | Protein: ${scaledProtein}g${typeIndicator}`;
-  } catch (error) {
+  } catch {
     return `Per 100g${food.dataType === 'Foundation' ? ' [Foundation]' : ''}`;
   }
 }
@@ -501,10 +501,11 @@ export async function searchFoodsWithFallback(
       body: JSON.stringify(foundationOnlyBody),
     });
 
-    if (foundationResponse.json && foundationResponse.json.foods) {
-      const foundationFoods = foundationResponse.json.foods
-        .map((food: UsdaFood) => processFoodItem(food))
-        .filter((food: UsdaFoodResult | null) => food !== null) as UsdaFoodResult[];
+    const foundationData = foundationResponse.json as UsdaApiResponse;
+    if (foundationData && foundationData.foods) {
+      const foundationFoods = foundationData.foods
+        .map((food) => processFoodItem(food))
+        .filter((food): food is UsdaFoodResult => food !== null);
 
       if (foundationFoods.length > 0) {
         return foundationFoods.slice(0, pageSize);
@@ -512,7 +513,7 @@ export async function searchFoodsWithFallback(
     }
 
     return [];
-  } catch (error) {
+  } catch {
     return [];
   }
 }

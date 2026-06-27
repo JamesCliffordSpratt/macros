@@ -1,6 +1,6 @@
 import { App } from 'obsidian';
 import { UnifiedFoodResult } from './search';
-import { getOffProductDetails } from './openFoodFacts';
+import { getOffProductDetails, OffFoodResult } from './openFoodFacts';
 
 export interface BarcodeSearchOptions {
   openFoodFacts?: { enabled: boolean };
@@ -32,7 +32,7 @@ export async function searchByBarcode(
       if (offResult) {
         results.push(offResult);
       }
-    } catch (error) {
+    } catch {
       // Silent fallback to next source
     }
   }
@@ -44,7 +44,7 @@ export async function searchByBarcode(
       if (usdaResults.length > 0) {
         results.push(...usdaResults);
       }
-    } catch (error) {
+    } catch {
       // Silent fallback - USDA barcode support is limited anyway
     }
   }
@@ -94,7 +94,7 @@ async function searchOpenFoodFactsByBarcode(
     }
 
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -102,7 +102,7 @@ async function searchOpenFoodFactsByBarcode(
 /**
  * Convert OffFoodResult to UnifiedFoodResult
  */
-function convertToUnifiedResult(product: any): UnifiedFoodResult {
+function convertToUnifiedResult(product: OffFoodResult): UnifiedFoodResult {
   return {
     id: `off_${product.code}`,
     name: product.productName,
@@ -192,7 +192,7 @@ async function searchUsdaByBarcode(
       dataType: item.dataType,
       raw: item,
     }));
-  } catch (error) {
+  } catch {
     return [];
   }
 }

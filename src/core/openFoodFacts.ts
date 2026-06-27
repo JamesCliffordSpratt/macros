@@ -130,6 +130,13 @@ export interface OffSearchResponse {
   products: OffProduct[];
 }
 
+/** Response shape for the OFF single-product (`/api/v*/product/<barcode>`) endpoint. */
+export interface OffProductResponse {
+  status?: number | string;
+  status_verbose?: string;
+  product?: OffProduct;
+}
+
 export interface OffFoodResult {
   code: string;
   productName: string;
@@ -248,8 +255,8 @@ function getLocalizedField(
   ];
 
   for (const fieldName of fallbackChain) {
-    const value = (product as any)[fieldName];
-    if (value && typeof value === 'string' && value.trim().length > 0) {
+    const value = (product as unknown as Record<string, unknown>)[fieldName];
+    if (typeof value === 'string' && value.trim().length > 0) {
       return value.trim();
     }
   }
@@ -359,7 +366,7 @@ function processOffProduct(product: OffProduct, userLocale = 'en'): OffFoodResul
       micronutrients: extractOffMicronutrients(nutriments),
       source: 'openfoodfacts' as const,
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -461,7 +468,7 @@ export async function searchOpenFoodFacts(
     });
 
     return mergedResults.slice(0, pageSize);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -514,12 +521,12 @@ async function searchOpenFoodFactsCGI(
 
       if (!response.json || response.status !== 200) return [];
 
-      const data = response.json;
+      const data = response.json as OffSearchResponse | OffProduct[];
       let products: OffProduct[] = [];
-      if (data.products && Array.isArray(data.products)) {
-        products = data.products;
-      } else if (Array.isArray(data)) {
+      if (Array.isArray(data)) {
         products = data;
+      } else if (data.products && Array.isArray(data.products)) {
+        products = data.products;
       } else {
         return [];
       }
@@ -530,7 +537,7 @@ async function searchOpenFoodFactsCGI(
         if (processed) out.push(processed);
       }
       return out;
-    } catch (instanceError) {
+    } catch {
       return [];
     }
   };
@@ -555,7 +562,7 @@ async function searchOpenFoodFactsCGI(
     }
 
     return Array.from(merged.values()).slice(0, pageSize);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -648,7 +655,7 @@ async function searchOpenFoodFactsV2(
     }
 
     return results;
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -692,7 +699,7 @@ export async function getOffProductDetails(
           continue; // Try next endpoint
         }
 
-        const data = response.json;
+        const data = response.json as OffProductResponse;
 
         // Handle different status formats from OFF API
         let isProductFound = false;
@@ -722,14 +729,14 @@ export async function getOffProductDetails(
         } else {
           continue; // Try next endpoint
         }
-      } catch (endpointError) {
+      } catch {
         continue; // Try next endpoint
       }
     }
 
     // If we get here, all endpoints failed
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -809,7 +816,7 @@ export async function searchOffByCategory(
     }
 
     return results.slice(0, pageSize);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
