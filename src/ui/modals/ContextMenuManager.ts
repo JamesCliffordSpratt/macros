@@ -238,9 +238,9 @@ export class ContextMenuManager {
     this.applyMenuStyling();
 
     const originalHide = menu.hide.bind(menu) as () => void;
-    (menu as Menu & { hide: () => void }).hide = () => {
+    (menu as unknown as { hide: () => void }).hide = () => {
       this.restoreTooltips();
-      return originalHide();
+      originalHide();
     };
 
     window.setTimeout(() => {
@@ -397,9 +397,9 @@ export class ContextMenuManager {
     this.applyMenuStyling();
 
     const originalHide = menu.hide.bind(menu) as () => void;
-    (menu as Menu & { hide: () => void }).hide = () => {
+    (menu as unknown as { hide: () => void }).hide = () => {
       this.restoreTooltips();
-      return originalHide();
+      originalHide();
     };
 
     window.setTimeout(() => {
@@ -583,9 +583,9 @@ export class ContextMenuManager {
     this.applyMenuStyling();
 
     const originalHide = menu.hide.bind(menu) as () => void;
-    (menu as Menu & { hide: () => void }).hide = () => {
+    (menu as unknown as { hide: () => void }).hide = () => {
       this.restoreTooltips();
-      return originalHide();
+      originalHide();
     };
 
     window.setTimeout(() => {
