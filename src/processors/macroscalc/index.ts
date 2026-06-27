@@ -107,7 +107,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
       // Setup cleanup
       plugin.registerEvent(
         plugin.app.workspace.on('layout-change', () => {
-          if (!el.isConnected || !document.contains(el)) {
+          if (!el.isConnected || !activeDocument.contains(el)) {
             plugin.macroService._activeMacrosCalcRenderers.delete(renderer);
           }
         })
@@ -131,7 +131,7 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
     plugin.logger.debug(`Force refreshing all macroscalc renderers`);
 
     // First, find all macroscalc elements in the DOM
-    const macroscalcElements = document.querySelectorAll('[data-macroscalc-ids]');
+    const macroscalcElements = activeDocument.querySelectorAll('[data-macroscalc-ids]');
 
     if (macroscalcElements.length > 0) {
       plugin.logger.debug(`Found ${macroscalcElements.length} macroscalc elements to refresh`);
@@ -193,7 +193,7 @@ async function forceRefreshAllRenderers(plugin: MacrosPlugin): Promise<void> {
 
       for (const renderer of plugin.macroService._activeMacrosCalcRenderers) {
         // Check if the renderer's element is still in the DOM
-        if (renderer.el && renderer.el.isConnected && document.contains(renderer.el)) {
+        if (renderer.el && renderer.el.isConnected && activeDocument.contains(renderer.el)) {
           validRenderers.add(renderer);
         }
       }

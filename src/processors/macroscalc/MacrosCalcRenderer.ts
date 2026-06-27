@@ -1,4 +1,5 @@
 import MacrosPlugin from '../../main';
+import { MetricValue, MacroscalcMetric } from './metrics/MetricsRegistry';
 import {
   formatCalories,
   formatGrams,
@@ -189,7 +190,7 @@ export class MacrosCalcRenderer {
     const displayOptions = this.getDisplayOptions();
 
     // Create a document fragment to batch DOM operations
-    const fragment = document.createDocumentFragment();
+    const fragment = activeDocument.createDocumentFragment();
     this.el.empty();
 
     // Load state from MacrosState
@@ -455,7 +456,7 @@ export class MacrosCalcRenderer {
     const metricResults = registry.calculateMetrics(metricsData, this.metricsConfigs);
 
     // Group metrics by category
-    const categorizedMetrics = new Map<string, { metric: unknown; values: unknown[] }[]>();
+    const categorizedMetrics = new Map<string, { metric: MacroscalcMetric; values: MetricValue[] }[]>();
 
     for (const [metricId, values] of metricResults) {
       const metric = registry.get(metricId);
@@ -527,7 +528,7 @@ export class MacrosCalcRenderer {
 
   private createCustomMetricCard(
     container: HTMLElement,
-    metricValue: unknown,
+    metricValue: MetricValue,
     category?: string
   ): void {
     const card = container.createDiv({
@@ -1005,7 +1006,7 @@ export class MacrosCalcRenderer {
         ];
 
         detailHeaderData.forEach((headerInfo) => {
-          const th = document.createElement('th');
+          const th = activeDocument.createElement('th');
           const desktopSpan = createEl('span', {
             cls: 'header-text-desktop',
             text: headerInfo.text,
@@ -1708,7 +1709,7 @@ export class MacrosCalcRenderer {
       this.plugin.logger.debug('Chart created successfully:', chart);
 
       const resizeHandler = () => {
-        if (document.contains(chartCanvas)) {
+        if (activeDocument.contains(chartCanvas)) {
           chart.resize();
         }
       };
@@ -1747,7 +1748,7 @@ export class MacrosCalcRenderer {
       t('table.headers.fat'),
       t('table.headers.carbs'),
     ].forEach((header) => {
-      const th = document.createElement('th');
+      const th = activeDocument.createElement('th');
       th.textContent = header;
       headerRow.appendChild(th);
     });

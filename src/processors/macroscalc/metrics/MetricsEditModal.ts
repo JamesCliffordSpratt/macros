@@ -1,6 +1,6 @@
 import { Modal } from 'obsidian';
 import MacrosPlugin from '../../../main';
-import { MetricsRegistry, MetricConfig } from './MetricsRegistry';
+import { MetricsRegistry, MetricConfig, MacroscalcMetric } from './MetricsRegistry';
 import { t } from '../../../lang/I18nManager';
 
 export class MetricsEditModal extends Modal {
@@ -124,8 +124,8 @@ export class MetricsEditModal extends Modal {
     return categoryNames[categoryKey] || categoryKey.toUpperCase();
   }
 
-  private groupMetricsByCategory(): Record<string, unknown[]> {
-    const categories: Record<string, unknown[]> = {};
+  private groupMetricsByCategory(): Record<string, MacroscalcMetric[]> {
+    const categories: Record<string, MacroscalcMetric[]> = {};
 
     this.registry.getAll().forEach((metric) => {
       const category = metric.category || 'other';
@@ -138,7 +138,7 @@ export class MetricsEditModal extends Modal {
     return categories;
   }
 
-  private renderMetricSetting(container: HTMLElement, metric: unknown): void {
+  private renderMetricSetting(container: HTMLElement, metric: MacroscalcMetric): void {
     // Find the working config for this metric (should always exist now)
     const config = this.workingConfigs.find((c) => c.id === metric.id);
     if (!config) {
@@ -211,7 +211,7 @@ export class MetricsEditModal extends Modal {
   private updateConfigVisibility(
     settingItem: HTMLElement,
     enabled: boolean,
-    metric: unknown,
+    metric: MacroscalcMetric,
     config: MetricConfig
   ): void {
     // Remove existing config container

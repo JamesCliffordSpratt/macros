@@ -217,7 +217,7 @@ export class RenameConfirmationModal extends Modal {
   }
 
   private addStyles(): void {
-    const styleEl = document.createElement('style');
+    const styleEl = activeDocument.createElement('style');
     styleEl.textContent = `
       .rename-summary {
         margin-bottom: 1rem;
@@ -311,11 +311,11 @@ export class RenameConfirmationModal extends Modal {
         border-top: 1px solid var(--background-modifier-border);
       }
     `;
-    document.head.appendChild(styleEl);
+    activeDocument.head.appendChild(styleEl);
 
     // Clean up styles when modal closes
     this.onClose = () => {
-      document.head.removeChild(styleEl);
+      activeDocument.head.removeChild(styleEl);
     };
   }
 

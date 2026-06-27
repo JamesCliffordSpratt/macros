@@ -32,21 +32,21 @@ export class ContextMenuManager {
    * Hide all active tooltips before showing context menu
    */
   private hideActiveTooltips(): void {
-    const activeTooltips = document.querySelectorAll('.macro-tooltip');
+    const activeTooltips = activeDocument.querySelectorAll('.macro-tooltip');
     activeTooltips.forEach((tooltip) => {
       (tooltip as HTMLElement).style.display = 'none';
     });
 
-    document.body.classList.add('context-menu-open');
+    activeDocument.body.classList.add('context-menu-open');
   }
 
   /**
    * Re-enable tooltips after context menu closes
    */
   private restoreTooltips(): void {
-    document.body.classList.remove('context-menu-open');
+    activeDocument.body.classList.remove('context-menu-open');
 
-    const hiddenTooltips = document.querySelectorAll('.macro-tooltip');
+    const hiddenTooltips = activeDocument.querySelectorAll('.macro-tooltip');
     hiddenTooltips.forEach((tooltip) => {
       (tooltip as HTMLElement).style.display = '';
     });
@@ -57,7 +57,7 @@ export class ContextMenuManager {
    */
   private applyMenuStyling(): void {
     window.setTimeout(() => {
-      const menuElement = document.querySelector('.menu');
+      const menuElement = activeDocument.querySelector('.menu');
       if (menuElement) {
         menuElement.setAttribute('data-macros-plugin', 'true');
       }
@@ -244,7 +244,7 @@ export class ContextMenuManager {
     };
 
     window.setTimeout(() => {
-      if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
+      if (!activeDocument.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
     }, 100);
@@ -264,7 +264,7 @@ export class ContextMenuManager {
       });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(activeDocument.body, { childList: true, subtree: true });
 
     window.setTimeout(() => {
       observer.disconnect();
@@ -403,7 +403,7 @@ export class ContextMenuManager {
     };
 
     window.setTimeout(() => {
-      if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
+      if (!activeDocument.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
     }, 100);
@@ -423,7 +423,7 @@ export class ContextMenuManager {
       });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(activeDocument.body, { childList: true, subtree: true });
 
     window.setTimeout(() => {
       observer.disconnect();
@@ -589,7 +589,7 @@ export class ContextMenuManager {
     };
 
     window.setTimeout(() => {
-      if (!document.querySelector('.menu[data-macros-plugin="true"]')) {
+      if (!activeDocument.querySelector('.menu[data-macros-plugin="true"]')) {
         this.restoreTooltips();
       }
     }, 100);
@@ -609,7 +609,7 @@ export class ContextMenuManager {
       });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(activeDocument.body, { childList: true, subtree: true });
 
     window.setTimeout(() => {
       observer.disconnect();

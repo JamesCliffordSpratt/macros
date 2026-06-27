@@ -97,7 +97,9 @@ export class RenameWatcher {
       }
     } catch (error) {
       this.plugin.logger.error('Error handling file rename:', error);
-      this.plugin.app.workspace.trigger('notice', t('rename.error', { error: error.message }));
+      this.plugin.app.workspace.trigger('notice', t('rename.error', {
+        error: error instanceof Error ? error.message : String(error),
+      }));
     }
   }
 
@@ -175,7 +177,9 @@ export class RenameWatcher {
       }
     } catch (error) {
       this.plugin.logger.error('Error performing rename operation:', error);
-      this.plugin.app.workspace.trigger('notice', t('rename.error', { error: error.message }));
+      this.plugin.app.workspace.trigger('notice', t('rename.error', {
+        error: error instanceof Error ? error.message : String(error),
+      }));
     }
   }
 
@@ -224,7 +228,7 @@ export class RenameWatcher {
       this.plugin.logger.error('Error reverting file rename:', error);
       this.plugin.app.workspace.trigger(
         'notice',
-        t('rename.revertError', { error: error.message })
+        t('rename.revertError', { error: error instanceof Error ? error.message : String(error) })
       );
     }
   }

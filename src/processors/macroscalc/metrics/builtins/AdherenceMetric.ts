@@ -24,7 +24,7 @@ export class AdherenceMetric implements MacroscalcMetric {
           .addSlider((slider) => {
             slider
               .setLimits(5, 25, 5)
-              .setValue(config.calorieTolerance || 10)
+              .setValue((config.calorieTolerance as number) || 10)
               .setDynamicTooltip()
               .onChange((value) => {
                 config.calorieTolerance = value;
@@ -38,7 +38,7 @@ export class AdherenceMetric implements MacroscalcMetric {
           .addSlider((slider) => {
             slider
               .setLimits(5, 25, 5)
-              .setValue(config.proteinTolerance || 10)
+              .setValue((config.proteinTolerance as number) || 10)
               .setDynamicTooltip()
               .onChange((value) => {
                 config.proteinTolerance = value;
@@ -52,7 +52,7 @@ export class AdherenceMetric implements MacroscalcMetric {
           .addSlider((slider) => {
             slider
               .setLimits(5, 25, 5)
-              .setValue(config.fatTolerance || 15)
+              .setValue((config.fatTolerance as number) || 15)
               .setDynamicTooltip()
               .onChange((value) => {
                 config.fatTolerance = value;
@@ -66,7 +66,7 @@ export class AdherenceMetric implements MacroscalcMetric {
           .addSlider((slider) => {
             slider
               .setLimits(5, 25, 5)
-              .setValue(config.carbsTolerance || 15)
+              .setValue((config.carbsTolerance as number) || 15)
               .setDynamicTooltip()
               .onChange((value) => {
                 config.carbsTolerance = value;
@@ -100,10 +100,10 @@ export class AdherenceMetric implements MacroscalcMetric {
       const adherenceConfig = data.configs.find((c) => c.id === 'adherence');
       if (adherenceConfig && adherenceConfig.settings) {
         config = {
-          calorieTolerance: adherenceConfig.settings.calorieTolerance || 10,
-          proteinTolerance: adherenceConfig.settings.proteinTolerance || 10,
-          fatTolerance: adherenceConfig.settings.fatTolerance || 15,
-          carbsTolerance: adherenceConfig.settings.carbsTolerance || 15,
+          calorieTolerance: (adherenceConfig.settings.calorieTolerance as number) || 10,
+          proteinTolerance: (adherenceConfig.settings.proteinTolerance as number) || 10,
+          fatTolerance: (adherenceConfig.settings.fatTolerance as number) || 15,
+          carbsTolerance: (adherenceConfig.settings.carbsTolerance as number) || 15,
         };
       }
     }

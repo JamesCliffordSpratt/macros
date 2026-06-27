@@ -236,7 +236,7 @@ export class I18nManager {
       // FIX: Use typed interfaces instead of 'any'
       const obsidianLocale =
         this.getMomentLocale() || // Use existing safe method
-        document.documentElement.lang ||
+        activeDocument.documentElement.lang ||
         (this.app as ObsidianAppWithConfig).vault?.config?.userInterfaceMode ||
         (this.app as ObsidianAppWithConfig).locale;
 

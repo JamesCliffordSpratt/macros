@@ -170,7 +170,7 @@ export class BarcodeScanner extends Component {
     if (!this.video || !this.codeReader) return;
 
     if (!this.canvas) {
-      this.canvas = document.createElement('canvas');
+      this.canvas = activeDocument.createElement('canvas');
       this.context = this.canvas.getContext('2d', { willReadFrequently: true });
     }
 
@@ -492,7 +492,7 @@ export class BarcodeScanner extends Component {
     } = {}
   ): Promise<BarcodeResult | null> {
     // Create optimized canvas with willReadFrequently flag to suppress warnings
-    const canvas = document.createElement('canvas');
+    const canvas = activeDocument.createElement('canvas');
     const ctx = canvas.getContext('2d', {
       willReadFrequently: true, // This fixes the Canvas2D warnings
     });
@@ -739,7 +739,7 @@ export class BarcodeScannerModal extends Modal {
       cls: 'barcode-scan-upload-btn',
     });
 
-    this.uploadInput = document.createElement('input');
+    this.uploadInput = activeDocument.createElement('input');
     this.uploadInput.type = 'file';
     this.uploadInput.accept = 'image/*';
     this.uploadInput.capture = 'environment';

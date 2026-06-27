@@ -59,7 +59,7 @@ export class RefreshManager {
       }
 
       // Process macroscalc containers
-      const macroscalcElements = document.querySelectorAll('[data-macroscalc-ids]');
+      const macroscalcElements = activeDocument.querySelectorAll('[data-macroscalc-ids]');
       macroscalcElements.forEach((el) => {
         const idsAttr = el.getAttribute('data-macroscalc-ids');
         if (idsAttr) {
@@ -149,7 +149,7 @@ export class RefreshManager {
   async refreshAllMacroscalc(): Promise<void> {
     try {
       // First, find all macroscalc elements in the DOM
-      const macroscalcElements = document.querySelectorAll('[data-macroscalc-ids]');
+      const macroscalcElements = activeDocument.querySelectorAll('[data-macroscalc-ids]');
 
       if (macroscalcElements.length > 0) {
         this.plugin.logger.debug(

@@ -162,7 +162,7 @@ export class TableHeader {
 
   public initializeButtonState(): void {
     try {
-      const sections = document.querySelectorAll('.meal-header');
+      const sections = activeDocument.querySelectorAll('.meal-header');
 
       if (sections.length === 0) {
         this.isCollapsed = false;

@@ -14,10 +14,10 @@ function detectMobileDevice(): boolean {
 
 function ensureTooltipEl(): HTMLDivElement {
   if (!tooltipEl) {
-    tooltipEl = document.createElement('div');
+    tooltipEl = activeDocument.createElement('div');
     tooltipEl.className = 'macro-tooltip macro-tooltip-hidden';
     tooltipEl.setAttribute('style', '--x: -9999px; --y: -9999px;');
-    document.body.appendChild(tooltipEl);
+    activeDocument.body.appendChild(tooltipEl);
   }
   return tooltipEl;
 }
@@ -59,8 +59,8 @@ export class TooltipManager {
     });
 
     // Global event listeners
-    plugin.registerDomEvent(document, 'visibilitychange', () => {
-      if (document.hidden) TooltipManager.forceHide();
+    plugin.registerDomEvent(activeDocument, 'visibilitychange', () => {
+      if (activeDocument.hidden) TooltipManager.forceHide();
     });
 
     plugin.registerDomEvent(window, 'resize', () => {
@@ -93,7 +93,7 @@ export class TooltipManager {
       TooltipManager.forceHide();
     });
 
-    const root = document.querySelector('.workspace') || document.body;
+    const root = activeDocument.querySelector('.workspace') || activeDocument.body;
     mutationObserver.observe(root, { childList: true, subtree: true });
   }
 
@@ -171,7 +171,7 @@ export class TooltipManager {
       el.classList.add('macro-tooltip-mobile');
 
       // Position near the bottom of the Obsidian app, but above the toolbar
-      const obsidianApp = document.querySelector('.app-container') || document.body;
+      const obsidianApp = activeDocument.querySelector('.app-container') || activeDocument.body;
       const appRect = obsidianApp.getBoundingClientRect();
 
       // Set Y position to be above the bottom toolbar (more clearance)

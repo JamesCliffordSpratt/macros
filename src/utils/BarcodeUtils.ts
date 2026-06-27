@@ -73,12 +73,12 @@ export class ZXingLoader {
       async (): Promise<ZXingLibrary> => {
         return new Promise((resolve, reject) => {
           // Remove any existing script first
-          const existingScript = document.querySelector('script[src*="zxing"]');
+          const existingScript = activeDocument.querySelector('script[src*="zxing"]');
           if (existingScript) {
             existingScript.remove();
           }
 
-          const script = document.createElement('script');
+          const script = activeDocument.createElement('script');
           script.src = 'https://unpkg.com/@zxing/browser@0.1.1/lib/index.min.js';
           script.onload = () => {
             // Check multiple possible global names
@@ -92,7 +92,7 @@ export class ZXingLoader {
           script.onerror = (_error) => {
             reject(new Error('Failed to load ZXing browser from CDN'));
           };
-          document.head.appendChild(script);
+          activeDocument.head.appendChild(script);
         });
       },
 
@@ -100,12 +100,12 @@ export class ZXingLoader {
       async (): Promise<ZXingLibrary> => {
         return new Promise((resolve, reject) => {
           // Remove any existing script first
-          const existingScript = document.querySelector('script[src*="zxing"]');
+          const existingScript = activeDocument.querySelector('script[src*="zxing"]');
           if (existingScript) {
             existingScript.remove();
           }
 
-          const script = document.createElement('script');
+          const script = activeDocument.createElement('script');
           script.src = 'https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
           script.onload = () => {
             // Check multiple possible global names
@@ -119,14 +119,14 @@ export class ZXingLoader {
           script.onerror = (_error) => {
             reject(new Error('Failed to load ZXing from CDN'));
           };
-          document.head.appendChild(script);
+          activeDocument.head.appendChild(script);
         });
       },
 
       // Method 5: Try alternative CDN
       async (): Promise<ZXingLibrary> => {
         return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
+          const script = activeDocument.createElement('script');
           script.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
           script.onload = () => {
             const ZXing = window.ZXing || window.ZXingLibrary;
@@ -137,7 +137,7 @@ export class ZXingLoader {
             }
           };
           script.onerror = () => reject(new Error('Failed to load ZXing from jsdelivr'));
-          document.head.appendChild(script);
+          activeDocument.head.appendChild(script);
         });
       },
     ];
@@ -244,7 +244,7 @@ export class ZXingLoader {
 
       // Add decodeFromImageData method
       reader.decodeFromImageData = async function (imageData: ImageData): Promise<ZXingResult> {
-        const canvas = document.createElement('canvas');
+        const canvas = activeDocument.createElement('canvas');
         canvas.width = imageData.width;
         canvas.height = imageData.height;
         const ctx = canvas.getContext('2d');
@@ -261,7 +261,7 @@ export class ZXingLoader {
 
       // Add decodeFromImageElement method
       reader.decodeFromImageElement = async function (img: HTMLImageElement): Promise<ZXingResult> {
-        const canvas = document.createElement('canvas');
+        const canvas = activeDocument.createElement('canvas');
         canvas.width = img.width || img.naturalWidth;
         canvas.height = img.height || img.naturalHeight;
         const ctx = canvas.getContext('2d');

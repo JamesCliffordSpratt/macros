@@ -540,7 +540,7 @@ export class RowRenderer {
 
     try {
       // Find the macros block ID from the current context
-      const macrosContainer = document.querySelector('[data-macros-id]');
+      const macrosContainer = activeDocument.querySelector('[data-macros-id]');
       const macrosId = macrosContainer?.getAttribute('data-macros-id');
 
       if (!macrosId) {
@@ -876,7 +876,7 @@ export class RowRenderer {
     const cell = tableRow.insertCell();
     cell.classList.add(CLASS_NAMES.MACRO.CELL, `${macroType}-cell`);
 
-    const content = document.createElement('div');
+    const content = activeDocument.createElement('div');
 
     const total = row.protein + row.fat + row.carbs;
     const percentageOfFood = total > 0 ? Math.round((value / total) * 100) : 0;
