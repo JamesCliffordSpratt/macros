@@ -286,7 +286,7 @@ export class RowRenderer {
       return; // Only enable on mobile devices
     }
 
-    let longPressTimer: NodeJS.Timeout | null = null;
+    let longPressTimer: number | null = null;
     let startX = 0;
     let startY = 0;
     let hasMovedTooMuch = false;
@@ -435,7 +435,7 @@ export class RowRenderer {
   /**
    * Cancels an active long press
    */
-  private cancelLongPress(tableRow: HTMLTableRowElement, timer: NodeJS.Timeout): void {
+  private cancelLongPress(tableRow: HTMLTableRowElement, timer: number): void {
     window.clearTimeout(timer);
     tableRow.classList.remove('long-press-active');
   }

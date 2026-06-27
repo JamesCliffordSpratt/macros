@@ -35,7 +35,7 @@ export class LiveFoodSearchModal extends Modal {
   private resultsContainer: HTMLElement;
   private loadingIndicator: HTMLElement;
   private noResultsMessage: HTMLElement;
-  private searchTimeout: ReturnType<typeof setTimeout> | null = null;
+  private searchTimeout: number | null = null;
   private maxResults = 50;
   private results: UnifiedFoodResult[] = [];
   private allResults: UnifiedFoodResult[] = []; // Store all results for infinite scroll

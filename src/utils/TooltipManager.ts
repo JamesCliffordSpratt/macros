@@ -29,8 +29,8 @@ export class TooltipManager {
   private static activeContent = '';
 
   // Single timer for delayed operations
-  private static timer: ReturnType<typeof setTimeout> | null = null;
-  private static mobileHideTimer: ReturnType<typeof setTimeout> | null = null;
+  private static timer: number | null = null;
+  private static mobileHideTimer: number | null = null;
 
   // Simplified constants
   private static readonly SHOW_DELAY = 100;

@@ -130,7 +130,7 @@ export interface OffSearchResponse {
   products: OffProduct[];
 }
 
-/** Response shape for the OFF single-product (`/api/v*/product/<barcode>`) endpoint. */
+/** Response shape for the OFF single-product lookup endpoint (api/vN/product/CODE). */
 export interface OffProductResponse {
   status?: number | string;
   status_verbose?: string;

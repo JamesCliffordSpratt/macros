@@ -60,7 +60,7 @@ export class BarcodeScanner extends Component {
   public codeReader: ZXingCodeReader | null = null;
   private stream: MediaStream | null = null;
   private scanning = false;
-  private scanInterval: ReturnType<typeof setInterval> | null = null;
+  private scanInterval: number | null = null;
 
   constructor(
     private app: App,
