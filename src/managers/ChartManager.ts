@@ -59,7 +59,7 @@ export class ChartManager {
 
       ids = ids.filter((i) => i && i.trim() !== '');
       if (ids.length === 0) {
-        this.plugin.logger.error(`No valid IDs found in: ${id}`);
+        this.plugin.logger.error(`No valid IDs found in: ${Array.isArray(id) ? id.join(', ') : id}`);
         el.createEl('div', { text: t('charts.errors.noIdsProvided') });
         return;
       }
@@ -509,7 +509,7 @@ export class ChartManager {
       this.plugin.logger.debug('Chart configuration created, attempting to instantiate chart');
 
       // Create the chart with try-catch
-      let chart;
+      let chart: Chart | null = null;
       try {
         chart = new ChartConstructor(ctx, config);
       } catch (chartCreationError) {

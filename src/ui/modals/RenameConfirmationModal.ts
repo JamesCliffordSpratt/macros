@@ -186,7 +186,7 @@ export class RenameConfirmationModal extends Modal {
   private replaceButton: ButtonComponent | null = null;
 
   private updateButtonStates(): void {
-    if (this.replaceButton) {
+    if (this.replaceButton !== null) {
       const hasSelection = this.selectedFiles.size > 0;
       this.replaceButton.setDisabled(!hasSelection);
     }

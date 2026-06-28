@@ -60,7 +60,7 @@ export class Logger {
 
   info(message: string, ...args: unknown[]): void {
     if (this.debugMode) {
-      console.info(`[Macros Info] ${message}`, ...args);
+      console.debug(`[Macros Info] ${message}`, ...args);
     }
   }
 
