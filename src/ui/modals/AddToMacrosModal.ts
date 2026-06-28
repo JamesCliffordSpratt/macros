@@ -254,10 +254,10 @@ export class AddToMacrosModal extends Modal {
         'aria-label': t('general.clear'),
       },
     });
-    this.searchClearButton.innerHTML = '✕';
+    this.searchClearButton.setText('✕');
 
     // Initially hide the clear button
-    this.searchClearButton.style.display = 'none';
+    this.searchClearButton.addClass('macros-u-hidden');
 
     // Add search functionality
     this.component.registerDomEvent(this.searchInput, 'input', () => {
@@ -265,9 +265,9 @@ export class AddToMacrosModal extends Modal {
 
       // Show/hide clear button based on input content
       if (query.length > 0) {
-        this.searchClearButton.style.display = 'flex';
+        this.searchClearButton.removeClass('macros-u-hidden');
       } else {
-        this.searchClearButton.style.display = 'none';
+        this.searchClearButton.addClass('macros-u-hidden');
       }
 
       this.filterAndRender(query);
@@ -279,7 +279,7 @@ export class AddToMacrosModal extends Modal {
       e.stopPropagation();
 
       this.searchInput.value = '';
-      this.searchClearButton.style.display = 'none';
+      this.searchClearButton.addClass('macros-u-hidden');
       this.searchInput.focus();
       this.filterAndRender('');
     });
@@ -290,7 +290,7 @@ export class AddToMacrosModal extends Modal {
       if (e.key === 'Escape' && this.searchInput.value.length > 0) {
         e.preventDefault();
         this.searchInput.value = '';
-        this.searchClearButton.style.display = 'none';
+        this.searchClearButton.addClass('macros-u-hidden');
         this.filterAndRender('');
         return;
       }

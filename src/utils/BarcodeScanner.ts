@@ -32,7 +32,7 @@ interface EnhancedZXingLibrary {
 }
 
 interface ZXingCodeReader {
-  decode?(target: HTMLCanvasElement | ImageData | unknown): Promise<ZXingResult>;
+  decode?(target: unknown): Promise<ZXingResult>;
   decodeFromCanvas?(canvas: HTMLCanvasElement): Promise<ZXingResult>;
   decodeFromImageData?(imageData: ImageData): Promise<ZXingResult>;
   decodeFromImageElement?(img: HTMLImageElement): Promise<ZXingResult>;
@@ -624,7 +624,7 @@ export class BarcodeScannerModal extends Modal {
     contentEl.addClass('barcode-scanner-modal');
 
     contentEl.createEl('h2', {
-      text: 'Scan Barcode',
+      text: 'Scan barcode',
       cls: 'barcode-scanner-header',
     });
 
@@ -669,7 +669,7 @@ export class BarcodeScannerModal extends Modal {
         cls: 'camera-error-message',
       });
       errorDiv.createEl('p', {
-        text: '⚠️ No camera detected',
+        text: '⚠️ no camera detected',
         cls: 'error-title',
       });
       errorDiv.createEl('p', {
@@ -690,7 +690,7 @@ export class BarcodeScannerModal extends Modal {
           cls: 'camera-warning-message',
         });
         warningDiv.createEl('p', {
-          text: '⚠️ Camera access issue detected',
+          text: '⚠️ camera access issue detected',
           cls: 'warning-title',
         });
         warningDiv.createEl('p', {
@@ -702,16 +702,16 @@ export class BarcodeScannerModal extends Modal {
         const troubleshootDiv = warningDiv.createDiv({ cls: 'troubleshooting' });
         troubleshootDiv.createEl('p', { text: 'Troubleshooting steps:' });
         const list = troubleshootDiv.createEl('ul');
-        list.createEl('li', { text: 'Check Windows Privacy Settings (Camera permissions)' });
+        list.createEl('li', { text: 'Check Windows privacy settings (camera permissions)' });
         list.createEl('li', { text: 'Restart Obsidian' });
-        list.createEl('li', { text: 'Try using "Upload Image" instead' });
+        list.createEl('li', { text: 'Try using "upload image" instead' });
         list.createEl('li', { text: 'Check if other apps can access your camera' });
       }
     }
 
     // Create the camera button
     this.cameraButton = this.controlsContainer.createEl('button', {
-      text: diagnostics.hasCamera ? '📷 Start Camera Scan' : '📷 Camera Not Available',
+      text: diagnostics.hasCamera ? '📷 Start camera scan' : '📷 Camera Not Available',
       cls: 'mod-cta barcode-scan-camera-btn',
     });
 
@@ -735,7 +735,7 @@ export class BarcodeScannerModal extends Modal {
 
   private createOtherControls(): void {
     this.uploadButton = this.controlsContainer.createEl('button', {
-      text: '🖼️ Upload Image',
+      text: '🖼️ upload image',
       cls: 'barcode-scan-upload-btn',
     });
 
@@ -743,7 +743,7 @@ export class BarcodeScannerModal extends Modal {
     this.uploadInput.type = 'file';
     this.uploadInput.accept = 'image/*';
     this.uploadInput.capture = 'environment';
-    this.uploadInput.style.display = 'none';
+    this.uploadInput.addClass('macros-u-hidden');
 
     this.component.registerDomEvent(this.uploadButton, 'click', () => {
       this.uploadInput.click();
@@ -757,7 +757,7 @@ export class BarcodeScannerModal extends Modal {
     });
 
     const manualBtn = this.controlsContainer.createEl('button', {
-      text: '✏️ Enter Manually',
+      text: '✏️ enter manually',
       cls: 'barcode-scan-manual-btn',
     });
 
@@ -795,7 +795,7 @@ export class BarcodeScannerModal extends Modal {
       const cameraReady = await this.scanner.initializeCamera();
 
       if (!cameraReady) {
-        this.cameraButton.textContent = '📷 Start Camera Scan';
+        this.cameraButton.textContent = '📷 Start camera scan';
         this.cameraButton.disabled = false;
         return;
       }
@@ -820,7 +820,7 @@ export class BarcodeScannerModal extends Modal {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.handleScanError(`Camera scanning failed: ${errorMessage}`);
-      this.cameraButton.textContent = '📷 Start Camera Scan';
+      this.cameraButton.textContent = '📷 Start camera scan';
       this.cameraButton.disabled = false;
     }
   }
@@ -853,7 +853,7 @@ export class BarcodeScannerModal extends Modal {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       this.handleScanError(`Image scan failed: ${errorMessage}`);
     } finally {
-      this.uploadButton.textContent = '🖼️ Upload Image';
+      this.uploadButton.textContent = '🖼️ upload image';
       this.uploadButton.disabled = false;
       this.uploadInput.value = '';
     }
@@ -894,11 +894,11 @@ export class BarcodeScannerModal extends Modal {
 
   private updateControlButtons(scanning: boolean): void {
     if (scanning) {
-      this.cameraButton.textContent = '⏹️ Stop Scanning';
+      this.cameraButton.textContent = '⏹️ stop scanning';
       this.cameraButton.disabled = false;
       this.uploadButton.disabled = true;
     } else {
-      this.cameraButton.textContent = '📷 Start Camera Scan';
+      this.cameraButton.textContent = '📷 Start camera scan';
       this.cameraButton.disabled = false;
       this.uploadButton.disabled = false;
     }
@@ -930,7 +930,7 @@ class ManualBarcodeEntryModal extends Modal {
     const { contentEl } = this;
     contentEl.addClass('manual-barcode-entry-modal');
 
-    contentEl.createEl('h2', { text: 'Enter Barcode Manually' });
+    contentEl.createEl('h2', { text: 'Enter barcode manually' });
 
     contentEl.createEl('p', {
       text: 'Enter the numbers from the barcode (EAN/UPC codes are typically 8-13 digits):',

@@ -34,7 +34,7 @@ export class ContextMenuManager {
   private hideActiveTooltips(): void {
     const activeTooltips = activeDocument.querySelectorAll('.macro-tooltip');
     activeTooltips.forEach((tooltip) => {
-      (tooltip as HTMLElement).style.display = 'none';
+      (tooltip as HTMLElement).addClass('macros-u-hidden');
     });
 
     activeDocument.body.classList.add('context-menu-open');
@@ -48,7 +48,7 @@ export class ContextMenuManager {
 
     const hiddenTooltips = activeDocument.querySelectorAll('.macro-tooltip');
     hiddenTooltips.forEach((tooltip) => {
-      (tooltip as HTMLElement).style.display = '';
+      (tooltip as HTMLElement).removeClass('macros-u-hidden');
     });
   }
 

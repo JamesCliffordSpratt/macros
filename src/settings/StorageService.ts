@@ -1719,7 +1719,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
     // Add informational note about using storage folder
     containerEl.createEl('p', {
-      text: 'Rename tracking uses the Storage Folder configured in the General tab.',
+      text: 'Rename tracking uses the storage folder configured in the general tab.',
       cls: 'setting-item-description',
     });
 

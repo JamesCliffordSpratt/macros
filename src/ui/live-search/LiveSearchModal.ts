@@ -1135,7 +1135,7 @@ export class LiveFoodSearchModal extends Modal {
 
         // Handle image load errors gracefully
         img.addEventListener('error', () => {
-          imageDiv.style.display = 'none';
+          imageDiv.addClass('macros-u-hidden');
         });
       }
 
@@ -1722,7 +1722,7 @@ class FileNameModal extends Modal {
 
     // Fixed: Prefix unused variables with underscore
     contentEl.createEl('h2', {
-      text: 'Save Food Item',
+      text: 'Save food item',
       cls: 'modal-title',
     });
 
