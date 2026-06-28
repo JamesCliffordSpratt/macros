@@ -332,10 +332,19 @@ export async function searchAllSources(
     );
   }
 
-  // Execute searches in parallel. Use allSettled so that one failing source
-  // (e.g. a network error or outage from a single API) doesn't wipe out the
-  // results from the others.
-  const settled = await Promise.allSettled(searchPromises);
+  // Give each source a time budget so a slow or unresponsive API (e.g. an
+  // Open Food Facts outage) can't hold up the results from the faster sources.
+  // Use allSettled so one failing source doesn't wipe out the others.
+  const SOURCE_TIMEOUT_MS = 8000;
+  const withTimeout = (p: Promise<UnifiedFoodResult[]>): Promise<UnifiedFoodResult[]> =>
+    Promise.race([
+      p,
+      new Promise<UnifiedFoodResult[]>((resolve) => {
+        window.setTimeout(() => resolve([]), SOURCE_TIMEOUT_MS);
+      }),
+    ]);
+
+  const settled = await Promise.allSettled(searchPromises.map(withTimeout));
   const results = settled
     .filter((r): r is PromiseFulfilledResult<UnifiedFoodResult[]> => r.status === 'fulfilled')
     .map((r) => r.value);
