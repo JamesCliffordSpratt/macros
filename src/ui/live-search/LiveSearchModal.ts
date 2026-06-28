@@ -1304,7 +1304,7 @@ export class LiveFoodSearchModal extends Modal {
       food.raw &&
       typeof food.raw === 'object'
     ) {
-      const foodId = (food.raw as Record<string, unknown>).food_id;
+      const foodId = (food.raw as Record<string, string>).food_id;
       const fsKey = this.plugin.settings.fatSecretApiKey?.trim();
       const fsSecret = this.plugin.settings.fatSecretApiSecret?.trim();
       if (foodId && fsKey && fsSecret) {
@@ -1333,7 +1333,7 @@ export class LiveFoodSearchModal extends Modal {
     // Create the markdown content
     const fdcId =
       food.source === 'usda' && food.raw && typeof food.raw === 'object' && 'fdcId' in food.raw
-        ? String((food.raw as Record<string, unknown>).fdcId)
+        ? String((food.raw as Record<string, string>).fdcId)
         : '';
 
     // Sanitize filename for actual file creation
@@ -1353,7 +1353,7 @@ source: ${food.source}`;
     } else if (food.source === 'openfoodfacts') {
       const offCode =
         food.raw && typeof food.raw === 'object' && 'code' in food.raw
-          ? String((food.raw as Record<string, unknown>).code)
+          ? String((food.raw as Record<string, string>).code)
           : '';
       frontmatter += `\noff_code: ${offCode}`;
 

@@ -423,7 +423,6 @@ export class DataManager {
 
         // Create safe filename for file operations
         const safeFileName = this.createSafeFileName(foodName);
-        const fileName = `${safeFileName}.md`;
 
         // Enhanced frontmatter with Open Food Facts support
         let frontmatter = `---

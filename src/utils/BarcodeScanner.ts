@@ -177,7 +177,8 @@ export class BarcodeScanner extends Component {
     this.plugin.logger.debug('Starting barcode scan loop');
     let scanAttempts = 0;
 
-    this.scanInterval = window.setInterval(async () => {
+    this.scanInterval = window.setInterval(() => {
+      void (async () => {
       if (!this.scanning || !this.video || !this.canvas || !this.context) {
         return;
       }
@@ -298,6 +299,7 @@ export class BarcodeScanner extends Component {
         }
         // NotFoundException is normal when no barcode is detected
       }
+      })();
     }, 300);
   }
 

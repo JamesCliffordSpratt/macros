@@ -531,7 +531,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // Set up bidirectional conversion
         const setupEnergyConversion = () => {
           // Convert from kcal to kJ
-          kcalInput.addEventListener('input', async () => {
+          kcalInput.addEventListener('input', () => {
             const kcalValue = parseFloat(kcalInput.value);
             if (!isNaN(kcalValue) && kcalValue >= 0) {
               const kjValue = convertEnergyUnit(kcalValue, 'kcal', 'kJ');
@@ -539,14 +539,14 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
               // Save the kcal value to settings
               this.plugin.settings.dailyCaloriesTarget = Math.round(kcalValue);
-              await this.plugin.saveSettings();
+              void this.plugin.saveSettings();
             } else if (kcalInput.value === '') {
               kjInput.value = '';
             }
           });
 
           // Convert from kJ to kcal
-          kjInput.addEventListener('input', async () => {
+          kjInput.addEventListener('input', () => {
             const kjValue = parseFloat(kjInput.value);
             if (!isNaN(kjValue) && kjValue >= 0) {
               const kcalValue = convertEnergyUnit(kjValue, 'kJ', 'kcal');
@@ -554,7 +554,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
               // Save the kcal value to settings (we always store in kcal internally)
               this.plugin.settings.dailyCaloriesTarget = Math.round(kcalValue);
-              await this.plugin.saveSettings();
+              void this.plugin.saveSettings();
             } else if (kjInput.value === '') {
               kcalInput.value = '';
             }
@@ -1390,9 +1390,9 @@ export class NutritionalSettingTab extends PluginSettingTab {
         });
 
         // Remove button handler
-        removeBtn.addEventListener('click', async () => {
+        removeBtn.addEventListener('click', () => {
           delete this.plugin.settings.foodTolerances[foodName];
-          await this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.display(); // Refresh the settings page
           new Notice(t('settings.tolerances.toleranceRemoved', { foodName }));
         });

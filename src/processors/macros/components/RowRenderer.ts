@@ -554,7 +554,7 @@ export class RowRenderer {
 
         const content = await this.plugin.dataManager.readFileContent(activeFile, true);
         const regex = /```macros\s+id:\s*(\S+)\s*([\s\S]*?)```/g;
-        let foundId = null;
+        let foundId: string | null = null;
         let match: RegExpExecArray | null = null;
 
         const cleanContainerName = this.extractCleanName(containerName);
