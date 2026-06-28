@@ -266,7 +266,7 @@ export class BarcodeScanner extends Component {
           });
 
           const barcodeResult: BarcodeResult = {
-            code: result.getText ? result.getText() : result.text || result.code || String(result),
+            code: result.getText ? result.getText() : result.text || result.code || '',
             format: result.getBarcodeFormat
               ? result.getBarcodeFormat().toString()
               : result.format || 'Unknown',
@@ -376,7 +376,7 @@ export class BarcodeScanner extends Component {
             resolve(result);
           } catch (error) {
             this.plugin.logger.error('Error during image scanning:', error);
-            reject(error);
+            reject(error instanceof Error ? error : new Error('Image scanning failed'));
           }
         };
 
@@ -933,6 +933,7 @@ class ManualBarcodeEntryModal extends Modal {
     contentEl.createEl('h2', { text: 'Enter barcode manually' });
 
     contentEl.createEl('p', {
+      // eslint-disable-next-line obsidianmd/ui/sentence-case
       text: 'Enter the numbers from the barcode (EAN/UPC codes are typically 8-13 digits):',
       cls: 'modal-description',
     });

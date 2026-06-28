@@ -163,7 +163,7 @@ class SortableTabOrder extends Component {
   private setupEventListeners(): void {
     this.registerDomEvent(this.listEl, 'dragstart', (e: DragEvent) => {
       const target = e.target as HTMLElement;
-      const listItem = target.closest('.sortable-tab-item') as HTMLElement | null;
+      const listItem = target.closest<HTMLElement>('.sortable-tab-item');
 
       if (listItem) {
         this.draggedItem = listItem;
@@ -194,7 +194,7 @@ class SortableTabOrder extends Component {
       e.preventDefault();
 
       const target = e.target as HTMLElement;
-      const listItem = target.closest('.sortable-tab-item') as HTMLElement | null;
+      const listItem = target.closest<HTMLElement>('.sortable-tab-item');
 
       if (listItem && listItem !== this.draggedItem) {
         this.listEl.querySelectorAll('.sortable-tab-item').forEach((item) => {
@@ -218,7 +218,7 @@ class SortableTabOrder extends Component {
       if (!this.draggedItem) return;
 
       const target = e.target as HTMLElement;
-      const dropTarget = target.closest('.sortable-tab-item') as HTMLElement | null;
+      const dropTarget = target.closest<HTMLElement>('.sortable-tab-item');
 
       if (dropTarget && dropTarget !== this.draggedItem) {
         const dropIndex = parseInt(dropTarget.dataset.index || '0');
@@ -386,7 +386,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     }
 
     // Re-render content
-    const contentEl = this.containerEl.querySelector('.macros-settings-content') as HTMLElement | null;
+    const contentEl = this.containerEl.querySelector<HTMLElement>('.macros-settings-content');
     if (contentEl) {
       this.renderActiveTab(contentEl);
     }
@@ -422,15 +422,15 @@ export class NutritionalSettingTab extends PluginSettingTab {
     new FolderSuggest(this.app, folderInputEl, 'Nutrition');
 
     // Add change handler
-    folderInputEl.addEventListener('change', async () => {
+    folderInputEl.addEventListener('change', () => {
       this.plugin.settings.storageFolder = normalizePath(folderInputEl.value);
-      await this.plugin.saveSettings();
+      void this.plugin.saveSettings();
     });
 
     // Add blur handler to ensure the value is saved when focus is lost
-    folderInputEl.addEventListener('blur', async () => {
+    folderInputEl.addEventListener('blur', () => {
       this.plugin.settings.storageFolder = normalizePath(folderInputEl.value);
-      await this.plugin.saveSettings();
+      void this.plugin.saveSettings();
     });
 
     // =======================================
@@ -489,6 +489,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kcal input
         const kcalContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kcalContainer.createEl('label', {
+          // eslint-disable-next-line obsidianmd/ui/sentence-case
           text: 'kcal',
           cls: 'energy-input-label',
         });
@@ -506,6 +507,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kJ input
         const kjContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kjContainer.createEl('label', {
+          // eslint-disable-next-line obsidianmd/ui/sentence-case
           text: 'kJ',
           cls: 'energy-input-label',
         });
@@ -880,6 +882,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     fatSecretNotice.createEl('a', {
+      // eslint-disable-next-line obsidianmd/ui/sentence-case
       text: 'https://platform.fatsecret.com/platform-api',
       attr: { href: 'https://platform.fatsecret.com/platform-api', target: '_blank' },
     });
@@ -1210,7 +1213,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
                 ? userLocale
                 : this.plugin.settings.openFoodFactsLanguage;
 
-            console.log('Testing OFF connection with:', {
+            this.plugin.logger.debug('Testing OFF connection with:', {
               query: 'apple',
               language: offLanguage,
               userLocale,
@@ -1224,7 +1227,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
               offLanguage
             );
 
-            console.log('OFF test results:', results);
+            this.plugin.logger.debug('OFF test results:', results);
 
             if (results.length > 0) {
               new Notice(
@@ -1233,7 +1236,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
 
               // Show some details about the first result for debugging
               const firstResult = results[0];
-              console.log('First result details:', {
+              this.plugin.logger.debug('First result details:', {
                 name: firstResult.productName,
                 source: firstResult.source,
                 quality: firstResult.dataQuality,
@@ -1244,14 +1247,14 @@ export class NutritionalSettingTab extends PluginSettingTab {
             }
           } catch (error) {
             console.error('Error during Open Food Facts test connection:', error);
-            if (error.message?.includes('CORS')) {
+            if ((error as Error).message?.includes('CORS')) {
               new Notice(t('settings.api.openFoodFactsTestCORSError'));
-            } else if (error.message?.includes('network')) {
+            } else if ((error as Error).message?.includes('network')) {
               new Notice(t('settings.api.openFoodFactsTestNetworkError'));
-            } else if (error.message?.includes('timeout')) {
+            } else if ((error as Error).message?.includes('timeout')) {
               new Notice(t('settings.api.openFoodFactsTestTimeoutError'));
             } else {
-              new Notice(t('settings.api.openFoodFactsTestError', { error: error.message }));
+              new Notice(t('settings.api.openFoodFactsTestError', { error: error instanceof Error ? error.message : String(error) }));
             }
           }
         });

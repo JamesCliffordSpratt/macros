@@ -372,7 +372,7 @@ export class LiveFoodSearchModal extends Modal {
     }
 
     const scannerModal = new BarcodeScannerModal(this.app, this.plugin, (barcode: string) =>
-      this.handleBarcodeScanned(barcode)
+      void this.handleBarcodeScanned(barcode)
     );
 
     scannerModal.open();
@@ -1333,7 +1333,7 @@ export class LiveFoodSearchModal extends Modal {
     // Create the markdown content
     const fdcId =
       food.source === 'usda' && food.raw && typeof food.raw === 'object' && 'fdcId' in food.raw
-        ? (food.raw as Record<string, unknown>).fdcId
+        ? String((food.raw as Record<string, unknown>).fdcId)
         : '';
 
     // Sanitize filename for actual file creation
@@ -1353,7 +1353,7 @@ source: ${food.source}`;
     } else if (food.source === 'openfoodfacts') {
       const offCode =
         food.raw && typeof food.raw === 'object' && 'code' in food.raw
-          ? (food.raw as Record<string, unknown>).code
+          ? String((food.raw as Record<string, unknown>).code)
           : '';
       frontmatter += `\noff_code: ${offCode}`;
 

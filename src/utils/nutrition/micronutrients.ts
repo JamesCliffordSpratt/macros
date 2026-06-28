@@ -929,7 +929,8 @@ export function extractMicronutrients(
 
   const fm = cache.frontmatter as Record<string, unknown>;
 
-  const storedServing = fm['serving_size'] != null ? String(fm['serving_size']) : '';
+  const sv = fm['serving_size'];
+  const storedServing = typeof sv === 'string' || typeof sv === 'number' ? String(sv) : '';
   const storedServingGrams = parseGrams(storedServing);
   if (isNaN(storedServingGrams) || storedServingGrams <= 0) return result;
 
@@ -938,8 +939,10 @@ export function extractMicronutrients(
   const scale = quantity / storedServingGrams;
 
   for (const key of MICRONUTRIENT_KEYS) {
-    if (fm[key] == null) continue;
-    const raw = parseFloat(String(fm[key]));
+    const rawVal = fm[key];
+    if (rawVal == null) continue;
+    const raw =
+      typeof rawVal === 'number' || typeof rawVal === 'string' ? parseFloat(String(rawVal)) : NaN;
     if (isNaN(raw)) continue;
     result[key] = raw * scale;
   }
