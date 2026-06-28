@@ -119,7 +119,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
 
   // Replace the redrawAllMacrocalc method with a more forceful version
   plugin.redrawAllMacrocalc = async function () {
-    await forceRefreshAllRenderers(this);
+    await forceRefreshAllRenderers(plugin);
   };
 }
 

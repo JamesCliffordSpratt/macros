@@ -454,7 +454,7 @@ export class I18nManager {
    * Interpolate variables in translation strings
    */
   private interpolate(template: string, variables: Record<string, string | number>): string {
-    return template.replace(/\{(\w+)\}/g, (match, key) => {
+    return template.replace(/\{(\w+)\}/g, (match: string, key: string) => {
       return variables[key]?.toString() ?? match;
     });
   }

@@ -274,7 +274,7 @@ export class GroupRenderer {
         }
       };
 
-      this.plugin.registerDomListener(removeBtn, 'click', removeBtnHandler);
+      this.plugin.registerDomListener(removeBtn, 'click', () => void removeBtnHandler());
       leftContent.appendChild(removeBtn);
     }
 

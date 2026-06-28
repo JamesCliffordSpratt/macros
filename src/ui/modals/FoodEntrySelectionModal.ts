@@ -123,7 +123,7 @@ export class FoodEntrySelectionModal extends Modal {
    * Get available data sources for display
    */
   private getAvailableDataSources(): Array<{ name: string; enabled: boolean }> {
-    const sources = [];
+    const sources: { name: string; enabled: boolean }[] = [];
 
     // Open Food Facts is always available (no credentials needed)
     if (this.plugin.settings.openFoodFactsEnabled !== false) {
