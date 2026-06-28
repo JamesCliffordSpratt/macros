@@ -24,23 +24,23 @@
 }
 
 .is-hidden {
-  display: none;
+  display: none !important;
 }
 
 .is-visible {
-  display: inline-flex;
+  display: inline-flex !important;
 }
 
 .control-hidden {
-  display: none;
+  display: none !important;
 }
 
 .control-visible {
-  display: block;
+  display: block !important;
 }
 
 .control-inline-flex {
-  display: inline-flex;
+  display: inline-flex !important;
 }
 
 .macro-flex-row {
@@ -81,11 +81,11 @@
 }
 
 .long-press-active {
-  background-color: var(--background-modifier-hover);
+  background-color: var(--background-modifier-hover) !important;
 }
 
 .long-press-ready {
-  background-color: var(--background-modifier-success);
+  background-color: var(--background-modifier-success) !important;
   transform: scale(0.98);
   transition: all 0.2s ease;
 }
@@ -123,10 +123,10 @@
 .macros-table td,
 .macros-table th,
 .macros-table .column-header {
-  vertical-align: middle;
+  vertical-align: middle !important;
   text-align: center;
-  padding: 8px 12px;
-  min-height: 40px;
+  padding: 8px 12px !important;
+  min-height: 40px !important;
 }
 
 .macros-table th,
@@ -159,8 +159,8 @@
 }
 
 .macros-table tr:focus-within {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--interactive-accent) !important;
+  outline-offset: 2px !important;
   z-index: 15;
 }
 
@@ -171,20 +171,20 @@
 }
 
 .macros-table td:first-child {
-  text-align: left;
-  vertical-align: top;
-  padding-right: 8px;
-  max-width: 260px;
-  min-width: 140px;
-  width: 32%;
-  padding: 8px 6px;
-  min-height: 40px;
+  text-align: left !important;
+  vertical-align: top !important;
+  padding-right: 8px !important;
+  max-width: 260px !important;
+  min-width: 140px !important;
+  width: 32% !important;
+  padding: 8px 6px !important;
+  min-height: 40px !important;
 }
 
 .macros-table td:not(:first-child),
 .macros-table th:not(:first-child) {
-  vertical-align: middle;
-  text-align: center;
+  vertical-align: middle !important;
+  text-align: center !important;
 }
 
 .macros-table td:first-child > div {
@@ -201,10 +201,10 @@
 }
 
 .macro-percentage {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  font-weight: normal;
-  margin-left: 2px;
+  font-size: 0.75rem !important;
+  opacity: 0.7 !important;
+  font-weight: normal !important;
+  margin-left: 2px !important;
 }
 
 .macro-percentage::before {
@@ -212,84 +212,84 @@
 }
 
 .macro-food-name-container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 24px;
-  background: none;
-  border-radius: 0;
-  padding: 3px;
-  margin: 0;
-  gap: 4px;
-  position: relative;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-height: 24px !important;
+  background: none !important;
+  border-radius: 0 !important;
+  padding: 3px !important;
+  margin: 0 !important;
+  gap: 4px !important;
+  position: relative !important;
 }
 
 .food-name-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-  min-width: 0;
-  flex: 1;
-  max-width: calc(100% - 28px);
-  background: none;
-  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  max-width: calc(100% - 28px) !important;
+  background: none !important;
+  overflow: hidden !important;
 }
 
 .macro-food-name {
-  flex-shrink: 1;
-  min-width: 75px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-  font-weight: inherit;
-  color: inherit;
-  direction: ltr;
-  text-align: left;
-  background: none;
-  line-height: 1.3;
-  font-size: 0.9em;
-  width: 100%;
-  margin-right: 4px;
-  cursor: default;
+  flex-shrink: 1 !important;
+  min-width: 75px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+  direction: ltr !important;
+  text-align: left !important;
+  background: none !important;
+  line-height: 1.3 !important;
+  font-size: 0.9em !important;
+  width: 100% !important;
+  margin-right: 4px !important;
+  cursor: default !important;
 }
 
 .macro-food-name:not(:hover) {
-  text-overflow: ellipsis;
+  text-overflow: ellipsis !important;
 }
 
 .macro-food-name[title] {
-  cursor: help;
+  cursor: help !important;
 }
 
 .macro-food-remove-btn {
-  flex-shrink: 0;
-  min-width: 18px;
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  opacity: 0.7;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85em;
-  z-index: 2;
-  align-self: flex-start;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border-radius: 3px;
-  font-weight: bold;
-  color: var(--text-muted);
+  flex-shrink: 0 !important;
+  min-width: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  opacity: 0.7 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.85em !important;
+  z-index: 2 !important;
+  align-self: flex-start !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  border-radius: 3px !important;
+  font-weight: bold !important;
+  color: var(--text-muted) !important;
   margin-left: 8px;
 }
 
 .macro-food-remove-btn:hover {
-  opacity: 1;
-  background-color: var(--background-modifier-hover);
-  color: var(--text-error);
-  transform: scale(1.1);
+  opacity: 1 !important;
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-error) !important;
+  transform: scale(1.1) !important;
 }
 
 .expanded-row {
@@ -344,21 +344,21 @@
 }
 
 .table-row-visible {
-  display: table-row;
+  display: table-row !important;
 }
 
 .table-row-hidden {
-  display: none;
+  display: none !important;
 }
 
 .macros-table th:first-child,
 .macros-table td:first-child {
-  width: 32%;
+  width: 32% !important;
 }
 
 .macros-table th:nth-child(2),
 .macros-table td:nth-child(2) {
-  width: 12%;
+  width: 12% !important;
 }
 
 .macros-table th:nth-child(3),
@@ -369,7 +369,7 @@
 .macros-table td:nth-child(5),
 .macros-table th:nth-child(6),
 .macros-table td:nth-child(6) {
-  width: 14%;
+  width: 14% !important;
 }
 
 .macros-table tr.long-press-active {
@@ -396,18 +396,18 @@ tr[data-macro-line]:hover {
 }
 
 .macro-food-name-container * {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 
 .food-name-content,
 .macro-food-name {
-  word-break: break-word;
-  overflow-wrap: break-word;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
 }
 
 .food-name-content:has(.food-comment-icon) {
-  background: none;
-  background-color: transparent;
+  background: none !important;
+  background-color: transparent !important;
 }
 
 /* ==============================
@@ -448,7 +448,7 @@ tr[data-macro-line]:hover {
   justify-content: space-between;
   width: 100%;
   gap: 8px;
-  background: none;
+  background: none !important;
 }
 
 .header-left {
@@ -457,7 +457,7 @@ tr[data-macro-line]:hover {
   gap: 6px;
   flex: 1;
   min-width: 0;
-  background: none;
+  background: none !important;
 }
 
 .header-label {
@@ -468,7 +468,7 @@ tr[data-macro-line]:hover {
   white-space: normal;
   font-weight: inherit;
   color: inherit;
-  background: none;
+  background: none !important;
   font-weight: 600;
   color: var(--text-normal);
 }
@@ -477,7 +477,7 @@ tr[data-macro-line]:hover {
   flex-shrink: 0;
   margin-left: 8px;
   opacity: 0.8;
-  background: none;
+  background: none !important;
   color: var(--text-muted);
   margin-left: 10px;
   font-size: 0.9em;
@@ -486,8 +486,8 @@ tr[data-macro-line]:hover {
 
 .meal-header,
 .combined-totals-header {
-  background-color: var(--background-modifier-form-field);
-  color: var(--text-normal);
+  background-color: var(--background-modifier-form-field) !important;
+  color: var(--text-normal) !important;
   font-weight: 700;
   text-align: center;
   position: relative;
@@ -506,16 +506,16 @@ tr[data-macro-line]:hover {
 
 .meal-header-cell {
   padding: 0;
-  background-color: var(--background-secondary-alt);
+  background-color: var(--background-secondary-alt) !important;
 }
 
 .meal-header-cell:hover,
 .meal-header-cell.collapsible-header:hover {
-  background-color: var(--background-modifier-hover);
+  background-color: var(--background-modifier-hover) !important;
 }
 
 .meal-header-cell:has(.meal-comment-icon) {
-  background-color: transparent;
+  background-color: transparent !important;
 }
 
 .meal-calorie-summary {
@@ -536,7 +536,7 @@ tr[data-macro-line]:hover {
 }
 
 .combined-totals-header .meal-header-cell {
-  background-color: var(--background-secondary-alt);
+  background-color: var(--background-secondary-alt) !important;
 }
 
 .meal-header-content {
@@ -591,7 +591,7 @@ tr[data-macro-line]:hover {
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s ease;
-  padding: 6px 8px;
+  padding: 6px 8px !important;
   border-radius: 4px;
   border: 1px dashed transparent;
 }
@@ -644,8 +644,8 @@ tr[data-macro-line]:hover {
 }
 
 .header-left:has(.meal-comment-icon) {
-  background: none;
-  background-color: transparent;
+  background: none !important;
+  background-color: transparent !important;
 }
 
 .header-text-desktop {
@@ -721,7 +721,7 @@ tr[data-macro-line]:hover {
 
 .macro-color-indicator {
   --indicator-color: transparent;
-  background-color: var(--indicator-color);
+  background-color: var(--indicator-color) !important;
 }
 
 /* ==============================
@@ -956,8 +956,8 @@ tr[data-macro-line]:hover {
 .macro-pie-progress-bar {
   --progress-color: transparent;
   --progress-width: 0%;
-  background-color: var(--progress-color);
-  width: var(--progress-width);
+  background-color: var(--progress-color) !important;
+  width: var(--progress-width) !important;
 }
 
 .pie-progress-width-0 {
@@ -1071,15 +1071,15 @@ tr[data-macro-line]:hover {
 }
 
 .macro-tooltip-mobile {
-  background-color: rgba(0, 0, 0, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 10000;
-  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  z-index: 10000 !important;
+  transition: all 0.2s ease !important;
 }
 
 .context-menu-open .macro-tooltip {
-  display: none;
+  display: none !important;
 }
 
 /* ==============================
@@ -1196,8 +1196,8 @@ tr[data-macro-line]:hover {
 }
 
 .settings-preview-canvas {
-  width: 300px;
-  height: 300px;
+  width: 300px !important;
+  height: 300px !important;
   max-width: 100%;
 }
 
@@ -1512,8 +1512,8 @@ tr[data-macro-line]:hover {
 }
 
 .macrospc-preview-container canvas {
-  width: 300px;
-  height: 300px;
+  width: 300px !important;
+  height: 300px !important;
   max-width: 100%;
   display: block;
 }
@@ -1635,11 +1635,11 @@ tr[data-macro-line]:hover {
 
 .energy-field .form-label,
 .energy-label-bold {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .energy-fields-container .form-label {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .energy-field .form-label {
@@ -1723,7 +1723,7 @@ tr[data-macro-line]:hover {
 .macro-metric-label {
   font-size: 0.85rem;
   color: var(--text-muted);
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .macro-metric-value-container {
@@ -1959,13 +1959,13 @@ tr[data-macro-line]:hover {
 }
 
 .macroscalc-hidden {
-  opacity: 0;
-  max-height: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .macroscalc-sort-icon {
@@ -2003,10 +2003,10 @@ tr[data-macro-line]:hover {
 .macroscalc-container .macros-table td,
 .macroscalc-container .macros-table th,
 .macroscalc-container .macros-table .column-header {
-  vertical-align: middle;
+  vertical-align: middle !important;
   text-align: center;
-  padding: 8px 6px;
-  min-height: 40px;
+  padding: 8px 6px !important;
+  min-height: 40px !important;
 }
 
 .macroscalc-container .macros-table th,
@@ -2015,7 +2015,7 @@ tr[data-macro-line]:hover {
   color: var(--text-normal);
   font-weight: 600;
   border-bottom: 1px solid var(--background-modifier-border);
-  padding: 10px 8px;
+  padding: 10px 8px !important;
   font-size: 0.95rem;
 }
 
@@ -2030,9 +2030,9 @@ tr[data-macro-line]:hover {
 .macroscalc-container .macros-table td:nth-child(4),
 .macroscalc-container .macros-table th:nth-child(5),
 .macroscalc-container .macros-table td:nth-child(5) {
-  width: 20%; /* All 5 columns equal width (100% / 5 = 20%) */
-  min-width: 80px;
-  text-align: center;
+  width: 20% !important; /* All 5 columns equal width (100% / 5 = 20%) */
+  min-width: 80px !important;
+  text-align: center !important;
   overflow: hidden;
 }
 
@@ -2055,8 +2055,8 @@ tr[data-macro-line]:hover {
   text-align: center;
   flex: 1;
   min-width: 0;
-  margin-left: 4px;
-  margin-right: 0;
+  margin-left: 4px !important;
+  margin-right: 0 !important;
   font-size: 0.9rem;
   font-weight: 500;
   overflow: hidden;
@@ -2068,28 +2068,28 @@ tr[data-macro-line]:hover {
 
 .macroscalc-expand-toggle {
   flex-shrink: 0;
-  margin-right: 0;
-  margin-left: 0;
-  transform: translateY(0);
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  transform: translateY(0) !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .macroscalc-id-cell-container {
-  text-align: center;
-  padding: 8px 6px; /* Reduced horizontal padding */
+  text-align: center !important;
+  padding: 8px 6px !important; /* Reduced horizontal padding */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .macroscalc-id-cell-container .macroscalc-expand-toggle {
-  margin-right: 6px;
-  width: 16px;
-  height: 16px;
+  margin-right: 6px !important;
+  width: 16px !important;
+  height: 16px !important;
   flex-shrink: 0;
 }
 
@@ -2130,14 +2130,14 @@ tr[data-macro-line]:hover {
 /* Equal width columns for expanded details table */
 .macroscalc-details-table th:first-child,
 .macroscalc-details-table td:first-child {
-  width: 20%; /* Food column */
-  text-align: left; /* Keep food names left-aligned */
-  padding-left: 8px;
+  width: 20% !important; /* Food column */
+  text-align: left !important; /* Keep food names left-aligned */
+  padding-left: 8px !important;
 }
 
 .macroscalc-details-table th:nth-child(2),
 .macroscalc-details-table td:nth-child(2) {
-  width: 13%; /* Quantity column */
+  width: 13% !important; /* Quantity column */
 }
 
 .macroscalc-details-table th:nth-child(3),
@@ -2148,7 +2148,7 @@ tr[data-macro-line]:hover {
 .macroscalc-details-table td:nth-child(5),
 .macroscalc-details-table th:nth-child(6),
 .macroscalc-details-table td:nth-child(6) {
-  width: 16.75%; /* Equal width for Calories, Protein, Fat, Carbs (67% / 4 = 16.75%) */
+  width: 16.75% !important; /* Equal width for Calories, Protein, Fat, Carbs (67% / 4 = 16.75%) */
 }
 
 .macroscalc-chart-section {
@@ -2258,13 +2258,13 @@ tr[data-macro-line]:hover {
 
 /* IMPROVED: Enhanced visual hierarchy */
 .macroscalc-container .macros-table .totals-row {
-  background-color: var(--background-secondary-alt);
+  background-color: var(--background-secondary-alt) !important;
   border-top: 2px solid var(--background-modifier-border);
   font-weight: 600;
 }
 
 .macroscalc-container .macros-table .totals-row td {
-  padding: 10px 8px;
+  padding: 10px 8px !important;
 }
 
 /* IMPROVED: Sort icon positioning adjustments */
@@ -2299,8 +2299,8 @@ tr[data-macro-line]:hover {
   .macroscalc-container .macros-table td:nth-child(4),
   .macroscalc-container .macros-table th:nth-child(5),
   .macroscalc-container .macros-table td:nth-child(5) {
-    width: 20%; /* Keep equal widths on mobile */
-    min-width: 60px;
+    width: 20% !important; /* Keep equal widths on mobile */
+    min-width: 60px !important;
     font-size: 0.85rem;
   }
 
@@ -2331,9 +2331,9 @@ tr[data-macro-line]:hover {
   }
 
   .macroscalc-expand-toggle {
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 12px !important;
   }
 
   .macroscalc-id-text {
@@ -2352,10 +2352,10 @@ tr[data-macro-line]:hover {
   .macroscalc-container .macros-table td:nth-child(4),
   .macroscalc-container .macros-table th:nth-child(5),
   .macroscalc-container .macros-table td:nth-child(5) {
-    width: 20%; /* Keep equal widths on small mobile */
-    min-width: 50px;
+    width: 20% !important; /* Keep equal widths on small mobile */
+    min-width: 50px !important;
     font-size: 0.8rem;
-    padding: 6px 3px;
+    padding: 6px 3px !important;
   }
 
   .macroscalc-header-container {
@@ -2423,37 +2423,37 @@ tr[data-macro-line]:hover {
 .macroscalc-toggle-button,
 .macroscalc-expand-toggle,
 .macrospc-container .macroscalc-toggle-button {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  line-height: 14px;
-  text-align: center;
-  transition: transform 0.2s ease;
-  opacity: 0.8;
-  flex-shrink: 0;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  line-height: 14px !important;
+  text-align: center !important;
+  transition: transform 0.2s ease !important;
+  opacity: 0.8 !important;
+  flex-shrink: 0 !important;
 }
 
 .toggle-icon::after,
 .meal-toggle-icon,
 .macroscalc-toggle-button::after,
 .macroscalc-expand-toggle.expanded::after {
-  content: '▼';
-  display: inline-block;
-  font-size: 12px;
+  content: '▼' !important;
+  display: inline-block !important;
+  font-size: 12px !important;
 }
 
 .collapsed .toggle-icon::after,
 .collapsed .meal-toggle-icon,
 .macroscalc-toggle-button.collapsed::after,
 .macroscalc-expand-toggle::after {
-  content: '▶';
-  display: inline-block;
-  font-size: 12px;
+  content: '▶' !important;
+  display: inline-block !important;
+  font-size: 12px !important;
 }
 
 .toggle-icon:hover,
@@ -2461,26 +2461,26 @@ tr[data-macro-line]:hover {
 .macroscalc-toggle-button:hover,
 .macroscalc-expand-toggle:hover,
 .macrospc-container .macroscalc-toggle-button:hover {
-  opacity: 1;
-  color: var(--text-accent);
+  opacity: 1 !important;
+  color: var(--text-accent) !important;
 }
 
 .macroscalc-id-cell .macroscalc-expand-toggle {
-  margin-right: 8px;
-  transform: translateY(0);
+  margin-right: 8px !important;
+  transform: translateY(0) !important;
 }
 
 .header-content .toggle-icon {
-  margin-left: 8px;
+  margin-left: 8px !important;
 }
 
 .meal-header-content .meal-toggle-icon {
-  margin-left: 8px;
+  margin-left: 8px !important;
 }
 
 .toggle-icon.collapsed::after,
 .toggle-icon.collapsed.expand-all-icon::after {
-  content: '▶';
+  content: '▶' !important;
 }
 
 /* ==============================
@@ -2829,7 +2829,7 @@ tr[data-macro-line]:hover {
 
   .enhanced-add-to-macros-modal .tabs-container {
     display: flex;
-    flex-direction: row; /* Force horizontal layout */
+    flex-direction: row !important; /* Force horizontal layout */
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--background-modifier-border);
     overflow-x: auto; /* Allow horizontal scrolling if needed */
@@ -2846,8 +2846,8 @@ tr[data-macro-line]:hover {
   .enhanced-add-to-macros-modal .macros-tab-button {
     min-width: 100px; /* Reduced for mobile but still readable */
     max-width: 140px;
-    padding: 6px 4px;
-    font-size: 0.7em;
+    padding: 6px 4px !important;
+    font-size: 0.7em !important;
     flex: 1; /* Equal width distribution */
     min-height: 44px; /* iOS recommended touch target size */
     display: flex;
@@ -2903,8 +2903,8 @@ tr[data-macro-line]:hover {
     min-width: 80px; /* Minimum viable width */
     max-width: 110px;
     font-weight: 600;
-    font-size: 0.65em;
-    padding: 4px 2px;
+    font-size: 0.65em !important;
+    padding: 4px 2px !important;
     letter-spacing: -0.3px;
   }
 
@@ -3033,8 +3033,8 @@ tr[data-macro-line]:hover {
 }
 
 .enhanced-add-to-macros-modal .tabs-container.centered-tabs {
-  display: flex;
-  flex-direction: row; /* Force horizontal */
+  display: flex !important;
+  flex-direction: row !important; /* Force horizontal */
   justify-content: center;
   align-items: center;
   gap: 6px;
@@ -3280,7 +3280,7 @@ tr[data-macro-line]:hover {
 .enhanced-add-to-macros-modal .group-food-add-button {
   background: var(--interactive-accent);
   border-color: var(--interactive-accent);
-  color: var(--text-on-accent);
+  color: var(--text-on-accent) !important;
 }
 
 .enhanced-add-to-macros-modal .meal-add-button:hover,
@@ -3288,7 +3288,7 @@ tr[data-macro-line]:hover {
 .enhanced-add-to-macros-modal .group-food-add-button:hover {
   background: var(--interactive-accent-hover);
   border-color: var(--interactive-accent-hover);
-  color: var(--text-on-accent);
+  color: var(--text-on-accent) !important;
 }
 
 .enhanced-add-to-macros-modal .add-button:hover {
@@ -4065,8 +4065,8 @@ tr[data-macro-line]:hover {
   transition: all 0.2s ease;
   user-select: none;
   color: inherit;
-  background: none;
-  background-color: transparent;
+  background: none !important;
+  background-color: transparent !important;
   filter: none;
 }
 
@@ -4087,24 +4087,24 @@ tr[data-macro-line]:hover {
 }
 
 .food-comment-icon {
-  flex-shrink: 0;
-  min-width: 12px;
-  width: 12px;
-  height: 12px;
-  margin: 0;
-  opacity: 0.8;
-  font-size: 0.65em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  z-index: 2;
-  align-self: flex-start;
+  flex-shrink: 0 !important;
+  min-width: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  margin: 0 !important;
+  opacity: 0.8 !important;
+  font-size: 0.65em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  z-index: 2 !important;
+  align-self: flex-start !important;
   cursor: help;
   transition: all 0.2s ease;
   user-select: none;
   color: inherit;
-  background: none;
-  background-color: transparent;
+  background: none !important;
+  background-color: transparent !important;
   filter: none;
 }
 
@@ -4126,14 +4126,14 @@ tr[data-macro-line]:hover {
 
 .meal-comment,
 .food-comment {
-  display: none;
+  display: none !important;
 }
 
 .meal-header-cell .meal-comment-icon,
 .macro-food-name-container .food-comment-icon {
-  background: transparent;
-  backdrop-filter: none;
-  filter: none;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  filter: none !important;
 }
 
 /* ==============================
@@ -4342,39 +4342,39 @@ tr[data-macro-line]:hover {
 
 @media (min-width: 769px) {
   .macroscalc-id-cell-container {
-    text-align: center;
-    padding-left: 12px;
-    padding-right: 12px;
+    text-align: center !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
 
   .macroscalc-id-cell-container .macroscalc-expand-toggle {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
-    margin-left: 0;
-    text-align: center;
-    vertical-align: middle;
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 4px !important;
+    margin-left: 0 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   .macroscalc-id-cell-container .macroscalc-id-text {
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 0;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin-left: 0 !important;
   }
 
   .macro-food-remove-btn {
-    display: inline-flex;
+    display: inline-flex !important;
   }
 
   .macro-food-name {
-    max-width: calc(100% - 32px);
+    max-width: calc(100% - 32px) !important;
   }
 
   .macro-food-name-container {
-    gap: 8px;
-    min-height: 24px;
-    padding: 2px 0;
+    gap: 8px !important;
+    min-height: 24px !important;
+    padding: 2px 0 !important;
   }
 
   .macros-button-container {
@@ -4396,7 +4396,7 @@ tr[data-macro-line]:hover {
   }
 
   .macro-food-remove-btn {
-    display: none;
+    display: none !important;
   }
 
   .macros-table tr {
@@ -4417,16 +4417,16 @@ tr[data-macro-line]:hover {
   }
 
   .macro-food-name-container {
-    gap: 12px;
-    min-height: 36px;
-    padding: 4px 0;
+    gap: 12px !important;
+    min-height: 36px !important;
+    padding: 4px 0 !important;
   }
 
   .macro-food-name {
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
-    max-width: 100%;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    font-weight: 500 !important;
+    max-width: 100% !important;
   }
 
   .macros-table td,
@@ -4437,7 +4437,7 @@ tr[data-macro-line]:hover {
   }
 
   .macro-percentage {
-    font-size: 0.7rem;
+    font-size: 0.7rem !important;
   }
 
   .remove-item-button {
@@ -4447,18 +4447,18 @@ tr[data-macro-line]:hover {
   }
 
   .editable-quantity {
-    padding: 4px 6px;
+    padding: 4px 6px !important;
     font-size: 0.9rem;
-    min-height: 32px;
-    border: 1px dashed rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    min-height: 32px !important;
+    border: 1px dashed rgba(255, 255, 255, 0.3) !important;
+    border-radius: 6px !important;
   }
 
   .editable-quantity:hover,
   .editable-quantity:focus,
   .editable-quantity:active {
-    border-color: var(--interactive-accent);
-    background-color: var(--background-modifier-hover);
+    border-color: var(--interactive-accent) !important;
+    background-color: var(--background-modifier-hover) !important;
   }
 
   .editable-quantity input {
@@ -4547,9 +4547,9 @@ tr[data-macro-line]:hover {
   }
 
   .macroscalc-expand-toggle {
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 12px !important;
   }
 
   .macroscalc-id-text {
@@ -4558,15 +4558,15 @@ tr[data-macro-line]:hover {
 
   .macro-tooltip,
   .macro-tooltip-mobile {
-    min-width: 180px;
-    max-width: calc(100vw - 40px);
-    padding: 12px 16px;
-    font-size: 14px;
-    line-height: 1.4;
-    background-color: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transform: translateX(-50%) translateY(-4px) scale(1);
+    min-width: 180px !important;
+    max-width: calc(100vw - 40px) !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transform: translateX(-50%) translateY(-4px) scale(1) !important;
   }
 
   .tooltip-visible {
@@ -4576,9 +4576,9 @@ tr[data-macro-line]:hover {
   .macro-progress-container,
   .target-progress-container,
   .macro-metric-progress-container {
-    height: 6px;
-    margin-top: 3px;
-    margin-bottom: 2px;
+    height: 6px !important;
+    margin-top: 3px !important;
+    margin-bottom: 2px !important;
   }
 
   .delete-confirmation-content {
@@ -4711,36 +4711,36 @@ tr[data-macro-line]:hover {
   }
 
   .macros-table td:first-child {
-    max-width: 200px;
-    min-width: 120px;
-    width: 35%;
-    padding: 6px 4px;
+    max-width: 200px !important;
+    min-width: 120px !important;
+    width: 35% !important;
+    padding: 6px 4px !important;
   }
 
   .macro-food-name {
-    min-width: 50px;
-    font-size: 0.85em;
-    max-width: calc(100% - 16px);
+    min-width: 50px !important;
+    font-size: 0.85em !important;
+    max-width: calc(100% - 16px) !important;
   }
 
   .food-comment-icon {
-    width: 12px;
-    height: 12px;
-    font-size: 0.7em;
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 0.7em !important;
   }
 
   .food-name-content {
-    max-width: calc(100% - 4px);
+    max-width: calc(100% - 4px) !important;
   }
 
   .macros-table th:first-child,
   .macros-table td:first-child {
-    width: 35%;
+    width: 35% !important;
   }
 
   .macros-table th:nth-child(2),
   .macros-table td:nth-child(2) {
-    width: 13%;
+    width: 13% !important;
   }
 
   .macros-table th:nth-child(3),
@@ -4751,7 +4751,7 @@ tr[data-macro-line]:hover {
   .macros-table td:nth-child(5),
   .macros-table th:nth-child(6),
   .macros-table td:nth-child(6) {
-    width: 13%;
+    width: 13% !important;
   }
 
   .dual-energy-inputs {
@@ -4875,7 +4875,7 @@ tr[data-macro-line]:hover {
   }
 
   .macro-percentage {
-    font-size: 0.65rem;
+    font-size: 0.65rem !important;
   }
 
   .macro-dashboard-content {
@@ -4938,10 +4938,10 @@ tr[data-macro-line]:hover {
 
   .macro-tooltip,
   .macro-tooltip-mobile {
-    min-width: 160px;
-    max-width: calc(100vw - 20px);
-    padding: 10px 14px;
-    font-size: 13px;
+    min-width: 160px !important;
+    max-width: calc(100vw - 20px) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
   }
 
   .delete-warning-icon {
@@ -4987,14 +4987,14 @@ tr[data-macro-line]:hover {
   }
 
   .macro-food-name {
-    font-size: 0.8em;
-    min-width: 45px;
+    font-size: 0.8em !important;
+    min-width: 45px !important;
   }
 
   .food-comment-icon {
-    width: 10px;
-    height: 10px;
-    font-size: 0.65em;
+    width: 10px !important;
+    height: 10px !important;
+    font-size: 0.65em !important;
   }
 
   .enhanced-add-to-macros-modal .tabs-container.centered-tabs {
@@ -5229,18 +5229,18 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 @media (prefers-contrast: high) {
   .macros-table tr.long-press-active {
-    background-color: var(--interactive-accent);
-    border: 2px solid var(--text-normal);
+    background-color: var(--interactive-accent) !important;
+    border: 2px solid var(--text-normal) !important;
   }
 
   .macros-table tr.long-press-ready {
-    background-color: #800000;
-    border: 3px solid #ffffff;
+    background-color: #800000 !important;
+    border: 3px solid #ffffff !important;
   }
 
   .delete-confirmation-title {
-    color: var(--text-error, #800000);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: var(--text-error, #800000) !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
   }
 
   .modal-button-container .mod-warning {
@@ -5250,10 +5250,10 @@ body:not(.theme-obsidian) .api-credentials-success {
 
   .macro-tooltip,
   .macro-tooltip-mobile {
-    background-color: black;
-    color: white;
-    border: 2px solid white;
-    font-weight: 500;
+    background-color: black !important;
+    color: white !important;
+    border: 2px solid white !important;
+    font-weight: 500 !important;
   }
 
   .macros-id-suggestion.is-selected,
@@ -5285,8 +5285,8 @@ body:not(.theme-obsidian) .api-credentials-success {
   .macro-tooltip,
   .macro-tooltip-mobile,
   .energy-field .form-input {
-    transition: none;
-    animation: none;
+    transition: none !important;
+    animation: none !important;
   }
 
   .macros-table tr.long-press-active,
@@ -5296,7 +5296,7 @@ body:not(.theme-obsidian) .api-credentials-success {
   }
 
   .macros-table tr.long-press-ready {
-    background-color: var(--text-error, #c0392b);
+    background-color: var(--text-error, #c0392b) !important;
   }
 }
 
@@ -5560,8 +5560,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 /* High contrast mode - keep subtle but visible */
 @media (prefers-contrast: high) {
   .macros-table tr.long-press-active {
-    background-color: var(--interactive-accent);
-    border: 1px solid var(--text-normal);
+    background-color: var(--interactive-accent) !important;
+    border: 1px solid var(--text-normal) !important;
   }
 }
 
@@ -5609,10 +5609,10 @@ body:not(.theme-obsidian) .api-credentials-success {
 @media (max-width: 768px) {
   .macro-tooltip,
   .macro-tooltip-mobile {
-    font-size: 14px;
-    padding: 10px 14px;
-    max-width: calc(100vw - 40px);
-    line-height: 1.4;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    max-width: calc(100vw - 40px) !important;
+    line-height: 1.4 !important;
   }
 }
 
@@ -5694,7 +5694,7 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 .macros-search-input {
-  padding-right: 40px;
+  padding-right: 40px !important;
 }
 
 @media (max-width: 768px) {
@@ -5726,7 +5726,7 @@ body:not(.theme-obsidian) .api-credentials-success {
   }
 
   .macros-search-input {
-    padding-right: 42px;
+    padding-right: 42px !important;
   }
 }
 
@@ -7868,8 +7868,8 @@ body:not(.theme-obsidian) .api-credentials-success {
   padding: 14px 16px;
   border: 2px solid var(--background-modifier-border);
   border-radius: 8px;
-  background: var(--background-secondary);
-  color: var(--text-normal);
+  background: var(--background-secondary) !important;
+  color: var(--text-normal) !important;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -7878,24 +7878,24 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 /* Hover state - only when not selected */
 .tolerance-severity-btn:hover:not(.selected) {
-  background: var(--background-modifier-hover);
+  background: var(--background-modifier-hover) !important;
   border-color: var(--interactive-accent);
 }
 
 /* Selected state - explicit and high specificity */
 .tolerance-severity-btn.selected {
-  background: var(--interactive-accent);
-  border-color: var(--interactive-accent);
-  color: var(--text-on-accent);
+  background: var(--interactive-accent) !important;
+  border-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
   box-shadow: 0 2px 8px var(--interactive-accent-alpha);
   transform: translateY(-1px);
 }
 
 /* Ensure selected state takes precedence over hover */
 .tolerance-severity-btn.selected:hover {
-  background: var(--interactive-accent-hover);
-  border-color: var(--interactive-accent-hover);
-  color: var(--text-on-accent);
+  background: var(--interactive-accent-hover) !important;
+  border-color: var(--interactive-accent-hover) !important;
+  color: var(--text-on-accent) !important;
 }
 
 .severity-icon {
@@ -7934,11 +7934,11 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 /* Force reset any persistent selected states */
 .tolerance-severity-btn:not(.selected) {
-  background: var(--background-secondary);
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border);
-  box-shadow: none;
-  transform: none;
+  background: var(--background-secondary) !important;
+  color: var(--text-normal) !important;
+  border-color: var(--background-modifier-border) !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .tolerance-severity-btn:not(.selected) .severity-description {
@@ -8230,8 +8230,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 /* Enhanced visual feedback for selected severity */
 .tolerance-severity-btn.selected {
-  box-shadow: 0 2px 8px var(--interactive-accent-alpha);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--interactive-accent-alpha) !important;
+  transform: translateY(-1px) !important;
 }
 
 .tolerance-severity-btn:active:not(.selected) {
@@ -9293,4 +9293,4 @@ body:not(.theme-obsidian) .api-credentials-success {
   color: var(--text-faint);
 }
 
-.macros-u-hidden { display: none; }
+.macros-u-hidden { display: none !important; }
