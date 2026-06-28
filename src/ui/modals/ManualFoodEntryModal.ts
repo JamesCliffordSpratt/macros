@@ -331,7 +331,7 @@ export class ManualFoodEntryModal extends Modal {
     let expanded = false;
     const toggle = () => {
       expanded = !expanded;
-      body.style.display = expanded ? 'block' : 'none';
+      body.toggleClass('macros-u-hidden', !expanded);
       toggleIcon.textContent = expanded ? '▼' : '▶';
     };
     this.component.registerDomEvent(header, 'click', toggle);

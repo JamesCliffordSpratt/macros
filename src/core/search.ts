@@ -332,8 +332,13 @@ export async function searchAllSources(
     );
   }
 
-  // Execute searches in parallel
-  const results = await Promise.all(searchPromises);
+  // Execute searches in parallel. Use allSettled so that one failing source
+  // (e.g. a network error or outage from a single API) doesn't wipe out the
+  // results from the others.
+  const settled = await Promise.allSettled(searchPromises);
+  const results = settled
+    .filter((r): r is PromiseFulfilledResult<UnifiedFoodResult[]> => r.status === 'fulfilled')
+    .map((r) => r.value);
 
   // Merge and deduplicate with enhanced prioritization
   const merged = mergeAndDedupeResults(...results);

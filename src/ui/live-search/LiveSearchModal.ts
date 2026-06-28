@@ -939,7 +939,7 @@ export class LiveFoodSearchModal extends Modal {
   }
 
   escapeRegExp(string: string): string {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\');
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   /**
