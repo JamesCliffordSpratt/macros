@@ -49,7 +49,8 @@ export function processNutritionalData(
   // Frontmatter values can be non-strings (e.g. YAML parses `serving_size: 100`
   // as a number). A `as string` cast does nothing at runtime, so coerce here to
   // avoid "toLowerCase is not a function" on numeric/other values.
-  const storedServing = fm['serving_size'] != null ? String(fm['serving_size'] as string | number) : '';
+  const sv = fm['serving_size'];
+  const storedServing = typeof sv === 'string' || typeof sv === 'number' ? String(sv) : '';
   if (!storedServing.toLowerCase().includes('g')) return null;
 
   const storedServingGrams = parseGrams(storedServing);

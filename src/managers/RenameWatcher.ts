@@ -25,9 +25,9 @@ export class RenameWatcher {
    */
   init(): void {
     // Listen for file rename events
-    this.renameEventRef = this.plugin.app.vault.on('rename', (file, oldPath) =>
-      this.handleFileRename(file as TFile, oldPath)
-    );
+    this.renameEventRef = this.plugin.app.vault.on('rename', (file, oldPath) => {
+      if (file instanceof TFile) void this.handleFileRename(file, oldPath);
+    });
     this.plugin.registerEvent(this.renameEventRef);
 
     this.plugin.logger.debug('RenameWatcher initialized');

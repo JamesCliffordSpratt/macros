@@ -76,7 +76,7 @@ export class ManualFoodEntryModal extends Modal {
       type: 'text',
       cls: 'form-input macros-form-input',
       attr: {
-        placeholder: 'e.g., chicken breast',
+        placeholder: 'E.g., chicken breast',
         required: 'true',
       },
     });

@@ -70,7 +70,9 @@ export class MacrosTableRenderer {
 
     // Register event handlers to detect external file changes using Obsidian's API
     this.plugin.registerEvent(
-      this.plugin.app.vault.on('modify', (file) => this.handleFileModify(file as TFile))
+      this.plugin.app.vault.on('modify', (file) => {
+        if (file instanceof TFile) this.handleFileModify(file);
+      })
     );
   }
 
