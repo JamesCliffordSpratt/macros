@@ -545,20 +545,12 @@ async function searchOpenFoodFactsCGI(
   try {
     const merged = new Map<string, OffFoodResult>();
 
-    // Query the primary instance first - this alone is usually enough.
+    // Query only the primary (world) instance. It already contains the full
+    // global catalog, so the regional mirrors mostly returned duplicates while
+    // adding several slow cgi/search.pl round-trips. Skipping them keeps the
+    // search responsive (the v2 API call in the orchestrator adds coverage).
     for (const result of await fetchInstance(instances[0])) {
       if (!merged.has(result.code)) merged.set(result.code, result);
-    }
-
-    // Only fan out to the regional instances (in parallel) if we still need more.
-    if (merged.size < pageSize) {
-      const fallbackBatches = await Promise.all(instances.slice(1).map(fetchInstance));
-      for (const batch of fallbackBatches) {
-        for (const result of batch) {
-          if (!merged.has(result.code)) merged.set(result.code, result);
-        }
-        if (merged.size >= pageSize) break;
-      }
     }
 
     return Array.from(merged.values()).slice(0, pageSize);
