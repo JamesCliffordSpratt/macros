@@ -9292,3 +9292,5 @@ body:not(.theme-obsidian) .api-credentials-success {
   font-size: 0.75rem;
   color: var(--text-faint);
 }
+
+.macros-u-hidden { display: none !important; }

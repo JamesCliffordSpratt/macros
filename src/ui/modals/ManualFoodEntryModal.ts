@@ -254,7 +254,7 @@ export class ManualFoodEntryModal extends Modal {
 
     // Only show status section if we have added items
     if (this.addedItems.length > 0) {
-      this.statusContainer.style.display = 'block';
+      this.statusContainer.removeClass('macros-u-hidden');
 
       const addedHeader = this.statusContainer.createDiv({ cls: 'added-items-header' });
       addedHeader.createEl('h3', {
@@ -265,7 +265,7 @@ export class ManualFoodEntryModal extends Modal {
       this.addedItemsList = this.statusContainer.createDiv({ cls: 'added-items-list' });
       this.updateAddedItemsDisplay();
     } else {
-      this.statusContainer.style.display = 'none';
+      this.statusContainer.addClass('macros-u-hidden');
     }
   }
 
@@ -303,10 +303,10 @@ export class ManualFoodEntryModal extends Modal {
 
     // Show/hide status section based on items
     if (this.addedItems.length > 0) {
-      this.statusContainer.style.display = 'block';
+      this.statusContainer.removeClass('macros-u-hidden');
       this.updateAddedItemsDisplay();
     } else {
-      this.statusContainer.style.display = 'none';
+      this.statusContainer.addClass('macros-u-hidden');
     }
   }
 
@@ -326,7 +326,7 @@ export class ManualFoodEntryModal extends Modal {
     });
 
     const body = section.createDiv({ cls: 'micronutrient-entry-body' });
-    body.style.display = 'none';
+    body.addClass('macros-u-hidden');
 
     let expanded = false;
     const toggle = () => {

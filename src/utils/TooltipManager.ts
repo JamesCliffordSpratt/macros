@@ -16,7 +16,7 @@ function ensureTooltipEl(): HTMLDivElement {
   if (!tooltipEl) {
     tooltipEl = activeDocument.createElement('div');
     tooltipEl.className = 'macro-tooltip macro-tooltip-hidden';
-    tooltipEl.setAttribute('style', '--x: -9999px; --y: -9999px;');
+    tooltipEl.setCssProps({ '--x': '-9999px', '--y': '-9999px' });
     activeDocument.body.appendChild(tooltipEl);
   }
   return tooltipEl;

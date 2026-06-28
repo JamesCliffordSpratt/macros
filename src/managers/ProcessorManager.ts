@@ -20,7 +20,7 @@ export function registerProcessors(plugin: MacrosPlugin): void {
   // instead of falling back to showing their raw source.
   plugin.registerMarkdownCodeBlockProcessor('macrosmicro', (_source, el) => {
     el.empty();
-    el.style.display = 'none';
+    el.addClass('macros-u-hidden');
   });
 
   plugin.logger.debug('All processors registered');
