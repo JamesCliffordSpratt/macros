@@ -9294,3 +9294,38 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 .macros-u-hidden { display: none; }
+
+/* === Food name cell layout (appended override) === */
+.macros-table td:first-child {
+  padding-left: 4px;
+}
+.macro-food-name-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 2px 0;
+  gap: 4px;
+}
+.food-name-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.macro-food-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.food-icons-container {
+  flex: 0 0 auto;
+}

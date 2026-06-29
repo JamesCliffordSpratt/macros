@@ -25,7 +25,6 @@ export class AdherenceMetric implements MacroscalcMetric {
             slider
               .setLimits(5, 25, 5)
               .setValue((config.calorieTolerance as number) || 10)
-              .setDynamicTooltip()
               .onChange((value) => {
                 config.calorieTolerance = value;
                 onChange(config);
@@ -39,7 +38,6 @@ export class AdherenceMetric implements MacroscalcMetric {
             slider
               .setLimits(5, 25, 5)
               .setValue((config.proteinTolerance as number) || 10)
-              .setDynamicTooltip()
               .onChange((value) => {
                 config.proteinTolerance = value;
                 onChange(config);
@@ -53,7 +51,6 @@ export class AdherenceMetric implements MacroscalcMetric {
             slider
               .setLimits(5, 25, 5)
               .setValue((config.fatTolerance as number) || 15)
-              .setDynamicTooltip()
               .onChange((value) => {
                 config.fatTolerance = value;
                 onChange(config);
@@ -67,7 +64,6 @@ export class AdherenceMetric implements MacroscalcMetric {
             slider
               .setLimits(5, 25, 5)
               .setValue((config.carbsTolerance as number) || 15)
-              .setDynamicTooltip()
               .onChange((value) => {
                 config.carbsTolerance = value;
                 onChange(config);
