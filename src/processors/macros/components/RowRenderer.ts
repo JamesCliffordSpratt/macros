@@ -752,10 +752,6 @@ export class RowRenderer {
       }
     }, 200);
 
-    // Add remove button only on desktop (mobile uses context menu)
-    if (!group.macroLine || isMealItem) {
-      this.createDesktopRemoveButton(nameContainer, isMealItem, containerName, row);
-    }
 
     if (this.isMobileDevice() && (!group.macroLine || isMealItem)) {
       const instructions = macrosId
