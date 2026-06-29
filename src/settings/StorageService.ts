@@ -489,7 +489,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kcal input
         const kcalContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kcalContainer.createEl('label', {
-          // eslint-disable-next-line obsidianmd/ui/sentence-case
+          // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
           text: 'kcal',
           cls: 'energy-input-label',
         });
@@ -507,7 +507,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kJ input
         const kjContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kjContainer.createEl('label', {
-          // eslint-disable-next-line obsidianmd/ui/sentence-case
+          // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
           text: 'kJ',
           cls: 'energy-input-label',
         });
@@ -882,7 +882,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     fatSecretNotice.createEl('a', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
       text: 'https://platform.fatsecret.com/platform-api',
       attr: { href: 'https://platform.fatsecret.com/platform-api', target: '_blank' },
     });

@@ -935,7 +935,7 @@ class ManualBarcodeEntryModal extends Modal {
     contentEl.createEl('h2', { text: 'Enter barcode manually' });
 
     contentEl.createEl('p', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
       text: 'Enter the numbers from the barcode (EAN/UPC codes are typically 8-13 digits):',
       cls: 'modal-description',
     });

@@ -1,5 +1,4 @@
 import { App, requestUrl } from 'obsidian';
-import * as CryptoJS from 'crypto-js';
 import { extractServingSize } from '../utils';
 import { toCanonicalMicronutrient } from '../utils/nutrition/micronutrients';
 /*
@@ -74,6 +73,28 @@ const FATSECRET_FIELD_TO_KEY: Record<string, { key: string; unit: string }> = {
   cholesterol: { key: 'cholesterol', unit: 'mg' },
 };
 
+/**
+ * Compute an HMAC-SHA1 signature of `message` keyed by `key` and return it
+ * Base64-encoded, using the built-in Web Crypto API (replaces crypto-js).
+ */
+async function hmacSha1Base64(message: string, key: string): Promise<string> {
+  const enc = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(key),
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+  const sigBuffer = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(message));
+  const bytes = new Uint8Array(sigBuffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 export async function fetchFoodData(
   app: App,
   foodName: string,
@@ -122,10 +143,8 @@ export async function fetchFoodData(
     // Create signing key
     const signingKey = `${encodeURIComponent(apiSecret)}&`;
 
-    // Generate signature using CryptoJS
-    const signature = CryptoJS.HmacSHA1(signatureBaseString, signingKey).toString(
-      CryptoJS.enc.Base64
-    );
+    // Generate signature using the Web Crypto API
+    const signature = await hmacSha1Base64(signatureBaseString, signingKey);
 
     // Add signature to parameters
     const requestParams = {
@@ -174,11 +193,11 @@ function generateNonce(): string {
  * Build an OAuth 1.0 (HMAC-SHA1) signed FatSecret REST URL for the given
  * method-specific parameters.
  */
-function buildSignedFatSecretUrl(
+async function buildSignedFatSecretUrl(
   methodParams: Record<string, string>,
   apiKey: string,
   apiSecret: string
-): string {
+): Promise<string> {
   const baseUrl = 'https://platform.fatsecret.com/rest/server.api';
   const params: Record<string, string> = {
     format: 'json',
@@ -202,9 +221,7 @@ function buildSignedFatSecretUrl(
   ].join('&');
 
   const signingKey = `${encodeURIComponent(apiSecret)}&`;
-  const signature = CryptoJS.HmacSHA1(signatureBaseString, signingKey).toString(
-    CryptoJS.enc.Base64
-  );
+  const signature = await hmacSha1Base64(signatureBaseString, signingKey);
 
   const urlParams = new URLSearchParams();
   Object.entries({ ...params, oauth_signature: signature }).forEach(([key, value]) => {
@@ -252,7 +269,7 @@ export async function fetchFatSecretMicronutrients(
   apiSecret: string
 ): Promise<FatSecretMicronutrients | null> {
   try {
-    const url = buildSignedFatSecretUrl(
+    const url = await buildSignedFatSecretUrl(
       { method: 'food.get.v4', food_id: foodId },
       apiKey,
       apiSecret

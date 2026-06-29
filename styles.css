@@ -466,8 +466,6 @@ tr[data-macro-line]:hover {
   overflow: visible;
   text-overflow: unset;
   white-space: normal;
-  font-weight: inherit;
-  color: inherit;
   background: none;
   font-weight: 600;
   color: var(--text-normal);
@@ -475,7 +473,6 @@ tr[data-macro-line]:hover {
 
 .header-calorie-summary {
   flex-shrink: 0;
-  margin-left: 8px;
   opacity: 0.8;
   background: none;
   color: var(--text-muted);
