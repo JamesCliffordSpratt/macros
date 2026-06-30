@@ -28,7 +28,7 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 - **Barcode scanning support** - Search products by UPC/EAN codes (via Open Food Facts)
 - **Live food search** with real-time suggestions and fuzzy matching
 - **Manual food entry** for custom items not in databases
-- **Markdown food files** with comprehensive nutritional data (calories, protein, fat, carbs)
+- **Markdown food files** with comprehensive nutritional data (calories, protein, fat, carbs, plus optional micronutrients)
 - **Custom serving sizes** with automatic nutritional scaling
 - **Energy unit flexibility** - display in kcal or kJ with automatic conversion
 - **Multi-language support** - Open Food Facts provides localized product names in 25+ languages
@@ -59,6 +59,15 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 - **Interactive configuration** - Customize which metrics appear via settings modal (⚙️ icon)
 - **Streak tracking** - Monitor current streaks and longest streaks for meeting targets
 - **Adherence percentages** - See what percentage of days you hit your targets
+
+### 🧪 **Micronutrient Tracking**
+- **Vitamins & minerals beyond macros** - track nutrients such as vitamin A, C, and D, calcium, iron, potassium, sodium, fiber, sugar, saturated fat, and cholesterol
+- **Automatic micronutrient data** - pulled from USDA FoodData Central and FatSecret when available
+- **Manual micronutrient entry** - add custom nutrient values per food in the manual entry modal
+- **Micronutrient tables** (`macrosmicro`) - render per-nutrient totals for any macros block
+- **Personalized targets** - recommended values based on your profile, organized into Vitamins, Minerals, and Other
+- **Custom targets** - override any recommended value or reset everything back to recommendations
+- **Upper-limit awareness** - flags nutrients with a suggested upper limit
 
 ### 🏷️ **Food Tolerance & Dietary Tracking**
 - **Tolerance indicators** - Mark foods with severity levels (🟡, 🟠, 🔴) and symptoms
@@ -331,6 +340,19 @@ Click the **⚙️ icon** to enable/disable metrics:
 
 Set custom tolerances for each macro (e.g., Calories ±10%, Protein ±10%, Fat ±15%, Carbs ±15%) to track how consistently you hit your targets. The plugin calculates your current streak and shows your longest streak period.
 
+### Micronutrient Tracking
+
+Track vitamins and minerals alongside your macros. Micronutrient values are pulled automatically from USDA FoodData Central and FatSecret when available, and you can add or override them manually in the food entry modal.
+
+Render per-nutrient totals for any macros block with a `macrosmicro` code block:
+````markdown
+```macrosmicro
+id: today
+```
+````
+
+Set your targets in **Settings → Micronutrients**: each nutrient shows a recommended value based on your profile (organized into Vitamins, Minerals, and Other), and you can enter custom targets or reset everything back to the recommendations.
+
 ### Custom Serving Sizes
 All foods support custom serving sizes with automatic nutritional scaling:
 - Use grams: `Chicken: 200g`
@@ -404,6 +426,12 @@ Configure which databases to use for food search:
 - Support for custom serving sizes per item
 - Quick-add to any macro table
 
+### **Micronutrients**
+- Set targets for vitamins, minerals, and other nutrients
+- Recommended values based on your profile, grouped into Vitamins, Minerals, and Other
+- Enter custom targets or reset all back to recommendations
+- Nutrients with a suggested upper limit are flagged
+
 ### **Food Tolerances**
 - Track food intolerances and sensitivities
 - Mark severity levels with visual indicators
@@ -470,6 +498,7 @@ Configure which databases to use for food search:
 ## 🗺️ Roadmap
 
 ### **Recently Completed** ✅
+- [x] **Micronutrient tracking** (vitamins & minerals) with personalized targets and `macrosmicro` totals
 - [x] **Multi-source food database** with FatSecret, USDA, and Open Food Facts
 - [x] **Barcode scanning support** via Open Food Facts
 - [x] **Advanced metrics system** with customizable dashboard
@@ -489,7 +518,6 @@ Configure which databases to use for food search:
 - [ ] **Recipe builder** with ingredient scaling and nutritional analysis
 
 ### **Long Term**
-- [ ] **Micronutrient tracking** (vitamins, minerals) with RDA comparisons
 - [ ] **AI-powered meal suggestions** based on nutritional targets and preferences
 
 ---
@@ -582,4 +610,4 @@ This plugin uses nutritional data from:
 
 **Crafted with ❤️ for Obsidian users who love food and data.**
 
-*Last updated: 2025-01-17*
+*Last updated: 2026-06-30*
