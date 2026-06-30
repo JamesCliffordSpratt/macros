@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.3](https://github.com/JamesCliffordSpratt/macros/compare/2.6.2...2.6.3) (2026-06-30)
+
+
+### Bug Fixes
+
+* cold-start chart rendering; sentence-case UI strings; eslint setup ([402fd7c](https://github.com/JamesCliffordSpratt/macros/commit/402fd7c4cbe293e23dfcf404bdf63ded41362476))
+
 ### [2.6.2](https://github.com/JamesCliffordSpratt/macros/compare/2.6.1...2.6.2) (2026-06-29)
 
 ### [2.6.1](https://github.com/JamesCliffordSpratt/macros/compare/2.6.0...2.6.1) (2026-06-28)
