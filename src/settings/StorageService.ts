@@ -1308,7 +1308,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
           .addButton((removeBtn) => {
             removeBtn
               .setButtonText(t('general.remove'))
-              .setWarning()
+              .then((b) => b.buttonEl.addClass('mod-warning'))
               .onClick(async () => {
                 this.plugin.settings.mealTemplates = this.plugin.settings.mealTemplates.filter(
                   (m) => m.name !== meal.name
@@ -1407,7 +1407,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
         .addButton((btn) => {
           btn
             .setButtonText(t('settings.tolerances.clearAllButton'))
-            .setWarning()
+            .then((b) => b.buttonEl.addClass('mod-warning'))
             .onClick(async () => {
               this.plugin.settings.foodTolerances = {};
               await this.plugin.saveSettings();
@@ -1550,7 +1550,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
       .addButton((btn) => {
         btn
           .setButtonText(t('settings.micronutrients.resetAllButton'))
-          .setWarning()
+          .then((b) => b.buttonEl.addClass('mod-warning'))
           .onClick(async () => {
             this.plugin.settings.micronutrientTargets = {};
             await this.plugin.saveSettings();
