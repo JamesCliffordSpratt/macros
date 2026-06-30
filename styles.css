@@ -1826,8 +1826,20 @@ tr[data-macro-line]:hover {
   border-radius: 6px;
   border: 1px solid var(--background-modifier-border);
   background-color: var(--background-primary);
-  scrollbar-width: thin;
-  scrollbar-color: var(--background-modifier-border) transparent;
+}
+
+.macros-results-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.macros-results-container::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.macros-results-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .macros-results-container:empty {
@@ -2832,8 +2844,11 @@ tr[data-macro-line]:hover {
     overflow-x: auto; /* Allow horizontal scrolling if needed */
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     -ms-overflow-style: none;
+  }
+
+  .enhanced-add-to-macros-modal .tabs-container::-webkit-scrollbar {
+    display: none;
   }
 
   .enhanced-add-to-macros-modal .tabs-container.centered-tabs::-webkit-scrollbar {
@@ -3114,8 +3129,20 @@ tr[data-macro-line]:hover {
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   align-content: start;
-  scrollbar-width: thin;
-  scrollbar-color: var(--background-modifier-border) transparent;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.enhanced-add-to-macros-modal .items-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .enhanced-add-to-macros-modal .items-container.active {
@@ -3644,8 +3671,20 @@ tr[data-macro-line]:hover {
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   align-content: start;
-  scrollbar-width: thin;
-  scrollbar-color: var(--background-modifier-border) transparent;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.enhanced-meal-template-modal .foods-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .enhanced-meal-template-modal .foods-container::-webkit-scrollbar {
