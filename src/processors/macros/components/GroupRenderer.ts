@@ -236,6 +236,8 @@ export class GroupRenderer {
       // Add tooltip with the comment text
       safeAttachTooltip(commentIcon, comment, this.plugin);
       iconsContainer.appendChild(commentIcon);
+      leftContent.addClass('has-comment-icon');
+      headerCell.addClass('has-comment-icon');
     }
 
     nameContainer.appendChild(iconsContainer);

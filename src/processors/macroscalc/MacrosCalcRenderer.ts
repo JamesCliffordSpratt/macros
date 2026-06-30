@@ -1087,6 +1087,7 @@ export class MacrosCalcRenderer {
               });
 
               safeAttachTooltip(commentIcon, comment, this.plugin);
+              headerContent.addClass('has-comment-icon');
             }
           } else if (line.startsWith('-') && currentMealName) {
             const bulletContent = line.substring(1).trim();
@@ -1274,6 +1275,7 @@ export class MacrosCalcRenderer {
       });
 
       safeAttachTooltip(commentIcon, comment, this.plugin);
+      nameContentDiv.addClass('has-comment-icon');
     }
 
     window.setTimeout(() => {

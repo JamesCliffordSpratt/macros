@@ -738,6 +738,7 @@ export class RowRenderer {
       });
 
       safeAttachTooltip(commentIcon, comment, this.plugin);
+      nameContentDiv.addClass('has-comment-icon');
     }
 
     // Better truncation detection and tooltip handling

@@ -405,7 +405,7 @@ tr[data-macro-line]:hover {
   overflow-wrap: break-word;
 }
 
-.food-name-content:has(.food-comment-icon) {
+.food-name-content.has-comment-icon {
   background: none;
   background-color: transparent;
 }
@@ -511,7 +511,7 @@ tr[data-macro-line]:hover {
   background-color: var(--background-modifier-hover);
 }
 
-.meal-header-cell:has(.meal-comment-icon) {
+.meal-header-cell.has-comment-icon {
   background-color: transparent;
 }
 
@@ -640,7 +640,7 @@ tr[data-macro-line]:hover {
   font-style: italic;
 }
 
-.header-left:has(.meal-comment-icon) {
+.header-left.has-comment-icon {
   background: none;
   background-color: transparent;
 }
