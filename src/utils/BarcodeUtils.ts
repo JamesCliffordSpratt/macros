@@ -392,8 +392,7 @@ export class MobilePermissionHandler {
 
       // Check if we're in Obsidian desktop environment
       const isObsidianDesktop =
-        !!(window as Window & { require?: unknown }).require ||
-        Platform.isDesktopApp;
+        !!(window as Window & { require?: unknown }).require || Platform.isDesktopApp;
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -494,8 +493,7 @@ export class MobilePermissionHandler {
 
   private static getDesktopPermissionError(): string {
     const isObsidianDesktop =
-      !!(window as Window & { require?: unknown }).require ||
-      Platform.isDesktopApp;
+      !!(window as Window & { require?: unknown }).require || Platform.isDesktopApp;
 
     if (isObsidianDesktop) {
       return `Camera permission denied in Obsidian. Possible solutions:
@@ -523,8 +521,7 @@ export class MobilePermissionHandler {
   static shouldShowPermissionInstructions(): boolean {
     const isMobile = Platform.isMobile;
     const isObsidianDesktop =
-      !!(window as Window & { require?: unknown }).require ||
-      Platform.isDesktopApp;
+      !!(window as Window & { require?: unknown }).require || Platform.isDesktopApp;
 
     return isMobile || isObsidianDesktop;
   }
@@ -533,8 +530,7 @@ export class MobilePermissionHandler {
     const isIOS = Platform.isIosApp;
     const isAndroid = Platform.isAndroidApp;
     const isObsidianDesktop =
-      !!(window as Window & { require?: unknown }).require ||
-      Platform.isDesktopApp;
+      !!(window as Window & { require?: unknown }).require || Platform.isDesktopApp;
 
     if (isObsidianDesktop) {
       return `📱 Desktop: Check Windows camera settings (Settings > Privacy & Security > Camera) and ensure camera access is enabled for apps.`;

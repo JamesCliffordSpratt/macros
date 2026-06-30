@@ -371,8 +371,10 @@ export class LiveFoodSearchModal extends Modal {
       return;
     }
 
-    const scannerModal = new BarcodeScannerModal(this.app, this.plugin, (barcode: string) =>
-      void this.handleBarcodeScanned(barcode)
+    const scannerModal = new BarcodeScannerModal(
+      this.app,
+      this.plugin,
+      (barcode: string) => void this.handleBarcodeScanned(barcode)
     );
 
     scannerModal.open();
@@ -717,7 +719,7 @@ export class LiveFoodSearchModal extends Modal {
     searchTerm: string,
     // Fixed: Use proper typing instead of any
     settings: typeof this.plugin.settings,
-    searchAbortSignal: AbortSignal
+    _searchAbortSignal: AbortSignal
   ): Promise<UnifiedFoodResult[]> {
     let newResults: UnifiedFoodResult[] = [];
 

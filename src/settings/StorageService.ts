@@ -1254,7 +1254,11 @@ export class NutritionalSettingTab extends PluginSettingTab {
             } else if ((error as Error).message?.includes('timeout')) {
               new Notice(t('settings.api.openFoodFactsTestTimeoutError'));
             } else {
-              new Notice(t('settings.api.openFoodFactsTestError', { error: error instanceof Error ? error.message : String(error) }));
+              new Notice(
+                t('settings.api.openFoodFactsTestError', {
+                  error: error instanceof Error ? error.message : String(error),
+                })
+              );
             }
           }
         });

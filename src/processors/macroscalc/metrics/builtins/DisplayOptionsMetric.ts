@@ -48,7 +48,7 @@ export class DisplayOptionsMetric implements MacroscalcMetric {
     };
   }
 
-  calculate(data: MetricData): MetricValue[] {
+  calculate(_data: MetricData): MetricValue[] {
     // This metric doesn't calculate values, it just provides display configuration
     // Return empty array since it's purely for configuration
     return [];

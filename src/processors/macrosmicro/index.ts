@@ -6,10 +6,7 @@ import {
   getEffectiveTarget,
   formatMicroAmount,
 } from '../../utils/nutrition/micronutrients';
-import {
-  aggregateMicronutrientsForIds,
-  MicronutrientAggregateResult,
-} from './aggregate';
+import { aggregateMicronutrientsForIds, MicronutrientAggregateResult } from './aggregate';
 
 interface MacrosMicroBlockOptions {
   ids: string[];
@@ -81,9 +78,10 @@ function renderMicronutrientTable(
   if (visibleDefs.length === 0) {
     container.createDiv({
       cls: 'macrosmicro-empty',
-      text: result.resolvedCount === 0
-        ? t('micronutrients.processor.noFoods')
-        : t('micronutrients.processor.noData'),
+      text:
+        result.resolvedCount === 0
+          ? t('micronutrients.processor.noFoods')
+          : t('micronutrients.processor.noData'),
     });
     return;
   }

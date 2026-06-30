@@ -48,9 +48,7 @@ export class CustomServingSizeModal extends Modal {
           const defaultServingSize: unknown = cache.frontmatter['default_serving_size'];
           if (typeof defaultServingSize === 'string' || typeof defaultServingSize === 'number') {
             // Parse the default serving size (remove 'g' suffix if present)
-            const parsedDefaultServing = parseFloat(
-              String(defaultServingSize).replace(/g$/i, '')
-            );
+            const parsedDefaultServing = parseFloat(String(defaultServingSize).replace(/g$/i, ''));
             if (!isNaN(parsedDefaultServing) && parsedDefaultServing > 0) {
               suggestedServing = parsedDefaultServing;
               isUsingCustomDefault = true;

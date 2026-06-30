@@ -59,7 +59,9 @@ export class ChartManager {
 
       ids = ids.filter((i) => i && i.trim() !== '');
       if (ids.length === 0) {
-        this.plugin.logger.error(`No valid IDs found in: ${Array.isArray(id) ? id.join(', ') : id}`);
+        this.plugin.logger.error(
+          `No valid IDs found in: ${Array.isArray(id) ? id.join(', ') : id}`
+        );
         el.createEl('div', { text: t('charts.errors.noIdsProvided') });
         return;
       }
@@ -93,7 +95,7 @@ export class ChartManager {
             window.setTimeout(() => reject(new Error('Data load timeout')), 5000)
           );
 
-          const freshData = (await Promise.race([freshDataPromise, timeoutPromise]));
+          const freshData = await Promise.race([freshDataPromise, timeoutPromise]);
 
           if (freshData && Array.isArray(freshData) && freshData.length > 0) {
             this.plugin.dataManager.macroTables.set(currentId, freshData);
@@ -567,16 +569,13 @@ export class ChartManager {
       type: 'line',
       data: {
         labels,
-        datasets: datasets.map(
-          (dataset) =>
-            ({
-              ...dataset,
-              tension: 0.2,
-              fill: false,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-            })
-        ),
+        datasets: datasets.map((dataset) => ({
+          ...dataset,
+          tension: 0.2,
+          fill: false,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        })),
       },
       options: {
         responsive: true,

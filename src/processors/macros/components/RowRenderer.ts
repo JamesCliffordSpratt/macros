@@ -753,7 +753,6 @@ export class RowRenderer {
       }
     }, 200);
 
-
     if (this.isMobileDevice() && (!group.macroLine || isMealItem)) {
       const instructions = macrosId
         ? t('table.actions.longPressForOptions')

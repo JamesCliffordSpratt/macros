@@ -876,7 +876,7 @@ export function getRecommendedValue(
   }
 
   const anyValue = Object.values(def.dri).find((v) => v != null);
-  return anyValue != null ? (anyValue) : null;
+  return anyValue != null ? anyValue : null;
 }
 
 /**

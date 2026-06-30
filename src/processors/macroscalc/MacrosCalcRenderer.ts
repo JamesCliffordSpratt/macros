@@ -426,7 +426,7 @@ export class MacrosCalcRenderer {
     this.renderCustomMetrics(dashboardContent, totals);
   }
 
-  private renderBasicMetrics(container: HTMLElement, totals: MacroTotals): void {
+  private renderBasicMetrics(_container: HTMLElement, _totals: MacroTotals): void {
     // Remove this method's content entirely since we now have organized custom metrics
     // that include totals, averages, and ratios in a much better format.
     // The custom metrics system handles all the data display we need.
@@ -456,7 +456,10 @@ export class MacrosCalcRenderer {
     const metricResults = registry.calculateMetrics(metricsData, this.metricsConfigs);
 
     // Group metrics by category
-    const categorizedMetrics = new Map<string, { metric: MacroscalcMetric; values: MetricValue[] }[]>();
+    const categorizedMetrics = new Map<
+      string,
+      { metric: MacroscalcMetric; values: MetricValue[] }[]
+    >();
 
     for (const [metricId, values] of metricResults) {
       const metric = registry.get(metricId);
@@ -494,7 +497,7 @@ export class MacrosCalcRenderer {
       });
 
       // Render all metrics in this category
-      categoryMetrics.forEach(({ metric, values }) => {
+      categoryMetrics.forEach(({ metric: _metric, values }) => {
         values.forEach((value) => {
           this.createCustomMetricCard(categoryGrid, value, categoryKey);
         });
@@ -1376,9 +1379,7 @@ export class MacrosCalcRenderer {
 
     const headerRow = table.rows[0];
     for (let i = 0; i < headerRow.cells.length; i++) {
-      const sortIcon = headerRow.cells[i].querySelector(
-        '.macroscalc-sort-icon'
-      );
+      const sortIcon = headerRow.cells[i].querySelector('.macroscalc-sort-icon');
       if (sortIcon) {
         if (i === columnIndex) {
           sortIcon.textContent = ascending ? '↑' : '↓';
@@ -1482,9 +1483,7 @@ export class MacrosCalcRenderer {
     tbody.appendChild(aggregateRow);
 
     for (let i = 0; i < headerRow.cells.length; i++) {
-      const sortIcon = headerRow.cells[i].querySelector(
-        '.macroscalc-sort-icon'
-      );
+      const sortIcon = headerRow.cells[i].querySelector('.macroscalc-sort-icon');
       if (sortIcon) {
         const newSortIcon = sortIcon.cloneNode(true) as HTMLElement;
         sortIcon.parentNode?.replaceChild(newSortIcon, sortIcon);

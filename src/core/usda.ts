@@ -160,9 +160,7 @@ export async function searchFoods(
         if (response.json && response.status === 200) {
           const data = response.json as UsdaApiResponse;
           if (data.foods && data.foods.length > 0) {
-            return data.foods
-              .map((food) => processFoodItem(food))
-              .filter((food) => food !== null);
+            return data.foods.map((food) => processFoodItem(food)).filter((food) => food !== null);
           }
         }
       } catch {
@@ -295,7 +293,7 @@ function extractUsdaMicronutrients(food: UsdaFood): Record<string, number> | und
  * @param gramsServing Serving size (always 100g)
  * @returns string
  */
-function createDisplayDescription(food: UsdaFood, gramsServing: number): string {
+function createDisplayDescription(food: UsdaFood, _gramsServing: number): string {
   try {
     // Always display as "Per 100g" since we're standardizing to 100g
     const standardGrams = 100;

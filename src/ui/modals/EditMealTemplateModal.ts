@@ -249,7 +249,7 @@ export class EditMealTemplateModal extends Modal {
             text: t('meals.create.editServing'),
             cls: 'edit-button',
             attr: { type: 'button' },
-        });
+          });
 
           this.component.registerDomEvent(editButton, 'click', () => {
             void this.editFoodServing(food);
@@ -419,13 +419,13 @@ export class EditMealTemplateModal extends Modal {
       text: t('general.cancel'),
       cls: 'cancel-button',
       attr: { type: 'button' },
-        });
+    });
 
     this.saveButton = buttonContainer.createEl('button', {
       text: t('meals.edit.saveChanges'),
       cls: 'save-button',
       attr: { type: 'button' },
-        });
+    });
 
     this.component.registerDomEvent(cancelButton, 'click', () => {
       this.close();

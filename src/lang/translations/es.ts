@@ -188,7 +188,8 @@ export const esTranslations: LocaleData = {
       resetAll: 'Restablecer todo a lo recomendado',
       resetAllDesc: 'Borra todos los objetivos personalizados y vuelve a los valores recomendados.',
       resetAllButton: 'Restablecer Todo',
-      resetAllDone: 'Todos los objetivos de micronutrientes se restablecieron a los valores recomendados.',
+      resetAllDone:
+        'Todos los objetivos de micronutrientes se restablecieron a los valores recomendados.',
       resetToRecommended: 'Restablecer a lo recomendado',
       categoryVitamins: 'Vitaminas',
       categoryMinerals: 'Minerales',

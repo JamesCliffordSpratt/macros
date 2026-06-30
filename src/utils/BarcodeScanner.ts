@@ -179,126 +179,126 @@ export class BarcodeScanner extends Component {
 
     this.scanInterval = window.setInterval(() => {
       void (async () => {
-      if (!this.scanning || !this.video || !this.canvas || !this.context) {
-        return;
-      }
-
-      scanAttempts++;
-      if (scanAttempts % 10 === 0) {
-        this.plugin.logger.debug('Scan attempt', {
-          attempt: scanAttempts,
-          videoWidth: this.video.videoWidth,
-          videoHeight: this.video.videoHeight,
-        });
-      }
-
-      try {
-        // Check if video is ready
-        if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
-          if (scanAttempts % 20 === 0) {
-            this.plugin.logger.debug('Video not ready yet, waiting...');
-          }
+        if (!this.scanning || !this.video || !this.canvas || !this.context) {
           return;
         }
 
-        // Ensure canvas has proper dimensions
-        const width = this.video.videoWidth;
-        const height = this.video.videoHeight;
-
-        if (width === 0 || height === 0) {
-          if (scanAttempts % 20 === 0) {
-            this.plugin.logger.debug('Invalid video dimensions, skipping...');
-          }
-          return;
+        scanAttempts++;
+        if (scanAttempts % 10 === 0) {
+          this.plugin.logger.debug('Scan attempt', {
+            attempt: scanAttempts,
+            videoWidth: this.video.videoWidth,
+            videoHeight: this.video.videoHeight,
+          });
         }
-
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.context.drawImage(this.video, 0, 0, width, height);
-
-        // Try different ZXing API methods
-        let result: ZXingResult | null = null;
 
         try {
-          // Method 1: Try decodeFromCanvas (most common for browsers)
-          if (this.codeReader && this.codeReader.decodeFromCanvas) {
-            result = await this.codeReader.decodeFromCanvas(this.canvas);
-          }
-          // Method 2: Try decode with canvas (alternative syntax)
-          else if (this.codeReader && this.codeReader.decode) {
-            result = await this.codeReader.decode(this.canvas);
-          }
-          // Method 3: Try decodeFromImageData (newer versions)
-          else if (this.codeReader && this.codeReader.decodeFromImageData) {
-            const imageData = this.context.getImageData(0, 0, width, height);
-            result = await this.codeReader.decodeFromImageData(imageData);
-          }
-          // Method 4: Try decodeBitmap (if that's what we have)
-          else if (this.codeReader && this.codeReader.decodeBitmap) {
-            const imageData = this.context.getImageData(0, 0, width, height);
-            result = await this.codeReader.decodeBitmap(imageData);
-          }
-          // Method 5: Try decodeFromVideoDevice (for live video)
-          else if (this.codeReader && this.codeReader.decodeFromVideoDevice) {
-            result = await this.codeReader.decodeFromVideoDevice(undefined, this.video);
-          } else {
-            if (scanAttempts === 1) {
-              this.plugin.logger.error('No suitable decode method found on codeReader');
+          // Check if video is ready
+          if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
+            if (scanAttempts % 20 === 0) {
+              this.plugin.logger.debug('Video not ready yet, waiting...');
             }
             return;
           }
-        } catch (decodeError: unknown) {
-          const error = decodeError as { name?: string; message?: string };
-          if (error.name !== 'NotFoundException') {
+
+          // Ensure canvas has proper dimensions
+          const width = this.video.videoWidth;
+          const height = this.video.videoHeight;
+
+          if (width === 0 || height === 0) {
+            if (scanAttempts % 20 === 0) {
+              this.plugin.logger.debug('Invalid video dimensions, skipping...');
+            }
+            return;
+          }
+
+          this.canvas.width = width;
+          this.canvas.height = height;
+          this.context.drawImage(this.video, 0, 0, width, height);
+
+          // Try different ZXing API methods
+          let result: ZXingResult | null = null;
+
+          try {
+            // Method 1: Try decodeFromCanvas (most common for browsers)
+            if (this.codeReader && this.codeReader.decodeFromCanvas) {
+              result = await this.codeReader.decodeFromCanvas(this.canvas);
+            }
+            // Method 2: Try decode with canvas (alternative syntax)
+            else if (this.codeReader && this.codeReader.decode) {
+              result = await this.codeReader.decode(this.canvas);
+            }
+            // Method 3: Try decodeFromImageData (newer versions)
+            else if (this.codeReader && this.codeReader.decodeFromImageData) {
+              const imageData = this.context.getImageData(0, 0, width, height);
+              result = await this.codeReader.decodeFromImageData(imageData);
+            }
+            // Method 4: Try decodeBitmap (if that's what we have)
+            else if (this.codeReader && this.codeReader.decodeBitmap) {
+              const imageData = this.context.getImageData(0, 0, width, height);
+              result = await this.codeReader.decodeBitmap(imageData);
+            }
+            // Method 5: Try decodeFromVideoDevice (for live video)
+            else if (this.codeReader && this.codeReader.decodeFromVideoDevice) {
+              result = await this.codeReader.decodeFromVideoDevice(undefined, this.video);
+            } else {
+              if (scanAttempts === 1) {
+                this.plugin.logger.error('No suitable decode method found on codeReader');
+              }
+              return;
+            }
+          } catch (decodeError: unknown) {
+            const error = decodeError as { name?: string; message?: string };
+            if (error.name !== 'NotFoundException') {
+              if (scanAttempts % 50 === 0) {
+                this.plugin.logger.debug('Decode method error', {
+                  name: error.name,
+                  message: error.message,
+                });
+              }
+            }
+            return;
+          }
+
+          if (result) {
+            this.plugin.logger.debug('Barcode detected', {
+              code: result.getText ? result.getText() : result.text,
+              format: result.getBarcodeFormat ? result.getBarcodeFormat() : result.format,
+            });
+
+            const barcodeResult: BarcodeResult = {
+              code: result.getText ? result.getText() : result.text || result.code || '',
+              format: result.getBarcodeFormat
+                ? result.getBarcodeFormat().toString()
+                : result.format || 'Unknown',
+            };
+
+            this.stopScanning();
+            this.onBarcodeDetected(barcodeResult);
+          }
+
+          // Debug: Check if we're getting valid image data
+          if (scanAttempts % 30 === 0) {
+            const imageData = this.context.getImageData(0, 0, width, height);
+            const avgBrightness = this.calculateAverageBrightness(imageData);
+            this.plugin.logger.debug('Image data check', {
+              width: imageData.width,
+              height: imageData.height,
+              avgBrightness: avgBrightness.toFixed(1),
+            });
+          }
+        } catch (error: unknown) {
+          const err = error as { name?: string; message?: string };
+          if (err.name !== 'NotFoundException') {
             if (scanAttempts % 50 === 0) {
-              this.plugin.logger.debug('Decode method error', {
-                name: error.name,
-                message: error.message,
+              this.plugin.logger.debug('Scan frame error', {
+                name: err.name,
+                message: err.message,
               });
             }
           }
-          return;
+          // NotFoundException is normal when no barcode is detected
         }
-
-        if (result) {
-          this.plugin.logger.debug('Barcode detected', {
-            code: result.getText ? result.getText() : result.text,
-            format: result.getBarcodeFormat ? result.getBarcodeFormat() : result.format,
-          });
-
-          const barcodeResult: BarcodeResult = {
-            code: result.getText ? result.getText() : result.text || result.code || '',
-            format: result.getBarcodeFormat
-              ? result.getBarcodeFormat().toString()
-              : result.format || 'Unknown',
-          };
-
-          this.stopScanning();
-          this.onBarcodeDetected(barcodeResult);
-        }
-
-        // Debug: Check if we're getting valid image data
-        if (scanAttempts % 30 === 0) {
-          const imageData = this.context.getImageData(0, 0, width, height);
-          const avgBrightness = this.calculateAverageBrightness(imageData);
-          this.plugin.logger.debug('Image data check', {
-            width: imageData.width,
-            height: imageData.height,
-            avgBrightness: avgBrightness.toFixed(1),
-          });
-        }
-      } catch (error: unknown) {
-        const err = error as { name?: string; message?: string };
-        if (err.name !== 'NotFoundException') {
-          if (scanAttempts % 50 === 0) {
-            this.plugin.logger.debug('Scan frame error', {
-              name: err.name,
-              message: err.message,
-            });
-          }
-        }
-        // NotFoundException is normal when no barcode is detected
-      }
       })();
     }, 300);
   }
