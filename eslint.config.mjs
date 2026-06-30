@@ -16,6 +16,7 @@ export default [
       '**/*.config.{js,mjs,cjs}', // esbuild.config.mjs, this file, etc.
       'version-bump.mjs',
       'sync-version.js',
+      'sentence-case-locale.js', // one-off helper script
       // Non-source JSON (only package.json is meant to be linted, by the
       // obsidianmd manifest/license rules). The rest are data/config files.
       'data.json',
@@ -41,6 +42,8 @@ export default [
       'obsidianmd/no-unsupported-api': 'off',
       'obsidianmd/prefer-file-manager-trash-file': 'off',
       'obsidianmd/prefer-instanceof': 'off',
+      // Type-aware TS rule; can't run on plain JS files (no tsconfig project).
+      '@typescript-eslint/no-deprecated': 'off',
     },
   },
 
@@ -69,6 +72,14 @@ export default [
       // Defer to the unused-imports plugin to avoid duplicate reports.
       '@typescript-eslint/no-unused-vars': 'off',
     },
+  },
+
+  // Lint the English locale source for sentence-case UI strings. The
+  // recommended config can't see these (they go through t()), so enable the
+  // locale-module rule on en.ts only (other locales aren't English prose).
+  {
+    files: ['**/en.ts'],
+    rules: { 'obsidianmd/ui/sentence-case-locale-module': 'warn' },
   },
 
   // Prettier last, so it disables formatting rules that would conflict.

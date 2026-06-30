@@ -14,6 +14,7 @@ import {
   getCurrentEnergyUnitString,
 } from '../../utils';
 import { CalcBreakdown } from './calculator';
+import { drawWhenVisible } from '../../utils/visibility';
 import { parseGrams } from '../../utils/parsingUtils';
 import { findMatchingFoodFile } from '../../utils/fileUtils';
 import { processNutritionalData } from '../../utils/nutritionUtils';
@@ -1703,23 +1704,33 @@ export class MacrosCalcRenderer {
         },
       };
 
-      this.plugin.logger.debug('Creating Chart.js instance...');
+      // Defer instantiation until the canvas is visible. On cold start the note
+      // can render in a deferred/hidden leaf where requestAnimationFrame is
+      // paused and the responsive chart measures a 0x0 container, leaving it
+      // blank until the user navigates away and back.
+      this.plugin.logger.debug('Scheduling Chart.js instance (draw when visible)...');
 
-      const chart = new window.Chart(ctx, chartConfig);
+      drawWhenVisible(chartCanvas, () => {
+        try {
+          const chart = new window.Chart(ctx, chartConfig);
 
-      this.plugin.logger.debug('Chart created successfully:', chart);
+          this.plugin.logger.debug('Chart created successfully:', chart);
 
-      const resizeHandler = () => {
-        if (activeDocument.contains(chartCanvas)) {
-          chart.resize();
+          const resizeHandler = () => {
+            if (activeDocument.contains(chartCanvas)) {
+              chart.resize();
+            }
+          };
+
+          window.addEventListener('resize', resizeHandler);
+          this.charts.push({ chart, caloriesChart: null, resizeHandler });
+          this.chartLoader.registerChart(chartId, chart);
+
+          this.plugin.logger.debug('Chart setup complete');
+        } catch (error) {
+          this.plugin.logger.error('Error creating deferred chart:', error);
         }
-      };
-
-      window.addEventListener('resize', resizeHandler);
-      this.charts.push({ chart, caloriesChart: null, resizeHandler });
-      this.chartLoader.registerChart(chartId, chart);
-
-      this.plugin.logger.debug('Chart setup complete');
+      });
     } catch (error) {
       this.plugin.logger.error('Error creating chart:', error);
 

@@ -1,5 +1,6 @@
 import MacrosPlugin from '../../main';
 import { t } from '../../lang/I18nManager';
+import { drawWhenVisible } from '../../utils/visibility';
 
 export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
   plugin.registerMarkdownCodeBlockProcessor('macrospc', async (source: string, el: HTMLElement) => {
@@ -121,9 +122,13 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
         plugin.logger.debug(`Registered container with combined ID: ${combinedId}`);
       }
 
-      // Draw with the actual array of IDs - this will create the chart
-      await plugin.drawMacrospc(ids, el, width, height);
-      plugin.logger.debug(`Drew chart for IDs: ${ids.join(', ')}`);
+      // Draw with the actual array of IDs - this will create the chart.
+      // Defer until the element is visible so the chart paints on cold start
+      // (a restored note can render in a deferred/hidden leaf).
+      drawWhenVisible(el, () => {
+        void plugin.drawMacrospc(ids, el, width, height);
+      });
+      plugin.logger.debug(`Scheduled chart draw for IDs: ${ids.join(', ')}`);
     } catch (error) {
       // Clear loading and show error
       el.empty();

@@ -9365,3 +9365,10 @@ body:not(.theme-obsidian) .api-credentials-success {
 .food-icons-container {
   flex: 0 0 auto;
 }
+
+/* Center the "Food" column header. The td:first-child left-align above is
+   meant for the food-name data cells, not the header cell, so restore center
+   alignment to match the other column headers. */
+.macros-table .column-header:first-child {
+  text-align: center;
+}
