@@ -387,8 +387,8 @@
 }
 
 .long-press-ready td {
-  color: white !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 tr[data-macro-line]:hover {
@@ -620,8 +620,8 @@ tr[data-macro-line]:hover {
   color: var(--text-normal);
   border: 1px solid var(--interactive-accent);
   border-radius: 3px;
-  width: 70px !important;
-  padding: 4px 8px !important;
+  width: 70px;
+  padding: 4px 8px;
   font-size: 1em;
 }
 
@@ -2800,16 +2800,16 @@ tr[data-macro-line]:hover {
 }
 
 .macros-button-container .mod-cta {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-  border-color: var(--interactive-accent) !important;
-  opacity: 1 !important;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+  opacity: 1;
 }
 
 .macros-button-container .mod-cta:hover {
-  background-color: var(--interactive-accent-hover) !important;
-  border-color: var(--interactive-accent-hover) !important;
-  box-shadow: 0 2px 12px rgba(var(--interactive-accent-rgb), 0.3) !important;
+  background-color: var(--interactive-accent-hover);
+  border-color: var(--interactive-accent-hover);
+  box-shadow: 0 2px 12px rgba(var(--interactive-accent-rgb), 0.3);
 }
 
 /* ==============================
@@ -4250,8 +4250,8 @@ tr[data-macro-line]:hover {
 
 .macros-id-suggestion.is-selected,
 .macros-id-suggestion.mod-selected {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
 }
 
 .macros-id-suggestion.is-selected .macros-id-suggestion-title,
@@ -4273,16 +4273,16 @@ tr[data-macro-line]:hover {
 }
 
 .suggestion-item.is-selected .macros-id-suggestion {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
 }
 
 .suggestion-item.is-selected .macros-id-suggestion * {
-  color: var(--text-on-accent) !important;
+  color: var(--text-on-accent);
 }
 
 .suggestion-item.is-selected .macros-id-suggestion-preview {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .macros-id-suggestion-main {
@@ -4329,8 +4329,8 @@ tr[data-macro-line]:hover {
 
 .macros-context-menu,
 .macros-plugin .menu {
-  z-index: 10000 !important;
-  position: fixed !important;
+  z-index: 10000;
+  position: fixed;
 }
 
 /* ==============================
@@ -4409,8 +4409,8 @@ tr[data-macro-line]:hover {
   }
 
   .long-press-active td {
-    color: white !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   .macro-food-name-container {
@@ -4459,11 +4459,11 @@ tr[data-macro-line]:hover {
   }
 
   .editable-quantity input {
-    width: 60px !important;
-    padding: 3px 6px !important;
-    font-size: 16px !important;
-    min-height: 24px !important;
-    border-radius: 6px !important;
+    width: 60px;
+    padding: 3px 6px;
+    font-size: 16px;
+    min-height: 24px;
+    border-radius: 6px;
   }
 
   .macro-dashboard {
@@ -4567,7 +4567,7 @@ tr[data-macro-line]:hover {
   }
 
   .tooltip-visible {
-    transform: translateX(-50%) translateY(0px) scale(1) !important;
+    transform: translateX(-50%) translateY(0px) scale(1);
   }
 
   .macro-progress-container,
@@ -5182,9 +5182,9 @@ body:not(.theme-obsidian) .api-credentials-success {
 }
 
 .theme-dark .macro-tooltip-mobile {
-  background-color: rgba(25, 25, 25, 0.95) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: var(--text-normal) !important;
+  background-color: rgba(25, 25, 25, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-normal);
 }
 
 .theme-dark .comment-input-textarea {
@@ -5215,9 +5215,9 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 .theme-light .macro-tooltip,
 .theme-light .macro-tooltip-mobile {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.4) !important;
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.4);
 }
 
 /* ==============================
@@ -5241,8 +5241,8 @@ body:not(.theme-obsidian) .api-credentials-success {
   }
 
   .modal-button-container .mod-warning {
-    background-color: #800000 !important;
-    border: 2px solid #ffffff !important;
+    background-color: #800000;
+    border: 2px solid #ffffff;
   }
 
   .macro-tooltip,
@@ -5256,15 +5256,15 @@ body:not(.theme-obsidian) .api-credentials-success {
   .macros-id-suggestion.is-selected,
   .macros-id-suggestion.mod-selected,
   .suggestion-item.is-selected .macros-id-suggestion {
-    background-color: var(--text-accent) !important;
-    color: var(--background-primary) !important;
-    border: 2px solid var(--text-normal) !important;
+    background-color: var(--text-accent);
+    color: var(--background-primary);
+    border: 2px solid var(--text-normal);
   }
 
   .macros-id-suggestion.is-selected *,
   .macros-id-suggestion.mod-selected *,
   .suggestion-item.is-selected .macros-id-suggestion * {
-    color: var(--background-primary) !important;
+    color: var(--background-primary);
   }
 
   .energy-field .form-input {
@@ -5289,7 +5289,7 @@ body:not(.theme-obsidian) .api-credentials-success {
   .macros-table tr.long-press-active,
   .macros-table tr.long-press-ready,
   .modal-button-container button:hover {
-    transform: none !important;
+    transform: none;
   }
 
   .macros-table tr.long-press-ready {
@@ -5578,27 +5578,27 @@ body:not(.theme-obsidian) .api-credentials-success {
 /* Enhanced context menu positioning for mobile */
 .macros-context-menu,
 .macros-plugin .menu {
-  z-index: 10000 !important;
+  z-index: 10000;
 }
 
 /* Better touch targets for context menu items on mobile */
 @media (max-width: 768px) {
   .macros-context-menu .menu-item,
   .macros-plugin .menu .menu-item {
-    min-height: 44px !important;
-    padding: 12px 16px !important;
-    font-size: 16px !important;
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
   }
 
   .macros-context-menu .menu-separator,
   .macros-plugin .menu .menu-separator {
-    margin: 8px 0 !important;
+    margin: 8px 0;
   }
 
   .macros-context-menu,
   .macros-plugin .menu {
-    max-width: calc(100vw - 40px) !important;
-    margin: 20px !important;
+    max-width: calc(100vw - 40px);
+    margin: 20px;
   }
 }
 
@@ -8895,8 +8895,8 @@ body:not(.theme-obsidian) .api-credentials-success {
 
 /* Icon sizing within the barcode button - override Obsidian's default SVG size */
 .barcode-scanner-button svg {
-  width: 16px !important;
-  height: 16px !important;
+  width: 16px;
+  height: 16px;
   stroke-width: 2;
   flex-shrink: 0;
 }
