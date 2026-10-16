@@ -637,6 +637,7 @@ export const esTranslations: LocaleData = {
       extremes: 'Extremos y Récords',
       adherence: 'Adherencia y Rachas',
       display: 'Opciones de Visualización',
+      other: 'Otras métricas',
     },
     totalsAverages: {
       name: 'Totales y Promedios',
@@ -920,6 +921,11 @@ export const esTranslations: LocaleData = {
       removeTolerance: 'Eliminar tolerancia',
     },
   },
+  units: {
+    grams: 'g',
+    kcal: 'kcal',
+    kj: 'kJ',
+  },
   tooltips: {
     percentage: '{value}g {macro} • {percent}% del objetivo diario de {macro}',
     remaining: 'restante',
@@ -930,7 +936,7 @@ export const esTranslations: LocaleData = {
     caloriesOver: '{value} calorías • {percent}% del objetivo diario • {over} calorías excedidas',
     caloriePercent: '{value} calorías • {percent}% del objetivo diario',
     macroComposition: '{value}g {macro} ({percent}% del total de macros)',
-    target: 'Objetivo: {target}{unit}',
+    target: 'Objetivo: {target} {unit}',
     dailyTarget: 'del objetivo diario',
     offHighQuality:
       'Datos de alta calidad verificados por la comunidad con información nutricional completa',
