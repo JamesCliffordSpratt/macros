@@ -16,6 +16,6 @@ export { zhCNTranslations } from './zh-CN';
 // export { jaTranslations } from './ja';
 // export { koTranslations } from './ko';
 // export { zhTWTranslations } from './zh-TW';
-// export { ruTranslations } from './ru';
+export { ruTranslations } from './ru';
 // export { arTranslations } from './ar';
 // export { heTranslations } from './he';
