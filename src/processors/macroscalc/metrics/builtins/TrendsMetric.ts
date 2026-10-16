@@ -83,9 +83,9 @@ export class TrendsMetric implements MacroscalcMetric {
 
       if (currentEnergyUnit === 'kJ') {
         const kjValue = convertEnergyUnit(avgCalories, 'kcal', 'kJ');
-        calorieValue = `${MetricsCalculator.formatValue(kjValue, 0)} kJ`;
+        calorieValue = `${MetricsCalculator.formatValue(kjValue, 0)} ${t('units.kj')}`;
       } else {
-        calorieValue = `${MetricsCalculator.formatValue(avgCalories, 0)} kcal`;
+        calorieValue = `${MetricsCalculator.formatValue(avgCalories, 0)} ${t('units.kcal')}`;
       }
 
       results.push({
@@ -100,31 +100,31 @@ export class TrendsMetric implements MacroscalcMetric {
 
       results.push({
         label: t('metrics.trends.avgProtein', { days: dataPoints.length.toString() }),
-        value: `${MetricsCalculator.formatValue(avgProtein)}g`,
+        value: `${MetricsCalculator.formatValue(avgProtein)} ${t('units.grams')}`,
         subtext: `${dataPoints.length} ${t('metrics.trends.daysAvailable')}`,
         tooltip: t('metrics.trends.simpleAvgTooltip', {
           days: dataPoints.length.toString(),
-          value: `${MetricsCalculator.formatValue(avgProtein)}g`,
+          value: `${MetricsCalculator.formatValue(avgProtein)} ${t('units.grams')}`,
         }),
       });
 
       results.push({
         label: t('metrics.trends.avgFat', { days: dataPoints.length.toString() }),
-        value: `${MetricsCalculator.formatValue(avgFat)}g`,
+        value: `${MetricsCalculator.formatValue(avgFat)} ${t('units.grams')}`,
         subtext: `${dataPoints.length} ${t('metrics.trends.daysAvailable')}`,
         tooltip: t('metrics.trends.simpleAvgTooltip', {
           days: dataPoints.length.toString(),
-          value: `${MetricsCalculator.formatValue(avgFat)}g`,
+          value: `${MetricsCalculator.formatValue(avgFat)} ${t('units.grams')}`,
         }),
       });
 
       results.push({
         label: t('metrics.trends.avgCarbs', { days: dataPoints.length.toString() }),
-        value: `${MetricsCalculator.formatValue(avgCarbs)}g`,
+        value: `${MetricsCalculator.formatValue(avgCarbs)} ${t('units.grams')}`,
         subtext: `${dataPoints.length} ${t('metrics.trends.daysAvailable')}`,
         tooltip: t('metrics.trends.simpleAvgTooltip', {
           days: dataPoints.length.toString(),
-          value: `${MetricsCalculator.formatValue(avgCarbs)}g`,
+          value: `${MetricsCalculator.formatValue(avgCarbs)} ${t('units.grams')}`,
         }),
       });
 
@@ -143,9 +143,9 @@ export class TrendsMetric implements MacroscalcMetric {
 
     if (currentEnergyUnit === 'kJ') {
       const kjValue = convertEnergyUnit(latestCalorieAvg.value, 'kcal', 'kJ');
-      calorieValue = `${MetricsCalculator.formatValue(kjValue, 0)} kJ`;
+      calorieValue = `${MetricsCalculator.formatValue(kjValue, 0)} ${t('units.kj')}`;
     } else {
-      calorieValue = `${MetricsCalculator.formatValue(latestCalorieAvg.value, 0)} kcal`;
+      calorieValue = `${MetricsCalculator.formatValue(latestCalorieAvg.value, 0)} ${t('units.kcal')}`;
     }
 
     // Add all rolling average metrics with dynamic window size
@@ -162,7 +162,7 @@ export class TrendsMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.trends.rollingAvgProtein', { days: windowSize.toString() }),
-      value: `${MetricsCalculator.formatValue(latestProteinAvg.value)}g`,
+      value: `${MetricsCalculator.formatValue(latestProteinAvg.value)} ${t('units.grams')}`,
       subtext: `${t('metrics.trends.through')} ${MetricsCalculator.formatDate(latestProteinAvg.date)}`,
       tooltip: t('metrics.trends.rollingAvgProteinTooltip', {
         days: windowSize.toString(),
@@ -173,7 +173,7 @@ export class TrendsMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.trends.rollingAvgFat', { days: windowSize.toString() }),
-      value: `${MetricsCalculator.formatValue(latestFatAvg.value)}g`,
+      value: `${MetricsCalculator.formatValue(latestFatAvg.value)} ${t('units.grams')}`,
       subtext: `${t('metrics.trends.through')} ${MetricsCalculator.formatDate(latestFatAvg.date)}`,
       tooltip: t('metrics.trends.rollingAvgFatTooltip', {
         days: windowSize.toString(),
@@ -184,7 +184,7 @@ export class TrendsMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.trends.rollingAvgCarbs', { days: windowSize.toString() }),
-      value: `${MetricsCalculator.formatValue(latestCarbsAvg.value)}g`,
+      value: `${MetricsCalculator.formatValue(latestCarbsAvg.value)} ${t('units.grams')}`,
       subtext: `${t('metrics.trends.through')} ${MetricsCalculator.formatDate(latestCarbsAvg.date)}`,
       tooltip: t('metrics.trends.rollingAvgCarbsTooltip', {
         days: windowSize.toString(),
