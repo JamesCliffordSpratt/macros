@@ -105,7 +105,7 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 - **Visual feedback** - Clear indicators during long-press with CSS animations
 
 ### 🌍 **Localization & Accessibility**
-- **Multi-language support** - Currently English, Spanish, and Chinese (more coming!)
+- **Multi-language support** - Currently English, Spanish, Chinese, and Russian (more coming!)
 - **Automatic language detection** - Based on your Obsidian interface language
 - **Cultural adaptation** - Proper date formats, number formatting, and dietary terminology
 - **Open Food Facts localization** - Product names in 25+ languages including French, German, Italian, Portuguese, Japanese, Korean, Russian, and Arabic
@@ -130,6 +130,7 @@ The Macros plugin supports multiple languages and welcomes translation contribut
 - 🇺🇸 **English** – Complete ✅
 - 🇪🇸 **Spanish** – AI-generated, needs native speaker verification ⚠️
 - 🇨🇳 **Chinese (zh-CN)** – Complete ✅ – Thanks to @Moyf
+- 🇷🇺 **Russian (ru)** – Complete ✅ – Thanks to @alnpokrovsky and @Chemrat
 - 🇫🇷 French, 🇩🇪 German, 🇮🇹 Italian, 🇯🇵 Japanese, 🇰🇷 Korean and 30+ more languages – Contributors needed 🔍
 
 **Want to help translate?**
@@ -591,6 +592,7 @@ If you find this plugin helpful and want to support its development:
 ### **Contributors**
 - **Translations**: [Contributors welcome!](LOCALIZATION.md)
   - Chinese (zh-CN) – @Moyf
+  - Russian (ru) – @alnpokrovsky, @Chemrat
 - **Code**: [See all contributors](https://github.com/JamesCliffordSpratt/macros/graphs/contributors)
 
 ### **Special Thanks**
