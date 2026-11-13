@@ -13,14 +13,13 @@
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"release": "standard-version && node sync-version.js && git add manifest.json && git commit -m \"chore: sync version to manifest\" --no-verify && git push --follow-tags origin main"
+		"release": "npm run build && npm run lint && npm version patch && git push --follow-tags",
+		"release:minor": "npm run build && npm run lint && npm version minor && git push --follow-tags",
+		"release:major": "npm run build && npm run lint && npm version major && git push --follow-tags"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
-	"standard-version": {
-		"tagPrefix": ""
-	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.0",
 		"@types/jest": "^29.5.14",
@@ -37,7 +36,6 @@
 		"jest-environment-jsdom": "^29.7.0",
 		"obsidian": "latest",
 		"prettier": "^3.5.3",
-		"standard-version": "^9.5.0",
 		"ts-jest": "^29.4.11",
 		"tslib": "2.4.0",
 		"typescript": "^5.9.3"
@@ -47,5 +45,8 @@
 		"@zxing/library": "^0.21.3",
 		"chart.js": "^4.4.9",
 		"fuse.js": "^7.1.0"
+	},
+	"allowScripts": {
+		"esbuild@0.28.1": true
 	}
 }

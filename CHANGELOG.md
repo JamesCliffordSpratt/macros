@@ -1,5 +1,7 @@
 # Changelog
 
+> **Releases after 2.6.3:** release notes are published on [GitHub Releases](https://github.com/JamesCliffordSpratt/macros/releases). This file covers 2.6.3 and earlier.
+
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### [2.6.3](https://github.com/JamesCliffordSpratt/macros/compare/2.6.2...2.6.3) (2026-06-30)

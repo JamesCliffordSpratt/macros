@@ -1,19 +1,18 @@
-name: Release Obsidian Plugin
+name: Release Obsidian plugin
 
+# Triggered by the tag that `npm run release` (npm version + git push --follow-tags) pushes.
 on:
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
-      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
       attestations: write
-
     steps:
       - uses: actions/checkout@v4
 
@@ -22,16 +21,22 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Build plugin
+        run: |
+          npm ci
+          npm run build
 
-      - name: Type check
-        run: npm run typecheck
+      # Obsidian requires the release tag to equal the manifest version
+      - name: Check tag matches manifest.json version
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          manifest_version=$(node -p "require('./manifest.json').version")
+          if [ "$tag" != "$manifest_version" ]; then
+            echo "::error::Tag $tag does not match manifest.json version $manifest_version"
+            exit 1
+          fi
 
-      - name: Build
-        run: node esbuild.config.mjs production
-
-      - name: Generate artifact attestations
+      - name: Attest build provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
@@ -39,23 +44,12 @@ jobs:
             manifest.json
             styles.css
 
-      - name: Extract release notes from CHANGELOG
-        id: changelog
+      - name: Create draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.ref_name }}"
-          BARE="${VERSION#v}"
-          NOTES=$(awk "/### \[v?${BARE}\]/{found=1; next} found && /^###/{exit} found && NF{print}" CHANGELOG.md)
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.notes }}
-          files: |
-            main.js
-            manifest.json
-            styles.css
+          tag="${GITHUB_REF#refs/tags/}"
+          gh release create "$tag" \
+            --title="$tag" \
+            --draft \
+            main.js manifest.json styles.css

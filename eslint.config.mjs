@@ -15,7 +15,6 @@ export default [
       'coverage/**',
       '**/*.config.{js,mjs,cjs}', // esbuild.config.mjs, this file, etc.
       'version-bump.mjs',
-      'sync-version.js',
       'sentence-case-locale.js', // one-off helper script
       // Non-source JSON (only package.json is meant to be linted, by the
       // obsidianmd manifest/license rules). The rest are data/config files.
