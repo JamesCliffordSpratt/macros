@@ -130,7 +130,7 @@ export class EditMealTemplateModal extends Modal {
     const searchWrapper = searchContainer.createDiv({
       cls: 'search-wrapper macros-search-wrapper',
     });
-    searchWrapper.createEl('span', { cls: 'search-icon macros-search-icon', text: '🔍' });
+    searchWrapper.createSpan({ cls: 'search-icon macros-search-icon', text: '🔍' });
 
     this.searchInput = searchWrapper.createEl('input', {
       type: 'text',
@@ -190,7 +190,7 @@ export class EditMealTemplateModal extends Modal {
 
         // Enhanced calorie display with kJ support
         const currentEnergyUnit = this.plugin.settings.energyUnit;
-        const calorieSpan = nutritionInfo.createEl('span', {
+        const calorieSpan = nutritionInfo.createSpan({
           cls: 'nutrition-item macros-nutrition-item calories',
         });
 
@@ -206,15 +206,15 @@ export class EditMealTemplateModal extends Modal {
           calorieSpan.textContent = `${food.nutrition.calories.toFixed(1)} kcal`;
         }
 
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item protein',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item fat',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item carbs',
         });
@@ -224,7 +224,7 @@ export class EditMealTemplateModal extends Modal {
         const servingText = food.customServing
           ? t('meals.create.customServing', { serving: food.customServing.toString() })
           : t('meals.create.defaultServing', { serving: food.nutrition.serving });
-        servingInfo.createEl('span', {
+        servingInfo.createSpan({
           text: servingText,
           cls: 'serving-size',
         });
@@ -383,7 +383,7 @@ export class EditMealTemplateModal extends Modal {
 
         const displayText = food.customServing ? `${food.name}:${food.customServing}g` : food.name;
 
-        itemTag.createEl('span', { text: displayText, cls: 'item-text' });
+        itemTag.createSpan({ text: displayText, cls: 'item-text' });
 
         const removeButton = itemTag.createEl('button', {
           text: '×',

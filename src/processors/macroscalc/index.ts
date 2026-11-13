@@ -50,7 +50,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
         .filter((l) => l !== '');
 
       if (lines.length === 0) {
-        el.createEl('div', { text: t('calculator.errors.noContent') });
+        el.createDiv({ text: t('calculator.errors.noContent') });
         return;
       }
 
@@ -60,7 +60,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
       );
 
       if (!idsLine) {
-        el.createEl('div', { text: t('calculator.errors.noIds') });
+        el.createDiv({ text: t('calculator.errors.noIds') });
         return;
       }
 
@@ -74,7 +74,7 @@ export function registerMacrosCalcProcessor(plugin: MacrosPlugin): void {
         .filter((s) => s.length > 0);
 
       if (ids.length === 0) {
-        el.createEl('div', { text: t('calculator.errors.noTableIds') });
+        el.createDiv({ text: t('calculator.errors.noTableIds') });
         return;
       }
 

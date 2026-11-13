@@ -51,6 +51,7 @@ export class RenameConfirmationModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
+    this.modalEl.addClass('macros-rename-modal');
     contentEl.empty();
 
     // Title
@@ -99,12 +100,12 @@ export class RenameConfirmationModal extends Modal {
         this.updateButtonStates();
       });
 
-      fileHeader.createEl('span', {
+      fileHeader.createSpan({
         text: file.path,
         cls: 'rename-file-path',
       });
 
-      fileHeader.createEl('span', {
+      fileHeader.createSpan({
         text: `(${matches.length} ${matches.length === 1 ? 'match' : 'matches'})`,
         cls: 'rename-match-count',
       });
@@ -116,7 +117,7 @@ export class RenameConfirmationModal extends Modal {
       matches.slice(0, 3).forEach((match, _index) => {
         const previewItem = previewSection.createDiv({ cls: 'rename-preview-item' });
 
-        previewItem.createEl('div', {
+        previewItem.createDiv({
           text: `${t('rename.previewBefore')}: ${match.preview}`,
           cls: 'rename-preview-before',
         });
@@ -129,14 +130,14 @@ export class RenameConfirmationModal extends Modal {
           this.newName
         );
 
-        previewItem.createEl('div', {
+        previewItem.createDiv({
           text: `${t('rename.previewAfter')}: ${afterPreview}`,
           cls: 'rename-preview-after',
         });
       });
 
       if (matches.length > 3) {
-        previewSection.createEl('div', {
+        previewSection.createDiv({
           text: `... and ${matches.length - 3} more matches`,
           cls: 'rename-more-matches',
         });
@@ -178,9 +179,6 @@ export class RenameConfirmationModal extends Modal {
     // Store button references for state updates
     this.replaceButton = replaceButton;
     this.updateButtonStates();
-
-    // Add CSS styles
-    this.addStyles();
   }
 
   private replaceButton: ButtonComponent | null = null;
@@ -214,109 +212,6 @@ export class RenameConfirmationModal extends Modal {
 
   private escapeRegExp(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  private addStyles(): void {
-    const styleEl = activeDocument.createElement('style');
-    styleEl.textContent = `
-      .rename-summary {
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: var(--background-secondary);
-        border-radius: 4px;
-      }
-
-      .rename-files-count {
-        font-weight: 600;
-        color: var(--text-accent);
-      }
-
-      .rename-files-section {
-        margin-bottom: 1rem;
-      }
-
-      .rename-files-list {
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid var(--background-modifier-border);
-        border-radius: 4px;
-      }
-
-      .rename-file-item {
-        border-bottom: 1px solid var(--background-modifier-border);
-        padding: 0.75rem;
-      }
-
-      .rename-file-item:last-child {
-        border-bottom: none;
-      }
-
-      .rename-file-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .rename-file-checkbox {
-        margin: 0;
-      }
-
-      .rename-file-path {
-        font-weight: 500;
-        flex: 1;
-      }
-
-      .rename-match-count {
-        color: var(--text-muted);
-        font-size: 0.9em;
-      }
-
-      .rename-preview-section {
-        margin-left: 1.5rem;
-        font-size: 0.9em;
-      }
-
-      .rename-preview-item {
-        margin-bottom: 0.25rem;
-      }
-
-      .rename-preview-before {
-        color: var(--text-error);
-        font-family: var(--font-monospace);
-      }
-
-      .rename-preview-after {
-        color: var(--text-success);
-        font-family: var(--font-monospace);
-      }
-
-      .rename-more-matches {
-        color: var(--text-muted);
-        font-style: italic;
-        margin-top: 0.25rem;
-      }
-
-      .rename-options-section {
-        margin-bottom: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--background-modifier-border);
-      }
-
-      .rename-button-container {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
-        padding-top: 1rem;
-        border-top: 1px solid var(--background-modifier-border);
-      }
-    `;
-    activeDocument.head.appendChild(styleEl);
-
-    // Clean up styles when modal closes
-    this.onClose = () => {
-      activeDocument.head.removeChild(styleEl);
-    };
   }
 
   onClose(): void {

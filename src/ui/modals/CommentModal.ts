@@ -34,7 +34,7 @@ export class CommentModal extends Modal {
     contentEl.addClass('comment-modal');
 
     // Create header
-    const header = contentEl.createEl('div', {
+    const header = contentEl.createDiv({
       cls: 'modal-header macros-modal-header comment-modal-header',
     });
     const title = this.isEditing
@@ -51,7 +51,7 @@ export class CommentModal extends Modal {
     });
 
     // Create description
-    const description = contentEl.createEl('div', {
+    const description = contentEl.createDiv({
       cls: 'modal-description macros-modal-description comment-modal-description',
     });
     const descriptionText =
@@ -87,7 +87,7 @@ export class CommentModal extends Modal {
     textarea.value = this.currentComment;
 
     // Character count
-    const charCount = inputContainer.createEl('div', {
+    const charCount = inputContainer.createDiv({
       cls: 'comment-char-count',
       text: `${this.currentComment.length}/200`,
     });

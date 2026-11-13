@@ -50,18 +50,18 @@ class DeleteConfirmationModal extends Modal {
     contentEl.empty();
 
     // Modal header
-    const header = contentEl.createEl('div', { cls: 'modal-header delete-confirmation-header' });
+    const header = contentEl.createDiv({ cls: 'modal-header delete-confirmation-header' });
     header.createEl('h2', {
       text: t('table.actions.removeItem'),
       cls: 'delete-confirmation-title',
     });
 
     // Modal content
-    const content = contentEl.createEl('div', { cls: 'modal-content delete-confirmation-content' });
+    const content = contentEl.createDiv({ cls: 'modal-content delete-confirmation-content' });
 
     // Warning icon and message
-    const messageContainer = content.createEl('div', { cls: 'delete-message-container' });
-    messageContainer.createEl('div', {
+    const messageContainer = content.createDiv({ cls: 'delete-message-container' });
+    messageContainer.createDiv({
       cls: 'delete-warning-icon',
       text: '⚠️',
     });
@@ -87,7 +87,7 @@ class DeleteConfirmationModal extends Modal {
     });
 
     // Button container
-    const buttonContainer = content.createEl('div', { cls: 'modal-button-container' });
+    const buttonContainer = content.createDiv({ cls: 'modal-button-container' });
 
     // Cancel button
     const cancelBtn = new ButtonComponent(buttonContainer)
@@ -872,7 +872,7 @@ export class RowRenderer {
     const cell = tableRow.insertCell();
     cell.classList.add(CLASS_NAMES.MACRO.CELL, `${macroType}-cell`);
 
-    const content = activeDocument.createElement('div');
+    const content = createDiv();
 
     const total = row.protein + row.fat + row.carbs;
     const percentageOfFood = total > 0 ? Math.round((value / total) * 100) : 0;

@@ -168,7 +168,7 @@ function renderMicronutrientTable(
 
   // Footnote about basis
   const footnote = container.createDiv({ cls: 'macrosmicro-footnote' });
-  footnote.createEl('span', {
+  footnote.createSpan({
     text: t('micronutrients.processor.footnote'),
   });
 }
@@ -187,7 +187,7 @@ export function registerMacrosMicroProcessor(plugin: MacrosPlugin): void {
       el.empty();
 
       if (ids.length === 0) {
-        el.createEl('div', {
+        el.createDiv({
           cls: 'macrosmicro-error',
           text: t('charts.errors.noIdsProvided'),
         });
@@ -209,7 +209,7 @@ export function registerMacrosMicroProcessor(plugin: MacrosPlugin): void {
       } catch (error) {
         el.empty();
         plugin.logger.error('Error rendering macrosmicro block:', error);
-        el.createEl('div', {
+        el.createDiv({
           cls: 'macrosmicro-error',
           text: t('charts.errors.renderError', { error: (error as Error).message }),
         });

@@ -40,7 +40,7 @@ export class ToleranceModal extends Modal {
     contentEl.addClass('tolerance-modal');
 
     // Create header
-    const header = contentEl.createEl('div', {
+    const header = contentEl.createDiv({
       cls: 'modal-header macros-modal-header tolerance-modal-header',
     });
 
@@ -58,7 +58,7 @@ export class ToleranceModal extends Modal {
     });
 
     // Create description
-    const description = contentEl.createEl('div', {
+    const description = contentEl.createDiv({
       cls: 'modal-description macros-modal-description tolerance-modal-description',
     });
 
@@ -151,7 +151,7 @@ export class ToleranceModal extends Modal {
     textarea.value = this.currentTolerance?.symptoms || '';
 
     // Character count
-    const charCount = symptomsContainer.createEl('div', {
+    const charCount = symptomsContainer.createDiv({
       cls: 'tolerance-char-count',
       text: `${textarea.value.length}/200`,
     });

@@ -14,7 +14,7 @@ function detectMobileDevice(): boolean {
 
 function ensureTooltipEl(): HTMLDivElement {
   if (!tooltipEl) {
-    tooltipEl = activeDocument.createElement('div');
+    tooltipEl = createDiv();
     tooltipEl.className = 'macro-tooltip macro-tooltip-hidden';
     tooltipEl.setCssProps({ '--x': '-9999px', '--y': '-9999px' });
     activeDocument.body.appendChild(tooltipEl);

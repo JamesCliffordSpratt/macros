@@ -135,20 +135,20 @@ export function createPieChartLegend(
   el: HTMLElement,
   slices: { label: string; value: number; color: string }[]
 ): HTMLElement {
-  const legendDiv = el.createEl('div', {
+  const legendDiv = el.createDiv({
     cls: 'macrospc-legend',
   });
 
   slices.forEach((slice) => {
-    const legendItem = legendDiv.createEl('div', {
+    const legendItem = legendDiv.createDiv({
       cls: 'macrospc-legend-item',
     });
 
-    const colorBox = legendItem.createEl('span');
+    const colorBox = legendItem.createSpan();
     colorBox.addClass('macrospc-legend-color-box');
     colorBox.setAttribute('data-color', slice.color);
 
-    legendItem.createEl('span', { text: `${slice.label}: ${slice.value.toFixed(2)} g` });
+    legendItem.createSpan({ text: `${slice.label}: ${slice.value.toFixed(2)} g` });
   });
 
   return legendDiv;

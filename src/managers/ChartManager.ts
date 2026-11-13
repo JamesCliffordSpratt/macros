@@ -62,7 +62,7 @@ export class ChartManager {
         this.plugin.logger.error(
           `No valid IDs found in: ${Array.isArray(id) ? id.join(', ') : id}`
         );
-        el.createEl('div', { text: t('charts.errors.noIdsProvided') });
+        el.createDiv({ text: t('charts.errors.noIdsProvided') });
         return;
       }
 
@@ -72,7 +72,7 @@ export class ChartManager {
       const dashboardContainer = el.createDiv({ cls: 'macro-dashboard' });
 
       // Show loading state
-      const loadingEl = dashboardContainer.createEl('div', {
+      const loadingEl = dashboardContainer.createDiv({
         cls: 'macrospc-loading',
         text: t('charts.loading'),
       });
@@ -179,7 +179,7 @@ export class ChartManager {
       // Get canvas context with error handling
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        el.createEl('div', { text: t('charts.error') });
+        el.createDiv({ text: t('charts.error') });
         return;
       }
 
@@ -235,7 +235,7 @@ export class ChartManager {
       const totalMacros = totalProtein + totalFat + totalCarbs;
 
       if (totalMacros <= 0) {
-        el.createEl('div', { text: t('charts.noMacros', { ids: ids.join(', ') }) });
+        el.createDiv({ text: t('charts.noMacros', { ids: ids.join(', ') }) });
         return;
       }
 
@@ -299,7 +299,7 @@ export class ChartManager {
       // Verify Chart.js is still available
       if (!window.Chart) {
         this.plugin.logger.error('Chart.js not available when creating pie chart');
-        el.createEl('div', { text: t('charts.error') });
+        el.createDiv({ text: t('charts.error') });
         return;
       }
 
@@ -325,7 +325,7 @@ export class ChartManager {
         this.plugin.logger.debug(`Successfully created pie chart with ID: ${chartId}`);
       } catch (chartError) {
         this.plugin.logger.error('Error creating pie chart:', chartError);
-        el.createEl('div', { text: t('charts.error') });
+        el.createDiv({ text: t('charts.error') });
         return;
       }
 
@@ -373,7 +373,7 @@ export class ChartManager {
     } catch (err) {
       this.plugin.logger.error('drawMacrospc error', err);
       el.empty();
-      el.createEl('div', {
+      el.createDiv({
         text: t('charts.error'),
         cls: 'macrospc-error',
       });

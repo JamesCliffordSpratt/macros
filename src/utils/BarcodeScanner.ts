@@ -170,7 +170,7 @@ export class BarcodeScanner extends Component {
     if (!this.video || !this.codeReader) return;
 
     if (!this.canvas) {
-      this.canvas = activeDocument.createElement('canvas');
+      this.canvas = createEl('canvas');
       this.context = this.canvas.getContext('2d', { willReadFrequently: true });
     }
 
@@ -494,7 +494,7 @@ export class BarcodeScanner extends Component {
     } = {}
   ): Promise<BarcodeResult | null> {
     // Create optimized canvas with willReadFrequently flag to suppress warnings
-    const canvas = activeDocument.createElement('canvas');
+    const canvas = createEl('canvas');
     const ctx = canvas.getContext('2d', {
       willReadFrequently: true, // This fixes the Canvas2D warnings
     });
@@ -741,7 +741,7 @@ export class BarcodeScannerModal extends Modal {
       cls: 'barcode-scan-upload-btn',
     });
 
-    this.uploadInput = activeDocument.createElement('input');
+    this.uploadInput = createEl('input');
     this.uploadInput.type = 'file';
     this.uploadInput.accept = 'image/*';
     this.uploadInput.capture = 'environment';
@@ -935,7 +935,6 @@ class ManualBarcodeEntryModal extends Modal {
     contentEl.createEl('h2', { text: 'Enter barcode manually' });
 
     contentEl.createEl('p', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
       text: 'Enter the numbers from the barcode (EAN/UPC codes are typically 8-13 digits):',
       cls: 'modal-description',
     });

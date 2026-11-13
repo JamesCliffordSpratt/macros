@@ -172,8 +172,8 @@ export class GroupRenderer {
     group: Group,
     macrosId: string
   ): void {
-    const headerContent = createEl('div', { cls: 'header-content' });
-    const leftContent = createEl('div', { cls: 'header-left' });
+    const headerContent = createDiv({ cls: 'header-content' });
+    const leftContent = createDiv({ cls: 'header-left' });
 
     // Parse comment and timestamp from group macro line if it exists
     let displayName = group.name;
@@ -203,20 +203,20 @@ export class GroupRenderer {
     }
 
     // Create a container for the name and icons
-    const nameContainer = createEl('div', { cls: 'header-name-container' });
+    const nameContainer = createDiv({ cls: 'header-name-container' });
 
-    const nameSpan = createEl('span', {
+    const nameSpan = createSpan({
       cls: 'header-label',
       text: displayName,
     });
     nameContainer.appendChild(nameSpan);
 
     // Create icons container for proper alignment
-    const iconsContainer = createEl('div', { cls: 'header-icons-container' });
+    const iconsContainer = createDiv({ cls: 'header-icons-container' });
 
     // Add timestamp icon if timestamp exists
     if (timestamp) {
-      const timestampIcon = createEl('span', {
+      const timestampIcon = createSpan({
         cls: 'meal-timestamp-icon',
         text: '⏰',
       });
@@ -228,7 +228,7 @@ export class GroupRenderer {
 
     // Add comment icon if comment exists
     if (comment) {
-      const commentIcon = createEl('span', {
+      const commentIcon = createSpan({
         cls: 'meal-comment-icon',
         text: '💬',
       });
@@ -244,7 +244,7 @@ export class GroupRenderer {
     leftContent.appendChild(nameContainer);
 
     // UPDATED: Use formatCalories for proper energy unit handling and remove brackets
-    const caloriesSpan = createEl('span', {
+    const caloriesSpan = createSpan({
       cls: 'header-calorie-summary',
       text: formatCalories(group.total.calories), // This will automatically handle kcal/kJ conversion and proper spacing
     });
@@ -252,7 +252,7 @@ export class GroupRenderer {
 
     // Rest of the method remains the same...
     if (group.macroLine) {
-      const removeBtn = createEl('span', {
+      const removeBtn = createSpan({
         cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.REMOVE}`,
         text: '—',
       });
@@ -280,7 +280,7 @@ export class GroupRenderer {
       leftContent.appendChild(removeBtn);
     }
 
-    const toggleSpan = createEl('span', {
+    const toggleSpan = createSpan({
       cls: 'toggle-icon',
     });
 
@@ -458,12 +458,12 @@ export class GroupRenderer {
       }
 
       // Create spans for responsive text
-      const desktopSpan = createEl('span', {
+      const desktopSpan = createSpan({
         cls: 'header-text-desktop',
         text: text,
       });
 
-      const mobileSpan = createEl('span', {
+      const mobileSpan = createSpan({
         cls: 'header-text-mobile',
         text: mobileText,
       });
@@ -526,13 +526,13 @@ export class GroupRenderer {
     );
     combinedHeaderRow.dataset.section = 'combined-totals';
 
-    const combinedHeaderContent = createEl('div', { cls: 'header-content' });
-    const combinedLabel = createEl('span', {
+    const combinedHeaderContent = createDiv({ cls: 'header-content' });
+    const combinedLabel = createSpan({
       cls: 'header-label',
       text: t('table.summary.macrosSummary'),
     });
 
-    const combinedToggle = createEl('span', {
+    const combinedToggle = createSpan({
       cls: 'toggle-icon',
     });
 

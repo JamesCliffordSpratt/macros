@@ -64,7 +64,7 @@ export class FoodEntrySelectionModal extends Modal {
     const sourceNames = availableSources.map((source) => source.name);
 
     // Always show as available since Open Food Facts is always available
-    liveSearchFooter.createEl('span', {
+    liveSearchFooter.createSpan({
       text: `✅ ${sourceNames.join(' + ')} available`,
       cls: 'status-indicator macros-status-indicator status-success',
     });
@@ -84,7 +84,7 @@ export class FoodEntrySelectionModal extends Modal {
     });
 
     const manualEntryFooter = manualEntryOption.createDiv({ cls: 'option-footer' });
-    manualEntryFooter.createEl('span', {
+    manualEntryFooter.createSpan({
       text: t('food.entry.alwaysAvailable'),
       cls: 'status-indicator macros-status-indicator status-success',
     });

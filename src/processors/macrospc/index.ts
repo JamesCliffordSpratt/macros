@@ -43,7 +43,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
     el.empty();
 
     if (ids.length === 0) {
-      el.createEl('div', { text: t('charts.errors.noIdsProvided') });
+      el.createDiv({ text: t('charts.errors.noIdsProvided') });
       return;
     }
 
@@ -89,7 +89,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
       // Check if we have any successful loads
       if (!loadResults.some((result) => result)) {
         el.empty(); // Remove loading indicator
-        el.createEl('div', { text: t('charts.noData', { ids: ids.join(', ') }) });
+        el.createDiv({ text: t('charts.noData', { ids: ids.join(', ') }) });
         return;
       }
 
@@ -133,7 +133,7 @@ export function registerMacrosPCProcessor(plugin: MacrosPlugin): void {
       // Clear loading and show error
       el.empty();
       console.error(`Error rendering chart:`, error);
-      el.createEl('div', {
+      el.createDiv({
         text: t('charts.errors.renderError', { error: (error as Error).message }),
         cls: 'macrospc-error',
       });

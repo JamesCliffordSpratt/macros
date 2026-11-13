@@ -133,7 +133,7 @@ export class FoodResultsModal extends Modal {
       this.component.registerDomEvent(prevBtn, 'click', () => this.loadPage(this.currentPage - 1));
     }
 
-    navDiv.createEl('span', { text: ` ${t('general.page')} ${this.currentPage + 1} ` });
+    navDiv.createSpan({ text: ` ${t('general.page')} ${this.currentPage + 1} ` });
 
     if (this.results.length === this.maxResults) {
       const nextBtn = navDiv.createEl('button', { text: `${t('general.next')} >` });

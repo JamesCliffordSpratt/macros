@@ -191,7 +191,7 @@ export class MacrosCalcRenderer {
     const displayOptions = this.getDisplayOptions();
 
     // Create a document fragment to batch DOM operations
-    const fragment = activeDocument.createDocumentFragment();
+    const fragment = createFragment();
     this.el.empty();
 
     // Load state from MacrosState
@@ -1010,12 +1010,12 @@ export class MacrosCalcRenderer {
         ];
 
         detailHeaderData.forEach((headerInfo) => {
-          const th = activeDocument.createElement('th');
-          const desktopSpan = createEl('span', {
+          const th = createEl('th');
+          const desktopSpan = createSpan({
             cls: 'header-text-desktop',
             text: headerInfo.text,
           });
-          const mobileSpan = createEl('span', {
+          const mobileSpan = createSpan({
             cls: 'header-text-mobile',
             text: headerInfo.mobileText,
           });
@@ -1762,7 +1762,7 @@ export class MacrosCalcRenderer {
       t('table.headers.fat'),
       t('table.headers.carbs'),
     ].forEach((header) => {
-      const th = activeDocument.createElement('th');
+      const th = createEl('th');
       th.textContent = header;
       headerRow.appendChild(th);
     });

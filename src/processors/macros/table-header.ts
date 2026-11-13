@@ -35,7 +35,7 @@ export class TableHeader {
 
     const controls = headerContainer.createDiv({ cls: CLASS_NAMES.TABLE.CONTROLS });
 
-    this.toggleButton = controls.createEl('span', {
+    this.toggleButton = controls.createSpan({
       attr: { 'aria-label': t('table.actions.collapseAll') },
       cls: 'toggle-icon',
     });
@@ -105,7 +105,7 @@ export class TableHeader {
 
     this.plugin.registerDomListener(headerContainer, 'click', headerClickHandler);
 
-    const addBtn = controls.createEl('span', {
+    const addBtn = controls.createSpan({
       cls: `${CLASS_NAMES.TABLE.CONTROL_ICON} ${CLASS_NAMES.ICONS.ADD}`,
       attr: { 'aria-label': t('table.actions.addItems') },
       text: '+',

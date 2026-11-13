@@ -237,7 +237,7 @@ export class AddToMacrosModal extends Modal {
     const searchWrapper = searchContainer.createDiv({
       cls: 'search-wrapper macros-search-wrapper',
     });
-    searchWrapper.createEl('span', { cls: 'search-icon macros-search-icon', text: '🔍' });
+    searchWrapper.createSpan({ cls: 'search-icon macros-search-icon', text: '🔍' });
 
     this.searchInput = searchWrapper.createEl('input', {
       type: 'text',
@@ -595,7 +595,7 @@ export class AddToMacrosModal extends Modal {
       // Meal header
       const mealHeader = mealCard.createDiv({ cls: 'meal-header' });
       mealHeader.createEl('h3', { text: meal.name, cls: 'meal-name' });
-      mealHeader.createEl('span', {
+      mealHeader.createSpan({
         text: t('table.meal.items', { count: meal.items.length.toString() }),
         cls: 'meal-count',
       });
@@ -607,7 +607,7 @@ export class AddToMacrosModal extends Modal {
 
         // Use consistent styling with individual food cards - separate spans with background colors
         const currentEnergyUnit = this.plugin.settings.energyUnit;
-        const calorieSpan = nutritionInfo.createEl('span', {
+        const calorieSpan = nutritionInfo.createSpan({
           cls: 'nutrition-item macros-nutrition-item calories',
         });
 
@@ -622,22 +622,22 @@ export class AddToMacrosModal extends Modal {
           calorieSpan.textContent = `${mealNutrition.calories.toFixed(1)} kcal`;
         }
 
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${mealNutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item protein',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${mealNutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item fat',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${mealNutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item carbs',
         });
 
         // Serving size info to match individual foods
         const servingInfo = mealCard.createDiv({ cls: 'serving-info' });
-        servingInfo.createEl('span', {
+        servingInfo.createSpan({
           text: `Total for meal`,
           cls: 'serving-size',
         });
@@ -647,11 +647,11 @@ export class AddToMacrosModal extends Modal {
       const itemsPreview = mealCard.createDiv({ cls: 'meal-items-preview' });
       const previewItems = meal.items.slice(0, 3);
       previewItems.forEach((item) => {
-        itemsPreview.createEl('span', { text: item, cls: 'preview-item' });
+        itemsPreview.createSpan({ text: item, cls: 'preview-item' });
       });
 
       if (meal.items.length > 3) {
-        itemsPreview.createEl('span', {
+        itemsPreview.createSpan({
           text: `+${meal.items.length - 3} ${t('general.more')}`,
           cls: 'preview-more',
         });
@@ -701,7 +701,7 @@ export class AddToMacrosModal extends Modal {
 
         // Enhanced calorie display with kJ support
         const currentEnergyUnit = this.plugin.settings.energyUnit;
-        const calorieSpan = nutritionInfo.createEl('span', {
+        const calorieSpan = nutritionInfo.createSpan({
           cls: 'nutrition-item macros-nutrition-item calories',
         });
 
@@ -716,22 +716,22 @@ export class AddToMacrosModal extends Modal {
           calorieSpan.textContent = `${food.nutrition.calories.toFixed(1)} kcal`;
         }
 
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item protein',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item fat',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item carbs',
         });
 
         // Serving size
         const servingInfo = foodCard.createDiv({ cls: 'serving-info' });
-        servingInfo.createEl('span', {
+        servingInfo.createSpan({
           text: `Per ${food.nutrition.serving}`,
           cls: 'serving-size',
         });
@@ -788,7 +788,7 @@ export class AddToMacrosModal extends Modal {
 
         // Enhanced calorie display with kJ support
         const currentEnergyUnit = this.plugin.settings.energyUnit;
-        const calorieSpan = nutritionInfo.createEl('span', {
+        const calorieSpan = nutritionInfo.createSpan({
           cls: 'nutrition-item macros-nutrition-item calories',
         });
 
@@ -803,22 +803,22 @@ export class AddToMacrosModal extends Modal {
           calorieSpan.textContent = `${food.nutrition.calories.toFixed(1)} kcal`;
         }
 
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.protein.toFixed(1)}g ${t('table.headers.protein').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item protein',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.fat.toFixed(1)}g ${t('table.headers.fat').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item fat',
         });
-        nutritionInfo.createEl('span', {
+        nutritionInfo.createSpan({
           text: `${food.nutrition.carbs.toFixed(1)}g ${t('table.headers.carbs').toLowerCase()}`,
           cls: 'nutrition-item macros-nutrition-item carbs',
         });
 
         // Serving size
         const servingInfo = foodCard.createDiv({ cls: 'serving-info' });
-        servingInfo.createEl('span', {
+        servingInfo.createSpan({
           text: `Per ${food.nutrition.serving}`,
           cls: 'serving-size',
         });
@@ -1000,7 +1000,7 @@ export class AddToMacrosModal extends Modal {
           itemTag.addClass('group-item-tag');
         }
 
-        itemTag.createEl('span', { text: displayText, cls: 'item-text' });
+        itemTag.createSpan({ text: displayText, cls: 'item-text' });
 
         const removeButton = itemTag.createEl('button', {
           text: '×',

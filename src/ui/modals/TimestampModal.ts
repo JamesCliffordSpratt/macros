@@ -34,7 +34,7 @@ export class TimestampModal extends Modal {
     contentEl.addClass('timestamp-modal');
 
     // Create header
-    const header = contentEl.createEl('div', {
+    const header = contentEl.createDiv({
       cls: 'modal-header macros-modal-header timestamp-modal-header',
     });
     const title = this.isEditing
@@ -51,7 +51,7 @@ export class TimestampModal extends Modal {
     });
 
     // Create description
-    const description = contentEl.createEl('div', {
+    const description = contentEl.createDiv({
       cls: 'modal-description macros-modal-description timestamp-modal-description',
     });
     const descriptionText =

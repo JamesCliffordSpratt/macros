@@ -174,7 +174,7 @@ export class ZXingLoader {
 
       // Add decodeFromImageData method
       reader.decodeFromImageData = async function (imageData: ImageData): Promise<ZXingResult> {
-        const canvas = activeDocument.createElement('canvas');
+        const canvas = createEl('canvas');
         canvas.width = imageData.width;
         canvas.height = imageData.height;
         const ctx = canvas.getContext('2d');
@@ -191,7 +191,7 @@ export class ZXingLoader {
 
       // Add decodeFromImageElement method
       reader.decodeFromImageElement = async function (img: HTMLImageElement): Promise<ZXingResult> {
-        const canvas = activeDocument.createElement('canvas');
+        const canvas = createEl('canvas');
         canvas.width = img.width || img.naturalWidth;
         canvas.height = img.height || img.naturalHeight;
         const ctx = canvas.getContext('2d');

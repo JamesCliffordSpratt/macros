@@ -94,7 +94,7 @@ export class AddFoodToMealModal extends Modal {
     const list = this.itemListEl;
     this.meal.items.forEach((item, index) => {
       const li = list.createEl('li');
-      const span = li.createEl('span', { text: item });
+      const span = li.createSpan({ text: item });
       span.classList.add('meal-item-label');
 
       const removeBtn = li.createEl('button', { text: '×' });

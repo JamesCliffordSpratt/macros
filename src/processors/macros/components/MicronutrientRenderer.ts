@@ -208,7 +208,7 @@ function buildMicronutrientTable(
 
   // Footnote about basis
   const footnote = body.createDiv({ cls: 'macrosmicro-footnote' });
-  footnote.createEl('span', { text: t('micronutrients.processor.footnote') });
+  footnote.createSpan({ text: t('micronutrients.processor.footnote') });
 
   return container;
 }

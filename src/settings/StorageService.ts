@@ -135,18 +135,18 @@ class SortableTabOrder extends Component {
         },
       });
 
-      listItem.createEl('span', {
+      listItem.createSpan({
         cls: 'drag-handle',
         text: '⋮⋮',
         attr: { title: t('settings.display.dragToReorder') },
       });
 
-      const tabContent = listItem.createEl('div', { cls: 'tab-content' });
+      const tabContent = listItem.createDiv({ cls: 'tab-content' });
       const tabLabel = this.getTabLabel(tabKey);
 
-      tabContent.createEl('span', { cls: 'tab-label', text: tabLabel });
+      tabContent.createSpan({ cls: 'tab-label', text: tabLabel });
 
-      listItem.createEl('span', {
+      listItem.createSpan({
         cls: 'position-indicator',
         text: (index + 1).toString(),
       });
@@ -495,7 +495,6 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kcal input
         const kcalContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kcalContainer.createEl('label', {
-          // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
           text: 'kcal',
           cls: 'energy-input-label',
         });
@@ -513,7 +512,6 @@ export class NutritionalSettingTab extends PluginSettingTab {
         // kJ input
         const kjContainer = controlContainer.createDiv({ cls: 'energy-input-group' });
         kjContainer.createEl('label', {
-          // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
           text: 'kJ',
           cls: 'energy-input-label',
         });
@@ -888,7 +886,6 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     fatSecretNotice.createEl('a', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- intentional casing (unit symbol, URL, or acronym; not sentence prose)
       text: 'https://platform.fatsecret.com/platform-api',
       attr: { href: 'https://platform.fatsecret.com/platform-api', target: '_blank' },
     });
@@ -1296,7 +1293,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
       });
 
     if (this.plugin.settings.mealTemplates.length === 0) {
-      containerEl.createEl('div', {
+      containerEl.createDiv({
         text: t('settings.meals.noTemplates'),
         cls: 'no-templates-message',
       });
@@ -1346,7 +1343,7 @@ export class NutritionalSettingTab extends PluginSettingTab {
     const toleranceEntries = Object.entries(tolerances);
 
     if (toleranceEntries.length === 0) {
-      tolerancesContainer.createEl('div', {
+      tolerancesContainer.createDiv({
         text: t('settings.tolerances.noTolerances'),
         cls: 'no-tolerances-message',
       });

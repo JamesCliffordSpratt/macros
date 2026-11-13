@@ -9418,3 +9418,96 @@ body:not(.theme-obsidian) .api-credentials-success {
 .macros-table .column-header:first-child {
   text-align: center;
 }
+
+/* ---- Rename confirmation modal (was injected at runtime) ---- */
+.macros-rename-modal .rename-summary {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.macros-rename-modal .rename-files-count {
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+.macros-rename-modal .rename-files-section {
+  margin-bottom: 1rem;
+}
+
+.macros-rename-modal .rename-files-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.macros-rename-modal .rename-file-item {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0.75rem;
+}
+
+.macros-rename-modal .rename-file-item:last-child {
+  border-bottom: none;
+}
+
+.macros-rename-modal .rename-file-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.macros-rename-modal .rename-file-checkbox {
+  margin: 0;
+}
+
+.macros-rename-modal .rename-file-path {
+  font-weight: 500;
+  flex: 1;
+}
+
+.macros-rename-modal .rename-match-count {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.macros-rename-modal .rename-preview-section {
+  margin-left: 1.5rem;
+  font-size: 0.9em;
+}
+
+.macros-rename-modal .rename-preview-item {
+  margin-bottom: 0.25rem;
+}
+
+.macros-rename-modal .rename-preview-before {
+  color: var(--text-error);
+  font-family: var(--font-monospace);
+}
+
+.macros-rename-modal .rename-preview-after {
+  color: var(--text-success);
+  font-family: var(--font-monospace);
+}
+
+.macros-rename-modal .rename-more-matches {
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.macros-rename-modal .rename-options-section {
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.macros-rename-modal .rename-button-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--background-modifier-border);
+}
