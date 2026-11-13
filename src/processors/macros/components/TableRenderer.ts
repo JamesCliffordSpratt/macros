@@ -12,7 +12,7 @@ import { MacrosDashboard } from '../dashboard';
 import { GroupRenderer } from './GroupRenderer';
 import { appendMicronutrientSection } from './MicronutrientRenderer';
 import { processLinesIntoGroups } from '../utils/group-utils';
-import { Notice, debounce, TFile } from 'obsidian';
+import { Component, Notice, debounce, TFile } from 'obsidian';
 
 /**
  * Helper function to ensure consistent calorie calculation in groups
@@ -52,7 +52,12 @@ export class MacrosTableRenderer {
   // New field to track if a full refresh is needed
   private needsFullRefresh = false;
 
-  constructor(plugin: MacrosPlugin, el: HTMLElement, id: string | null) {
+  /**
+   * @param owner Component that owns this renderer's event listeners (the
+   *   code block's render child), so they are released when the block is
+   *   removed. Falls back to the plugin.
+   */
+  constructor(plugin: MacrosPlugin, el: HTMLElement, id: string | null, owner?: Component) {
     this.plugin = plugin;
     this.el = el;
     this.id = id;
@@ -69,7 +74,7 @@ export class MacrosTableRenderer {
     this.groupRenderer = new GroupRenderer(this.plugin, this.state);
 
     // Register event handlers to detect external file changes using Obsidian's API
-    this.plugin.registerEvent(
+    (owner ?? this.plugin).registerEvent(
       this.plugin.app.vault.on('modify', (file) => {
         if (file instanceof TFile) this.handleFileModify(file);
       })
@@ -248,7 +253,7 @@ export class MacrosTableRenderer {
 
     // Append micronutrient summary after the macros table (when enabled and
     // the foods carry micronutrient data).
-    appendMicronutrientSection(this.plugin, fragment as unknown as HTMLElement, lines);
+    appendMicronutrientSection(this.plugin, fragment as unknown as HTMLElement, lines, this.state);
 
     // Single DOM update
     this.el.appendChild(fragment);

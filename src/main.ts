@@ -178,8 +178,13 @@ export default class MacrosPlugin extends Plugin {
     return this.refreshManager.forceCompleteRefresh();
   }
 
+  /**
+   * Redraw all macros tables, pie charts and macroscalc dashboards in place
+   * (Reading view and Live Preview), e.g. after a settings change. Debounced
+   * briefly so rapid changes (typing a target) redraw once.
+   */
   refreshMacrosTables() {
-    this.refreshManager.refreshMarkdownViews();
+    this.refreshManager.scheduleLiveRefresh();
   }
 
   async saveSettings() {

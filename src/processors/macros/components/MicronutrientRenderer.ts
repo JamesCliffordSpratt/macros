@@ -1,6 +1,7 @@
 import { setIcon } from 'obsidian';
 import MacrosPlugin from '../../../main';
 import { t } from '../../../lang/I18nManager';
+import type { MacrosState } from '../../../utils/MacrosState';
 import {
   MICRONUTRIENTS,
   MicronutrientCategory,
@@ -12,6 +13,10 @@ import {
   aggregateMicronutrientsFromLines,
   MicronutrientAggregateResult,
 } from '../utils/micronutrient-aggregate';
+
+/** MacrosState keys for the per-table micronutrient UI state. */
+const SECTION_STATE_KEY = 'micronutrients';
+const EXTRAS_STATE_KEY = 'micronutrients-show-all';
 
 const CATEGORY_ORDER: { id: MicronutrientCategory; labelKey: string }[] = [
   { id: 'vitamin', labelKey: 'settings.micronutrients.categoryVitamins' },
@@ -30,7 +35,8 @@ const CATEGORY_ORDER: { id: MicronutrientCategory; labelKey: string }[] = [
 function buildMicronutrientTable(
   plugin: MacrosPlugin,
   result: MicronutrientAggregateResult,
-  showAll: boolean
+  showAll: boolean,
+  state: MacrosState | null
 ): HTMLElement | null {
   const profile = plugin.settings.micronutrientProfile;
   const overrides = plugin.settings.micronutrientTargets || {};
@@ -64,10 +70,17 @@ function buildMicronutrientTable(
 
   const body = container.createDiv({ cls: 'macrosmicro-body' });
 
+  // Collapse state is remembered per table, so it survives live refreshes
+  const setCollapsed = (collapsed: boolean) => {
+    body.toggleClass('macros-u-hidden', collapsed);
+    toggleIcon.textContent = collapsed ? '▶' : '▼';
+  };
+  setCollapsed(state?.getCollapsedState(SECTION_STATE_KEY) ?? false);
+
   header.addEventListener('click', () => {
-    const collapsed = body.style.display === 'none';
-    body.style.display = collapsed ? '' : 'none';
-    toggleIcon.textContent = collapsed ? '▼' : '▶';
+    const collapsed = !body.hasClass('macros-u-hidden');
+    setCollapsed(collapsed);
+    state?.saveCollapsedState(SECTION_STATE_KEY, collapsed);
   });
 
   const table = body.createEl('table', {
@@ -167,15 +180,9 @@ function buildMicronutrientTable(
   if (extraCount > 0) {
     const moreRow = tbody.createEl('tr', { cls: 'macrosmicro-more-row' });
     const moreCell = moreRow.createEl('td', { attr: { colspan: '4' } });
-    const moreBtn = moreCell.createEl('button', {
-      cls: 'macrosmicro-more-btn',
-      text: t('micronutrients.processor.showMore', { count: extraCount }),
-      attr: { 'aria-expanded': 'false' },
-    });
+    const moreBtn = moreCell.createEl('button', { cls: 'macrosmicro-more-btn' });
 
-    let expanded = false;
-    moreBtn.addEventListener('click', () => {
-      expanded = !expanded;
+    const setExpanded = (expanded: boolean) => {
       tbody
         .querySelectorAll('.macrosmicro-extra')
         .forEach((el) => el.toggleClass('macros-u-hidden', !expanded));
@@ -185,6 +192,17 @@ function buildMicronutrientTable(
           : t('micronutrients.processor.showMore', { count: extraCount })
       );
       moreBtn.setAttr('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    // Expanded state is remembered per table, so it survives live refreshes.
+    // (MacrosState stores a boolean per key; here `true` means "expanded".)
+    let expanded = state?.getCollapsedState(EXTRAS_STATE_KEY) ?? false;
+    setExpanded(expanded);
+
+    moreBtn.addEventListener('click', () => {
+      expanded = !expanded;
+      setExpanded(expanded);
+      state?.saveCollapsedState(EXTRAS_STATE_KEY, expanded);
     });
   }
 
@@ -205,7 +223,8 @@ function buildMicronutrientTable(
 export function appendMicronutrientSection(
   plugin: MacrosPlugin,
   container: HTMLElement,
-  lines: string[]
+  lines: string[],
+  state: MacrosState | null = null
 ): boolean {
   // Respect the global enable/disable toggle
   if (!plugin.settings.micronutrientTrackingEnabled) return false;
@@ -216,7 +235,7 @@ export function appendMicronutrientSection(
     // Only show the section when at least one food actually carries micro data
     if (!result.hasAnyData) return false;
 
-    const table = buildMicronutrientTable(plugin, result, false);
+    const table = buildMicronutrientTable(plugin, result, false, state);
     if (!table) return false;
 
     container.appendChild(table);

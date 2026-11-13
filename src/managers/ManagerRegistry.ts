@@ -46,6 +46,9 @@ export class ManagerRegistry {
       plugin.app.vault.on('rename', () => plugin.dataManager.invalidateFileCache())
     );
 
+    // Redraw tables/charts in place when food files change
+    plugin.refreshManager.registerFoodChangeListeners();
+
     plugin.logger.debug('All managers initialized');
   }
 
@@ -54,6 +57,7 @@ export class ManagerRegistry {
    */
   static unloadAll(plugin: MacrosPlugin): void {
     // Clean up in reverse dependency order
+    plugin.refreshManager?.cleanup();
     plugin.refreshManager?.refreshMarkdownViews();
     plugin.chartManager?.cleanup?.();
     plugin.dataManager?.cleanup?.();

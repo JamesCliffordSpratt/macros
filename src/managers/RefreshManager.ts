@@ -1,5 +1,12 @@
-import { MarkdownView } from 'obsidian';
+import { CachedMetadata, MarkdownView, TFile, debounce, normalizePath } from 'obsidian';
 import MacrosPlugin from '../main';
+
+/**
+ * A rendered `macros` code block that can redraw itself in place.
+ */
+export interface LiveMacrosBlock {
+  rerender(): Promise<void>;
+}
 
 /**
  * RefreshManager
@@ -11,6 +18,38 @@ export class RefreshManager {
   private plugin: MacrosPlugin;
   private refreshInProgress = false;
 
+  /**
+   * `macros` blocks currently rendered in a note (Reading view or Live
+   * Preview). Blocks add themselves when rendered and remove themselves when
+   * Obsidian unloads them, so they can be redrawn in place without reopening
+   * the note.
+   */
+  private liveMacrosBlocks = new Set<LiveMacrosBlock>();
+  private macrosRerenderRunning = false;
+  private macrosRerenderQueued = false;
+
+  /**
+   * Debounced `rerenderLiveViews()` for settings changes, so typing in a
+   * settings field doesn't redraw every table on each keystroke.
+   */
+  scheduleLiveRefresh = debounce(
+    () => {
+      void this.rerenderLiveViews();
+    },
+    150,
+    true
+  );
+
+  /** Coalesces bursts of food-file changes (e.g. a save that touches several files). */
+  private scheduleFoodRefresh = debounce(
+    () => {
+      this.plugin.dataManager.invalidateFileCache();
+      void this.rerenderLiveViews();
+    },
+    300,
+    true
+  );
+
   constructor(plugin: MacrosPlugin) {
     this.plugin = plugin;
   }
@@ -19,7 +58,97 @@ export class RefreshManager {
    * Clean up any resources when plugin is unloaded
    */
   cleanup(): void {
-    // Currently no cleanup needed, but the method is required for consistency
+    this.scheduleLiveRefresh.cancel();
+    this.scheduleFoodRefresh.cancel();
+    this.liveMacrosBlocks.clear();
+  }
+
+  registerMacrosBlock(block: LiveMacrosBlock): void {
+    this.liveMacrosBlocks.add(block);
+  }
+
+  unregisterMacrosBlock(block: LiveMacrosBlock): void {
+    this.liveMacrosBlocks.delete(block);
+  }
+
+  /**
+   * Redraw everything the plugin has rendered (macros tables, pie charts and
+   * macroscalc dashboards) in place. Works in both Reading view and Live
+   * Preview, so settings and food-data changes show up immediately.
+   */
+  async rerenderLiveViews(): Promise<void> {
+    await this.rerenderMacrosBlocks();
+    await this.refreshAllMacrospc();
+    await this.refreshAllMacroscalc();
+  }
+
+  /**
+   * Redraw every live `macros` table in place. Concurrent calls are coalesced:
+   * a request made while a pass is running triggers exactly one more pass.
+   */
+  async rerenderMacrosBlocks(): Promise<void> {
+    if (this.macrosRerenderRunning) {
+      this.macrosRerenderQueued = true;
+      return;
+    }
+
+    this.macrosRerenderRunning = true;
+    try {
+      do {
+        this.macrosRerenderQueued = false;
+        for (const block of [...this.liveMacrosBlocks]) {
+          try {
+            await block.rerender();
+          } catch (error) {
+            this.plugin.logger.error('Error re-rendering macros block:', error);
+          }
+        }
+      } while (this.macrosRerenderQueued);
+    } finally {
+      this.macrosRerenderRunning = false;
+    }
+  }
+
+  /**
+   * Redraw live views when a food file is created, edited, deleted or renamed,
+   * so tables reflect new nutrition data without reopening the note.
+   * Uses the metadata cache events (not vault `modify`) so the new frontmatter
+   * has already been parsed when we re-read it.
+   */
+  registerFoodChangeListeners(): void {
+    const { app } = this.plugin;
+
+    this.plugin.registerEvent(
+      app.metadataCache.on('changed', (file, _data, cache) => {
+        if (this.isFoodFile(file.path, cache)) this.scheduleFoodRefresh();
+      })
+    );
+    this.plugin.registerEvent(
+      app.metadataCache.on('deleted', (file, prevCache) => {
+        if (this.isFoodFile(file.path, prevCache)) this.scheduleFoodRefresh();
+      })
+    );
+    this.plugin.registerEvent(
+      app.vault.on('rename', (file, oldPath) => {
+        if (file instanceof TFile && (this.isFoodFile(file.path) || this.isFoodFile(oldPath))) {
+          this.scheduleFoodRefresh();
+        }
+      })
+    );
+  }
+
+  /**
+   * Whether a path is a food file: a markdown file inside the storage folder.
+   * When the storage folder is the vault root, require food frontmatter so
+   * ordinary notes don't trigger refreshes.
+   */
+  private isFoodFile(path: string, cache?: CachedMetadata | null): boolean {
+    if (!path.endsWith('.md')) return false;
+    const folder = normalizePath(this.plugin.settings.storageFolder || '/');
+    if (folder === '/') {
+      return cache?.frontmatter?.serving_size != null;
+    }
+    return path.startsWith(`${folder}/`);
   }
 
   /**
@@ -95,8 +224,8 @@ export class RefreshManager {
       this.plugin.logger.debug('Refreshing macroscalc containers');
       await this.refreshAllMacroscalc();
 
-      // Step 6: Refresh Markdown views to ensure all renderers are updated
-      this.refreshMarkdownViews();
+      // Step 6: Redraw live macros tables in place (Reading view and Live Preview)
+      await this.rerenderMacrosBlocks();
 
       this.plugin.logger.debug('Complete refresh finished');
     } catch (error) {
@@ -206,7 +335,10 @@ export class RefreshManager {
   }
 
   /**
-   * Refreshes all markdown views to trigger re-rendering of code blocks
+   * Re-renders Reading views so code blocks are processed again from scratch.
+   * Note: this does not affect Live Preview; use `rerenderLiveViews()` to
+   * refresh the plugin's output in every mode. Kept for plugin unload, where
+   * blocks need to fall back to their raw source.
    */
   refreshMarkdownViews(): void {
     this.plugin.app.workspace.getLeavesOfType('markdown').forEach((leaf) => {
