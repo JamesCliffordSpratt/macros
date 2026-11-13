@@ -7,6 +7,7 @@
 export { enTranslations } from './en';
 export { esTranslations } from './es';
 export { zhCNTranslations } from './zh-CN';
+export { ruTranslations } from './ru';
 
 // Add new language exports here as they become available
 // export { frTranslations } from './fr';
@@ -16,6 +17,5 @@ export { zhCNTranslations } from './zh-CN';
 // export { jaTranslations } from './ja';
 // export { koTranslations } from './ko';
 // export { zhTWTranslations } from './zh-TW';
-// export { ruTranslations } from './ru';
 // export { arTranslations } from './ar';
 // export { heTranslations } from './he';

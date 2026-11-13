@@ -3,6 +3,7 @@ import MacrosPlugin from '../main';
 import { enTranslations } from './translations/en';
 import { esTranslations } from './translations/es';
 import { zhCNTranslations } from './translations/zh-CN';
+import { ruTranslations } from './translations/ru';
 
 export interface LocaleData {
   [key: string]: string | LocaleData;
@@ -348,6 +349,7 @@ export class I18nManager {
       en: enTranslations,
       es: esTranslations,
       'zh-CN': zhCNTranslations,
+      ru: ruTranslations,
       // Add more languages here as they become available
     };
 
