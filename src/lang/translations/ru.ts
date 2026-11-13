@@ -106,7 +106,8 @@ export const ruTranslations: LocaleData = {
       showSummaryRowsDesc:
         'Переключить отображение строк итогов, целей и остатка в таблице макросов.',
       disableTooltips: 'Отключить подсказки',
-      disableTooltipsDesc: 'Отключить все всплывающие подсказки в таблицах макросов для более чистого интерфейса.',
+      disableTooltipsDesc:
+        'Отключить все всплывающие подсказки в таблицах макросов для более чистого интерфейса.',
       showCellPercentages: 'Показывать проценты в ячейках',
       showCellPercentagesDesc: 'Отображать процентные значения внутри ячеек макросов в таблицах.',
       energyUnit: 'Единица энергии',
@@ -237,7 +238,8 @@ export const ruTranslations: LocaleData = {
       usdaEnable: 'Включить USDA',
       usdaEnableDesc: 'Включить поиск по базе USDA FoodData Central',
       usdaCredentialsRequired: 'Сначала настройте ключ API USDA.',
-      usdaNotConfigured: '⚠️ Ключ API USDA не настроен. Настройте ключ API, чтобы включить поиск USDA.',
+      usdaNotConfigured:
+        '⚠️ Ключ API USDA не настроен. Настройте ключ API, чтобы включить поиск USDA.',
       usdaConfigured: '✅ Ключ API USDA успешно настроен.',
       usdaKey: 'Ключ API USDA',
       usdaKeyDesc: 'Ваш ключ API USDA FoodData Central (требуется бесплатная регистрация)',
@@ -291,14 +293,16 @@ export const ruTranslations: LocaleData = {
       testOpenFoodFactsConnection: 'Проверить соединение с Open Food Facts',
       testOpenFoodFactsConnectionDesc:
         'Проверить соединение с базой Open Food Facts, чтобы убедиться, что она работает правильно.',
-      openFoodFactsTestSuccess: '✅ Соединение с Open Food Facts успешно! Найдено результатов: {count}.',
+      openFoodFactsTestSuccess:
+        '✅ Соединение с Open Food Facts успешно! Найдено результатов: {count}.',
       openFoodFactsTestNoResults:
         '⚠️ Соединение с Open Food Facts установлено, но по запросу «apple» ничего не найдено. Это может быть нормально.',
       openFoodFactsTestCORSError:
         '❌ Соединение заблокировано политикой CORS. Это ограничение безопасности браузера.',
       openFoodFactsTestNetworkError:
         '❌ Ошибка сети при подключении к Open Food Facts. Проверьте подключение к интернету.',
-      openFoodFactsTestTimeoutError: '❌ Тайм-аут запроса. Серверы Open Food Facts могут быть медленными.',
+      openFoodFactsTestTimeoutError:
+        '❌ Тайм-аут запроса. Серверы Open Food Facts могут быть медленными.',
       openFoodFactsTestError: '❌ Проверка Open Food Facts не удалась: {error}',
     },
     developer: {
@@ -318,19 +322,22 @@ export const ruTranslations: LocaleData = {
       autoConfirmRenamesDesc:
         'Автоматически применять изменения при переименовании без показа окна подтверждения',
       renameScopeFolder: 'Папка для отслеживания переименований',
-      renameScopeFolderDesc: 'Папка для отслеживания переименований файлов продуктов (относительно корня хранилища)',
+      renameScopeFolderDesc:
+        'Папка для отслеживания переименований файлов продуктов (относительно корня хранилища)',
       backupOnRename: 'Создавать резервные копии при переименовании',
       backupOnRenameDesc:
         'Создавать резервные копии файлов перед их изменением во время операций переименования',
       caseSensitiveFoodMatch: 'Учитывать регистр при сопоставлении продуктов',
-      caseSensitiveFoodMatchDesc: 'Использовать сопоставление с учётом регистра при поиске ссылок на названия продуктов',
+      caseSensitiveFoodMatchDesc:
+        'Использовать сопоставление с учётом регистра при поиске ссылок на названия продуктов',
       includeAliasesOnRename: 'Включать псевдонимы при переименовании',
       includeAliasesOnRenameDesc:
         'Также обновлять псевдонимы файлов, совпадающие со старым названием продукта (экспериментально)',
     },
     support: {
       title: '☕ Поддержать плагин',
-      description: 'Если этот плагин оказался полезен, рассмотрите возможность поддержать его разработку!',
+      description:
+        'Если этот плагин оказался полезен, рассмотрите возможность поддержать его разработку!',
       coffeeText: 'Поддержите дальнейшую разработку плагина Macros:',
       linksTitle: '📚 Документация и ссылки',
       linksDescription: 'Полезные ресурсы для плагина Macros:',
@@ -407,7 +414,8 @@ export const ruTranslations: LocaleData = {
       itemSavedReadyForNext: 'Продукт сохранён! Готово к добавлению следующего.',
       allItemsSaved: 'Все продукты ({count}) успешно сохранены!',
       itemRemoved: 'Продукт удалён из списка',
-      keyboardShortcuts: 'Совет: нажмите Enter, чтобы сохранить, Ctrl+Enter — чтобы добавить и продолжить',
+      keyboardShortcuts:
+        'Совет: нажмите Enter, чтобы сохранить, Ctrl+Enter — чтобы добавить и продолжить',
       micronutrients: {
         title: 'Микронутриенты (необязательно)',
         description:
@@ -419,7 +427,8 @@ export const ruTranslations: LocaleData = {
     },
     customServing: {
       title: 'Свой размер порции для {foodName}',
-      description: 'Размер порции по умолчанию — {defaultServing} г. Введите свой размер порции в граммах:',
+      description:
+        'Размер порции по умолчанию — {defaultServing} г. Введите свой размер порции в граммах:',
       submit: 'Отправить',
     },
     fileName: {
@@ -671,7 +680,8 @@ export const ruTranslations: LocaleData = {
       rollingAvgCaloriesTooltip: 'Скользящее среднее калорий за {days} дн.: {value} (по {endDate})',
       rollingAvgProteinTooltip: 'Скользящее среднее белков за {days} дн.: {value} г (по {endDate})',
       rollingAvgFatTooltip: 'Скользящее среднее жиров за {days} дн.: {value} г (по {endDate})',
-      rollingAvgCarbsTooltip: 'Скользящее среднее углеводов за {days} дн.: {value} г (по {endDate})',
+      rollingAvgCarbsTooltip:
+        'Скользящее среднее углеводов за {days} дн.: {value} г (по {endDate})',
       simpleAvgTooltip: 'Среднее за {days} дней: {value}',
     },
     extremes: {
@@ -781,8 +791,10 @@ export const ruTranslations: LocaleData = {
     testConnectionFailed: 'Проверка соединения не удалась. Проверьте учётные данные API.',
     apiCredentialsRequired: 'Сначала настройте учётные данные API.',
     chartPreviewUnavailable: 'Предпросмотр диаграммы недоступен',
-    developerModeChanged: 'Режим разработчика {status}. Перезапустите Obsidian, чтобы применить все изменения.',
-    languageChanged: 'Язык изменён на {language}. Перезапустите Obsidian, чтобы применить изменения.',
+    developerModeChanged:
+      'Режим разработчика {status}. Перезапустите Obsidian, чтобы применить все изменения.',
+    languageChanged:
+      'Язык изменён на {language}. Перезапустите Obsidian, чтобы применить изменения.',
     itemRemoved: 'Элемент {item} удалён',
     itemRemoveError: 'Ошибка удаления элемента: {error}',
     removalCancelled: 'Удаление отменено',
@@ -871,7 +883,8 @@ export const ruTranslations: LocaleData = {
     severitySevere: 'Тяжёлая',
     severitySevereDesc: 'Серьёзные реакции, требующие медицинской помощи',
     symptomsLabel: 'Симптомы:',
-    symptomsPlaceholder: 'Например: «расстройство желудка, вздутие» или «аллергическая реакция, крапивница»',
+    symptomsPlaceholder:
+      'Например: «расстройство желудка, вздутие» или «аллергическая реакция, крапивница»',
     symptomsRequired: 'Опишите испытанные симптомы',
     symptomsTooLong: 'Описание симптомов слишком длинное (максимум 200 символов)',
     addTolerance: 'Добавить непереносимость',
@@ -907,9 +920,11 @@ export const ruTranslations: LocaleData = {
     macroComposition: '{value} г {macro} ({percent}% от общего количества макросов)',
     target: 'Цель: {target} {unit}',
     dailyTarget: 'От дневной цели',
-    offHighQuality: 'Высококачественные данные, проверенные сообществом, с полной информацией о питании',
+    offHighQuality:
+      'Высококачественные данные, проверенные сообществом, с полной информацией о питании',
     offMediumQuality: 'Умеренно полные данные сообщества, часть информации может отсутствовать',
-    offLowQuality: 'Доступно ограниченное количество данных, информация о питании может быть неполной',
+    offLowQuality:
+      'Доступно ограниченное количество данных, информация о питании может быть неполной',
     nutriScore: 'Nutri-Score: оценка питательной ценности от A (лучшая) до E (худшая)',
     novaGroup:
       'Классификация NOVA: уровень обработки продуктов от 1 (необработанные) до 4 (ультрапереработанные)',
