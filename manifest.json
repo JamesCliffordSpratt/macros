@@ -1,7 +1,7 @@
 {
   "id": "macros",
   "name": "Macros",
-  "version": "2.6.3",
+  "version": "2.7.0",
   "minAppVersion": "1.5.7",
   "description": "Nutrition and food tracker for your notes. Log meals, calories and macros (protein, fat, carbs) plus micronutrients. Search foods by name or barcode via FatSecret, USDA & Open Food Facts, set targets, and visualize with tables and charts.",
   "author": "James Spratt",
