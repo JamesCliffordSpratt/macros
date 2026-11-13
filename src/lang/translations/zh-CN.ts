@@ -588,6 +588,7 @@ export const zhCNTranslations: LocaleData = {
       extremes: '极值与记录',
       adherence: '依从性与连续记录',
       display: '显示选项',
+      other: '其他指标',
     },
     totalsAverages: {
       name: '总计与平均值',
@@ -858,6 +859,11 @@ export const zhCNTranslations: LocaleData = {
       removeTolerance: '移除耐受性',
     },
   },
+  units: {
+    grams: 'g',
+    kcal: 'kcal',
+    kj: 'kJ',
+  },
   tooltips: {
     percentage: '{value}g {macro} • 占每日{macro}目标的 {percent}%',
     remaining: '剩余',
@@ -868,7 +874,7 @@ export const zhCNTranslations: LocaleData = {
     caloriesOver: '{value} 千卡 • 占每日目标 {percent}% • 超出 {over} 千卡',
     caloriePercent: '{value} 千卡 • 占每日目标 {percent}%',
     macroComposition: '{value}g {macro}（占总营养素 {percent}%）',
-    target: '目标：{target}{unit}',
+    target: '目标：{target} {unit}',
     dailyTarget: '占每日目标',
     offHighQuality: '高质量社区验证数据，营养信息完整',
     offMediumQuality: '中等完整度社区数据，某些信息可能缺失',

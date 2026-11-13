@@ -791,7 +791,7 @@ export class RowRenderer {
         if (!isNaN(newValue) && newValue >= 0) {
           try {
             quantityCell.classList.add('quantity-updating');
-            quantityCell.textContent = `${newValue}g (${t('general.updating')}...)`;
+            quantityCell.textContent = `${newValue}${t('units.grams')} (${t('general.updating')}...)`;
             await this.onUpdateQuantity(
               row.macroLine,
               newValue,
@@ -803,7 +803,7 @@ export class RowRenderer {
             this.plugin.logger.error('Error updating quantity:', error);
             quantityCell.classList.remove('quantity-updating');
             quantityCell.classList.add('quantity-error');
-            quantityCell.textContent = `${servingValue}g (${t('general.error').toLowerCase()})`;
+            quantityCell.textContent = `${servingValue}${t('units.grams')} (${t('general.error').toLowerCase()})`;
             window.setTimeout(() => {
               quantityCell.classList.remove('quantity-error');
               quantityCell.textContent = row.serving;
@@ -850,9 +850,9 @@ export class RowRenderer {
 
     if (currentUnit === 'kJ') {
       const caloriesInKj = row.calories * 4.184;
-      calorieTooltipMessage = `${caloriesInKj.toFixed(1)} kJ • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
+      calorieTooltipMessage = `${caloriesInKj.toFixed(1)} ${t('units.kj')} • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
     } else {
-      calorieTooltipMessage = `${row.calories.toFixed(1)} kcal • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
+      calorieTooltipMessage = `${row.calories.toFixed(1)} ${t('units.kcal')} • ${Math.round(caloriePercentage)}% ${t('table.summary.dailyTarget')}`;
     }
 
     safeAttachTooltip(caloriesCell, calorieTooltipMessage, this.plugin);
@@ -1041,7 +1041,7 @@ export class RowRenderer {
       proteinCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
       proteinCell.textContent = `${formatGrams(remainingProtein)} (${t('table.summary.over')})`;
     } else if (remainingProtein === 0) {
-      proteinCell.textContent = '0.0g';
+      proteinCell.textContent = `0.0${t('units.grams')}`;
     } else {
       proteinCell.textContent = formatGrams(remainingProtein);
     }
@@ -1052,7 +1052,7 @@ export class RowRenderer {
       fatCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
       fatCell.textContent = `${formatGrams(remainingFat)} (${t('table.summary.over')})`;
     } else if (remainingFat === 0) {
-      fatCell.textContent = '0.0g';
+      fatCell.textContent = `0.0${t('units.grams')}`;
     } else {
       fatCell.textContent = formatGrams(remainingFat);
     }
@@ -1063,7 +1063,7 @@ export class RowRenderer {
       carbsCell.classList.add(CLASS_NAMES.TABLE.EXCEEDED);
       carbsCell.textContent = `${formatGrams(remainingCarbs)} (${t('table.summary.over')})`;
     } else if (remainingCarbs === 0) {
-      carbsCell.textContent = '0.0g';
+      carbsCell.textContent = `0.0${t('units.grams')}`;
     } else {
       carbsCell.textContent = formatGrams(remainingCarbs);
     }

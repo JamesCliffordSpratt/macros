@@ -46,9 +46,9 @@ export function formatCalories(calories: number): string {
 
   if (currentUnit === 'kJ') {
     const kj = convertEnergyUnit(calories, 'kcal', 'kJ');
-    return `${kj.toFixed(1)} kJ`; // Proper spacing (already correct)
+    return `${kj.toFixed(1)} ${t('units.kj')}`;
   } else {
-    return `${calories.toFixed(1)} kcal`; // Proper spacing (already correct)
+    return `${calories.toFixed(1)} ${t('units.kcal')}`;
   }
 }
 
@@ -58,7 +58,7 @@ export function formatCalories(calories: number): string {
  * @returns Formatted string with space between value and unit
  */
 export function formatGrams(grams: number): string {
-  return `${grams.toFixed(1)} g`; // Added space for consistency with energy units
+  return `${grams.toFixed(1)} ${t('units.grams')}`;
 }
 
 /**
@@ -67,7 +67,7 @@ export function formatGrams(grams: number): string {
  * @returns Formatted string with space between value and unit
  */
 export function formatWeight(weight: number): string {
-  return `${weight.toFixed(1)} g`; // Added space between number and unit
+  return `${weight.toFixed(1)} ${t('units.grams')}`;
 }
 
 /**
@@ -76,7 +76,7 @@ export function formatWeight(weight: number): string {
  * @param unit Unit string (default: 'g')
  * @returns Formatted string with space between value and unit
  */
-export function formatMacro(value: number, unit = 'g'): string {
+export function formatMacro(value: number, unit = t('units.grams')): string {
   return `${value.toFixed(1)} ${unit}`; // Added space between number and unit
 }
 
@@ -129,23 +129,23 @@ export function formatDashboardTooltip(
 
   if (currentLocale === 'zh-CN') {
     // Chinese word order: 占 7% · 剩余 95.2 g
-    let tooltipText = `${currentValue.toFixed(1)} g ${macroName.toLowerCase()} • 占 ${Math.round(percentage)}%`;
+    let tooltipText = `${currentValue.toFixed(1)} ${t('units.grams')} ${macroName.toLowerCase()} • 占 ${Math.round(percentage)}%`;
 
     if (remaining > 0) {
-      tooltipText += ` • 剩余 ${remaining.toFixed(1)} g`;
+      tooltipText += ` • 剩余 ${remaining.toFixed(1)} ${t('units.grams')}`;
     } else if (remaining < 0) {
-      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} ${t('units.grams')}`;
     }
 
     return tooltipText;
   } else {
     // English word order
-    let tooltipText = `${currentValue.toFixed(1)} g ${macroName.toLowerCase()} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+    let tooltipText = `${currentValue.toFixed(1)} ${t('units.grams')} ${macroName.toLowerCase()} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
 
     if (remaining > 0) {
-      tooltipText += ` • ${remaining.toFixed(1)} g ${t('general.remaining')}`;
+      tooltipText += ` • ${remaining.toFixed(1)} ${t('units.grams')} ${t('general.remaining')}`;
     } else if (remaining < 0) {
-      tooltipText += ` • ${Math.abs(remaining).toFixed(1)} g ${t('table.summary.over')}`;
+      tooltipText += ` • ${Math.abs(remaining).toFixed(1)} ${t('units.grams')} ${t('table.summary.over')}`;
     }
 
     return tooltipText;
@@ -256,19 +256,19 @@ export function formatCalorieTooltip(calories: number, target: number, percentag
     const remainingKj = targetKj - consumedKj;
 
     if (currentLocale === 'zh-CN') {
-      let tooltipText = `${consumedKj.toFixed(1)} kJ • 占 ${Math.round(percentage)}%`;
+      let tooltipText = `${consumedKj.toFixed(1)} ${t('units.kj')} • 占 ${Math.round(percentage)}%`;
       if (remainingKj > 0) {
-        tooltipText += ` • 剩余 ${remainingKj.toFixed(1)} kJ`;
+        tooltipText += ` • 剩余 ${remainingKj.toFixed(1)} ${t('units.kj')}`;
       } else if (remainingKj < 0) {
-        tooltipText += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} kJ`;
+        tooltipText += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} ${t('units.kj')}`;
       }
       return tooltipText;
     } else {
-      let tooltipText = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+      let tooltipText = `${consumedKj.toFixed(1)} ${t('units.kj')} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
       if (remainingKj > 0) {
-        tooltipText += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+        tooltipText += ` • ${remainingKj.toFixed(1)} ${t('units.kj')} ${t('general.remaining')}`;
       } else if (remainingKj < 0) {
-        tooltipText += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+        tooltipText += ` • ${Math.abs(remainingKj).toFixed(1)} ${t('units.kj')} ${t('table.summary.over')}`;
       }
       return tooltipText;
     }
@@ -276,19 +276,19 @@ export function formatCalorieTooltip(calories: number, target: number, percentag
     const remaining = target - calories;
 
     if (currentLocale === 'zh-CN') {
-      let tooltipText = `${calories.toFixed(1)} kcal • 占 ${Math.round(percentage)}%`;
+      let tooltipText = `${calories.toFixed(1)} ${t('units.kcal')} • 占 ${Math.round(percentage)}%`;
       if (remaining > 0) {
-        tooltipText += ` • 剩余 ${remaining.toFixed(1)} kcal`;
+        tooltipText += ` • 剩余 ${remaining.toFixed(1)} ${t('units.kcal')}`;
       } else if (remaining < 0) {
-        tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} kcal`;
+        tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} ${t('units.kcal')}`;
       }
       return tooltipText;
     } else {
-      let tooltipText = `${calories.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+      let tooltipText = `${calories.toFixed(1)} ${t('units.kcal')} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
       if (remaining > 0) {
-        tooltipText += ` • ${remaining.toFixed(1)} kcal ${t('general.remaining')}`;
+        tooltipText += ` • ${remaining.toFixed(1)} ${t('units.kcal')} ${t('general.remaining')}`;
       } else if (remaining < 0) {
-        tooltipText += ` • ${Math.abs(remaining).toFixed(1)} kcal ${t('table.summary.over')}`;
+        tooltipText += ` • ${Math.abs(remaining).toFixed(1)} ${t('units.kcal')} ${t('table.summary.over')}`;
       }
       return tooltipText;
     }
@@ -352,13 +352,13 @@ export function formatMacroPercentageTooltip(
 
   if (remaining > 0) {
     if (currentLocale === 'zh-CN') {
-      tooltipText += ` • 剩余 ${remaining.toFixed(1)} g`;
+      tooltipText += ` • 剩余 ${remaining.toFixed(1)} ${t('units.grams')}`;
     } else {
-      tooltipText += ` • ${remaining.toFixed(1)} g ${t('general.remaining')}`;
+      tooltipText += ` • ${remaining.toFixed(1)} ${t('units.grams')} ${t('general.remaining')}`;
     }
   } else if (remaining < 0) {
     if (currentLocale === 'zh-CN') {
-      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+      tooltipText += ` • 超出 ${Math.abs(remaining).toFixed(1)} ${t('units.grams')}`;
     } else {
       tooltipText += ` • ${t('tooltips.over', { over: Math.abs(remaining).toFixed(1) })}`;
     }
@@ -382,9 +382,9 @@ export function formatEnergy(valueInKcal: number, showUnit = true): string {
 
   if (currentUnit === 'kJ') {
     const kj = convertEnergyUnit(valueInKcal, 'kcal', 'kJ');
-    return showUnit ? `${kj.toFixed(1)} kJ` : kj.toFixed(1); // Proper spacing
+    return showUnit ? `${kj.toFixed(1)} ${t('units.kj')}` : kj.toFixed(1);
   } else {
-    return showUnit ? `${valueInKcal.toFixed(1)} kcal` : valueInKcal.toFixed(1); // Proper spacing
+    return showUnit ? `${valueInKcal.toFixed(1)} ${t('units.kcal')}` : valueInKcal.toFixed(1);
   }
 }
 
@@ -395,7 +395,7 @@ export function formatEnergy(valueInKcal: number, showUnit = true): string {
  */
 export function formatServing(serving: string): string {
   // Handle various serving size formats and ensure proper spacing
-  return serving.replace(/(\d+(?:\.\d+)?)\s*g/i, '$1 g');
+  return serving.replace(/(\d+(?:\.\d+)?)\s*g/i, `$1 ${t('units.grams')}`);
 }
 
 /**

@@ -298,10 +298,10 @@ export class MacrosCalcRenderer {
       const currentEnergyUnit = this.plugin.settings.energyUnit;
       if (currentEnergyUnit === 'kJ') {
         const kjValue = convertEnergyUnit(finalAggregate.calories, 'kcal', 'kJ');
-        aggCaloriesCell.innerText = `${kjValue.toFixed(1)} kJ`;
+        aggCaloriesCell.innerText = `${kjValue.toFixed(1)} ${t('units.kj')}`;
         safeAttachTooltip(
           aggCaloriesCell,
-          `${finalAggregate.calories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`,
+          `${finalAggregate.calories.toFixed(1)} ${t('units.kcal')} = ${kjValue.toFixed(1)} ${t('units.kj')}`,
           this.plugin
         );
       } else {
@@ -508,12 +508,12 @@ export class MacrosCalcRenderer {
 
   private getCategoryDisplayName(category: string): string {
     const categoryNames: Record<string, string> = {
-      totals: 'TOTALS & AVERAGES',
-      ratios: 'MACRO RATIOS',
-      trends: 'TRENDS',
-      extremes: 'EXTREMES',
-      adherence: 'ADHERENCE & STREAKS',
-      other: 'OTHER METRICS',
+      totals: t('metrics.categories.totals'),
+      ratios: t('metrics.categories.ratios'),
+      trends: t('metrics.categories.trends'),
+      extremes: t('metrics.categories.extremes'),
+      adherence: t('metrics.categories.adherence'),
+      other: t('metrics.categories.other'),
     };
     return categoryNames[category] || category.toUpperCase();
   }
@@ -857,7 +857,7 @@ export class MacrosCalcRenderer {
     const currentEnergyUnit = this.plugin.settings.energyUnit;
     if (currentEnergyUnit === 'kJ') {
       const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
-      caloriesCell.textContent = `${kjValue.toFixed(1)} kJ`;
+      caloriesCell.textContent = `${kjValue.toFixed(1)} ${t('units.kj')}`;
     } else {
       caloriesCell.textContent = formatCalories(item.totals.calories);
     }
@@ -874,7 +874,7 @@ export class MacrosCalcRenderer {
     if (currentEnergyUnit === 'kJ') {
       const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
       calorieTooltip = t('calculator.tooltips.calories', {
-        value: kjValue.toFixed(1) + ' kJ',
+        value: kjValue.toFixed(1) + ' ' + t('units.kj'),
         id: item.id,
         percentage: caloriePercentage.toFixed(0),
       });
@@ -1297,7 +1297,7 @@ export class MacrosCalcRenderer {
     const currentEnergyUnit = this.plugin.settings.energyUnit;
     if (currentEnergyUnit === 'kJ') {
       const kjValue = convertEnergyUnit(nutritionData.calories, 'kcal', 'kJ');
-      caloriesCell.textContent = `${kjValue.toFixed(1)} kJ`;
+      caloriesCell.textContent = `${kjValue.toFixed(1)} ${t('units.kj')}`;
     } else {
       caloriesCell.textContent = formatCalories(nutritionData.calories);
     }
@@ -1599,7 +1599,7 @@ export class MacrosCalcRenderer {
           labels: breakdown.map((item) => item.id),
           datasets: [
             {
-              label: t('table.headers.protein') + ' (g)',
+              label: t('table.headers.protein') + ' (' + t('units.grams') + ')',
               data: breakdown.map((item) => item.totals.protein),
               borderColor: this.plugin.settings.proteinColor || '#4caf50',
               backgroundColor: (this.plugin.settings.proteinColor || '#4caf50') + '20',
@@ -1609,7 +1609,7 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: t('table.headers.fat') + ' (g)',
+              label: t('table.headers.fat') + ' (' + t('units.grams') + ')',
               data: breakdown.map((item) => item.totals.fat),
               borderColor: this.plugin.settings.fatColor || '#f44336',
               backgroundColor: (this.plugin.settings.fatColor || '#f44336') + '20',
@@ -1619,7 +1619,7 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: t('table.headers.carbs') + ' (g)',
+              label: t('table.headers.carbs') + ' (' + t('units.grams') + ')',
               data: breakdown.map((item) => item.totals.carbs),
               borderColor: this.plugin.settings.carbsColor || '#2196f3',
               backgroundColor: (this.plugin.settings.carbsColor || '#2196f3') + '20',
@@ -1629,7 +1629,8 @@ export class MacrosCalcRenderer {
               pointHoverRadius: 6,
             },
             {
-              label: t('table.headers.calories') + ` (${currentEnergyUnit})`,
+              label:
+                t('table.headers.calories') + ` (${isKjUnit ? t('units.kj') : t('units.kcal')})`,
               data: calorieData,
               borderColor: '#ff9800',
               backgroundColor: '#ff980020',
@@ -1656,18 +1657,19 @@ export class MacrosCalcRenderer {
                 label: function (context: import('chart.js').TooltipItem<'line'>) {
                   let value = context.parsed.y.toFixed(1);
                   let unit = '';
+                  const isCalorieDataset = context.dataset.yAxisID === 'y1';
 
-                  if (context.dataset.label?.includes('calorie') && isKjUnit) {
+                  if (isCalorieDataset && isKjUnit) {
                     const kjValue = convertEnergyUnit(context.parsed.y, 'kcal', 'kJ');
                     value = kjValue.toFixed(1);
-                    unit = ' kJ';
-                  } else if (context.dataset.label?.includes('calorie')) {
-                    unit = ' kcal';
+                    unit = t('units.kj');
+                  } else if (isCalorieDataset) {
+                    unit = t('units.kcal');
                   } else {
-                    unit = 'g';
+                    unit = t('units.grams');
                   }
 
-                  return `${context.dataset.label}: ${value}${unit}`;
+                  return `${context.dataset.label}: ${value} ${unit}`;
                 },
               },
             },
@@ -1693,7 +1695,7 @@ export class MacrosCalcRenderer {
               position: 'right',
               title: {
                 display: true,
-                text: `${t('table.headers.calories')} (${currentEnergyUnit})`,
+                text: `${t('table.headers.calories')} (${isKjUnit ? t('units.kj') : t('units.kcal')})`,
               },
               grid: {
                 drawOnChartArea: false,
@@ -1755,7 +1757,7 @@ export class MacrosCalcRenderer {
     const currentEnergyUnit = getCurrentEnergyUnitString();
     [
       t('calculator.tableHeaders.id'),
-      `${t('table.headers.calories')} (${currentEnergyUnit})`,
+      `${t('table.headers.calories')} (${currentEnergyUnit === 'kJ' ? t('units.kj') : t('units.kcal')})`,
       t('table.headers.protein'),
       t('table.headers.fat'),
       t('table.headers.carbs'),
@@ -1772,14 +1774,14 @@ export class MacrosCalcRenderer {
       const currentEnergyUnit = this.plugin.settings.energyUnit;
       if (currentEnergyUnit === 'kJ') {
         const kjValue = convertEnergyUnit(item.totals.calories, 'kcal', 'kJ');
-        row.insertCell().textContent = kjValue.toFixed(1) + ' kJ';
+        row.insertCell().textContent = kjValue.toFixed(1) + ' ' + t('units.kj');
       } else {
-        row.insertCell().textContent = item.totals.calories.toFixed(1) + ' kcal';
+        row.insertCell().textContent = item.totals.calories.toFixed(1) + ' ' + t('units.kcal');
       }
 
-      row.insertCell().textContent = item.totals.protein.toFixed(1) + 'g';
-      row.insertCell().textContent = item.totals.fat.toFixed(1) + 'g';
-      row.insertCell().textContent = item.totals.carbs.toFixed(1) + 'g';
+      row.insertCell().textContent = item.totals.protein.toFixed(1) + ' ' + t('units.grams');
+      row.insertCell().textContent = item.totals.fat.toFixed(1) + ' ' + t('units.grams');
+      row.insertCell().textContent = item.totals.carbs.toFixed(1) + ' ' + t('units.grams');
     });
   }
 

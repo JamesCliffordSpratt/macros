@@ -69,11 +69,11 @@ export class ExtremesMetric implements MacroscalcMetric {
       if (currentEnergyUnit === 'kJ') {
         const maxKj = convertEnergyUnit(maxCalories.value, 'kcal', 'kJ');
         const minKj = convertEnergyUnit(minCalories.value, 'kcal', 'kJ');
-        maxCalorieValue = `${MetricsCalculator.formatValue(maxKj, 0)} kJ`;
-        minCalorieValue = `${MetricsCalculator.formatValue(minKj, 0)} kJ`;
+        maxCalorieValue = `${MetricsCalculator.formatValue(maxKj, 0)} ${t('units.kj')}`;
+        minCalorieValue = `${MetricsCalculator.formatValue(minKj, 0)} ${t('units.kj')}`;
       } else {
-        maxCalorieValue = `${MetricsCalculator.formatValue(maxCalories.value, 0)} kcal`;
-        minCalorieValue = `${MetricsCalculator.formatValue(minCalories.value, 0)} kcal`;
+        maxCalorieValue = `${MetricsCalculator.formatValue(maxCalories.value, 0)} ${t('units.kcal')}`;
+        minCalorieValue = `${MetricsCalculator.formatValue(minCalories.value, 0)} ${t('units.kcal')}`;
       }
 
       results.push({
@@ -101,7 +101,7 @@ export class ExtremesMetric implements MacroscalcMetric {
     if (maxProtein && minProtein) {
       results.push({
         label: t('metrics.extremes.maxProtein'),
-        value: `${MetricsCalculator.formatValue(maxProtein.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(maxProtein.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(maxProtein.id),
         tooltip: t('metrics.extremes.maxProteinTooltip', {
           value: MetricsCalculator.formatValue(maxProtein.value, 1),
@@ -111,7 +111,7 @@ export class ExtremesMetric implements MacroscalcMetric {
 
       results.push({
         label: t('metrics.extremes.minProtein'),
-        value: `${MetricsCalculator.formatValue(minProtein.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(minProtein.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(minProtein.id),
         tooltip: t('metrics.extremes.minProteinTooltip', {
           value: MetricsCalculator.formatValue(minProtein.value, 1),
@@ -124,7 +124,7 @@ export class ExtremesMetric implements MacroscalcMetric {
     if (maxFat && minFat) {
       results.push({
         label: t('metrics.extremes.maxFat'),
-        value: `${MetricsCalculator.formatValue(maxFat.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(maxFat.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(maxFat.id),
         tooltip: t('metrics.extremes.maxFatTooltip', {
           value: MetricsCalculator.formatValue(maxFat.value, 1),
@@ -134,7 +134,7 @@ export class ExtremesMetric implements MacroscalcMetric {
 
       results.push({
         label: t('metrics.extremes.minFat'),
-        value: `${MetricsCalculator.formatValue(minFat.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(minFat.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(minFat.id),
         tooltip: t('metrics.extremes.minFatTooltip', {
           value: MetricsCalculator.formatValue(minFat.value, 1),
@@ -147,7 +147,7 @@ export class ExtremesMetric implements MacroscalcMetric {
     if (maxCarbs && minCarbs) {
       results.push({
         label: t('metrics.extremes.maxCarbs'),
-        value: `${MetricsCalculator.formatValue(maxCarbs.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(maxCarbs.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(maxCarbs.id),
         tooltip: t('metrics.extremes.maxCarbsTooltip', {
           value: MetricsCalculator.formatValue(maxCarbs.value, 1),
@@ -157,7 +157,7 @@ export class ExtremesMetric implements MacroscalcMetric {
 
       results.push({
         label: t('metrics.extremes.minCarbs'),
-        value: `${MetricsCalculator.formatValue(minCarbs.value, 1)}g`,
+        value: `${MetricsCalculator.formatValue(minCarbs.value, 1)} ${t('units.grams')}`,
         subtext: formatDateId(minCarbs.id),
         tooltip: t('metrics.extremes.minCarbsTooltip', {
           value: MetricsCalculator.formatValue(minCarbs.value, 1),

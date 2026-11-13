@@ -249,11 +249,11 @@ export class ChartManager {
 
       if (currentEnergyUnit === 'kJ') {
         const kjValue = convertEnergyUnit(totalCalories, 'kcal', 'kJ');
-        calorieDisplayValue = `${kjValue.toFixed(1)} kJ`;
-        calorieTooltip = `${totalCalories.toFixed(1)} kcal = ${kjValue.toFixed(1)} kJ`;
+        calorieDisplayValue = `${kjValue.toFixed(1)} ${t('units.kj')}`;
+        calorieTooltip = `${totalCalories.toFixed(1)} ${t('units.kcal')} = ${kjValue.toFixed(1)} ${t('units.kj')}`;
       } else {
-        calorieDisplayValue = `${totalCalories.toFixed(1)} kcal`;
-        calorieTooltip = `${totalCalories.toFixed(1)} kcal`;
+        calorieDisplayValue = `${totalCalories.toFixed(1)} ${t('units.kcal')}`;
+        calorieTooltip = `${totalCalories.toFixed(1)} ${t('units.kcal')}`;
       }
 
       calorieDiv.createSpan({ cls: 'macro-summary-label', text: t('charts.calories') });
@@ -594,14 +594,14 @@ export class ChartManager {
                 if (context.dataset.label?.toLowerCase().includes('calorie') && isKjUnit) {
                   const kjValue = convertEnergyUnit(context.parsed.y, 'kcal', 'kJ');
                   value = kjValue.toFixed(1);
-                  unit = ' kJ';
+                  unit = t('units.kj');
                 } else if (context.dataset.label?.toLowerCase().includes('calorie')) {
-                  unit = ' kcal';
+                  unit = t('units.kcal');
                 } else {
-                  unit = 'g';
+                  unit = t('units.grams');
                 }
 
-                return `${context.dataset.label}: ${value}${unit}`;
+                return `${context.dataset.label}: ${value} ${unit}`;
               },
             },
           },
@@ -617,7 +617,7 @@ export class ChartManager {
             beginAtZero: true,
             title: {
               display: true,
-              text: `Grams / ${currentEnergyUnit}`,
+              text: `${t('calculator.chartAxisGrams')} / ${isKjUnit ? t('units.kj') : t('units.kcal')}`,
             },
           },
         },

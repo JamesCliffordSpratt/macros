@@ -113,13 +113,13 @@ export class MetricsEditModal extends Modal {
 
   private getCategoryDisplayName(categoryKey: string): string {
     const categoryNames: Record<string, string> = {
-      totals: 'Totals & Averages',
-      ratios: 'Macro Ratios',
-      trends: 'Trends & Moving Averages',
-      extremes: 'Extremes',
-      adherence: 'Adherence & Streaks',
-      display: 'Display Options',
-      other: 'Other Metrics',
+      totals: t('metrics.categories.totals'),
+      ratios: t('metrics.categories.ratios'),
+      trends: t('metrics.categories.trends'),
+      extremes: t('metrics.categories.extremes'),
+      adherence: t('metrics.categories.adherence'),
+      display: t('metrics.categories.display'),
+      other: t('metrics.categories.other'),
     };
     return categoryNames[categoryKey] || categoryKey.toUpperCase();
   }

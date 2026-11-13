@@ -45,11 +45,11 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
     if (currentEnergyUnit === 'kJ') {
       const totalKj = convertEnergyUnit(aggregateTotals.calories, 'kcal', 'kJ');
       const avgKj = convertEnergyUnit(averages.calories, 'kcal', 'kJ');
-      totalCaloriesValue = `${MetricsCalculator.formatValue(totalKj, 0)} kJ`;
-      avgCaloriesValue = `${MetricsCalculator.formatValue(avgKj, 0)} kJ`;
+      totalCaloriesValue = `${MetricsCalculator.formatValue(totalKj, 0)} ${t('units.kj')}`;
+      avgCaloriesValue = `${MetricsCalculator.formatValue(avgKj, 0)} ${t('units.kj')}`;
     } else {
-      totalCaloriesValue = `${MetricsCalculator.formatValue(aggregateTotals.calories, 0)} kcal`;
-      avgCaloriesValue = `${MetricsCalculator.formatValue(averages.calories, 0)} kcal`;
+      totalCaloriesValue = `${MetricsCalculator.formatValue(aggregateTotals.calories, 0)} ${t('units.kcal')}`;
+      avgCaloriesValue = `${MetricsCalculator.formatValue(averages.calories, 0)} ${t('units.kcal')}`;
     }
 
     // Add metrics
@@ -75,7 +75,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.totalProtein'),
-      value: `${MetricsCalculator.formatValue(aggregateTotals.protein, 0)}g`,
+      value: `${MetricsCalculator.formatValue(aggregateTotals.protein, 0)} ${t('units.grams')}`,
       subtext: timeRange,
       tooltip: t('metrics.totalsAverages.totalProteinTooltip', {
         total: MetricsCalculator.formatValue(aggregateTotals.protein, 0),
@@ -85,7 +85,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.avgProtein'),
-      value: `${MetricsCalculator.formatValue(averages.protein)}g`,
+      value: `${MetricsCalculator.formatValue(averages.protein)} ${t('units.grams')}`,
       subtext: t('metrics.totalsAverages.perDay'),
       tooltip: t('metrics.totalsAverages.avgProteinTooltip', {
         avg: MetricsCalculator.formatValue(averages.protein),
@@ -95,7 +95,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.totalFat'),
-      value: `${MetricsCalculator.formatValue(aggregateTotals.fat, 0)}g`,
+      value: `${MetricsCalculator.formatValue(aggregateTotals.fat, 0)} ${t('units.grams')}`,
       subtext: timeRange,
       tooltip: t('metrics.totalsAverages.totalFatTooltip', {
         total: MetricsCalculator.formatValue(aggregateTotals.fat, 0),
@@ -105,7 +105,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.avgFat'),
-      value: `${MetricsCalculator.formatValue(averages.fat)}g`,
+      value: `${MetricsCalculator.formatValue(averages.fat)} ${t('units.grams')}`,
       subtext: t('metrics.totalsAverages.perDay'),
       tooltip: t('metrics.totalsAverages.avgFatTooltip', {
         avg: MetricsCalculator.formatValue(averages.fat),
@@ -115,7 +115,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.totalCarbs'),
-      value: `${MetricsCalculator.formatValue(aggregateTotals.carbs, 0)}g`,
+      value: `${MetricsCalculator.formatValue(aggregateTotals.carbs, 0)} ${t('units.grams')}`,
       subtext: timeRange,
       tooltip: t('metrics.totalsAverages.totalCarbsTooltip', {
         total: MetricsCalculator.formatValue(aggregateTotals.carbs, 0),
@@ -125,7 +125,7 @@ export class TotalsAndAveragesMetric implements MacroscalcMetric {
 
     results.push({
       label: t('metrics.totalsAverages.avgCarbs'),
-      value: `${MetricsCalculator.formatValue(averages.carbs)}g`,
+      value: `${MetricsCalculator.formatValue(averages.carbs)} ${t('units.grams')}`,
       subtext: t('metrics.totalsAverages.perDay'),
       tooltip: t('metrics.totalsAverages.avgCarbsTooltip', {
         avg: MetricsCalculator.formatValue(averages.carbs),

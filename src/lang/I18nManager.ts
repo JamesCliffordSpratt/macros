@@ -495,7 +495,7 @@ export class I18nManager {
    */
   getAvailableLocales(): SupportedLocale[] {
     // Return locales that have external translation files
-    const availableLocaleCodes = ['en', 'es', 'zh-CN']; // Add more as translations are added
+    const availableLocaleCodes = ['en', 'es', 'zh-CN', 'ru']; // Add more as translations are added
 
     return availableLocaleCodes
       .map((code) => this.supportedLocales.get(code))

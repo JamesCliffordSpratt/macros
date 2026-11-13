@@ -615,6 +615,7 @@ export const ruTranslations: LocaleData = {
       extremes: 'Экстремумы и рекорды',
       adherence: 'Соблюдение и серии',
       display: 'Параметры отображения',
+      other: 'Прочие показатели',
     },
     totalsAverages: {
       name: 'Итоги и средние',
@@ -889,6 +890,11 @@ export const ruTranslations: LocaleData = {
       removeTolerance: 'Удалить непереносимость',
     },
   },
+  units: {
+    grams: 'г',
+    kcal: 'ккал',
+    kj: 'кДж',
+  },
   tooltips: {
     percentage: '{value} г {macro} • {percent}% от дневной цели',
     remaining: 'Остаток',
@@ -899,7 +905,7 @@ export const ruTranslations: LocaleData = {
     caloriesOver: '{value} калорий • {percent}% от дневной цели • превышение на {over} калорий',
     caloriePercent: '{value} калорий • {percent}% от дневной цели',
     macroComposition: '{value} г {macro} ({percent}% от общего количества макросов)',
-    target: 'Цель: {target}{unit}',
+    target: 'Цель: {target} {unit}',
     dailyTarget: 'От дневной цели',
     offHighQuality: 'Высококачественные данные, проверенные сообществом, с полной информацией о питании',
     offMediumQuality: 'Умеренно полные данные сообщества, часть информации может отсутствовать',

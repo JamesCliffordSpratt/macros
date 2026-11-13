@@ -195,18 +195,18 @@ export class MacrosDashboard {
           const percentage = targetKj > 0 ? (consumedKj / targetKj) * 100 : 0;
 
           if (currentLocale === 'zh-CN') {
-            tooltipMessage = `${consumedKj.toFixed(1)} kJ • 占 ${Math.round(percentage)}%`;
+            tooltipMessage = `${consumedKj.toFixed(1)} ${t('units.kj')} • 占 ${Math.round(percentage)}%`;
             if (remainingKj > 0) {
-              tooltipMessage += ` • 剩余 ${remainingKj.toFixed(1)} kJ`;
+              tooltipMessage += ` • 剩余 ${remainingKj.toFixed(1)} ${t('units.kj')}`;
             } else if (remainingKj < 0) {
-              tooltipMessage += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} kJ`;
+              tooltipMessage += ` • 超出 ${Math.abs(remainingKj).toFixed(1)} ${t('units.kj')}`;
             }
           } else {
-            tooltipMessage = `${consumedKj.toFixed(1)} kJ • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+            tooltipMessage = `${consumedKj.toFixed(1)} ${t('units.kj')} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
             if (remainingKj > 0) {
-              tooltipMessage += ` • ${remainingKj.toFixed(1)} kJ ${t('general.remaining')}`;
+              tooltipMessage += ` • ${remainingKj.toFixed(1)} ${t('units.kj')} ${t('general.remaining')}`;
             } else if (remainingKj < 0) {
-              tooltipMessage += ` • ${Math.abs(remainingKj).toFixed(1)} kJ ${t('table.summary.over')}`;
+              tooltipMessage += ` • ${Math.abs(remainingKj).toFixed(1)} ${t('units.kj')} ${t('table.summary.over')}`;
             }
           }
         } else {
@@ -217,18 +217,18 @@ export class MacrosDashboard {
           const percentage = targetKcal > 0 ? (consumedKcal / targetKcal) * 100 : 0;
 
           if (currentLocale === 'zh-CN') {
-            tooltipMessage = `${consumedKcal.toFixed(1)} kcal • 占 ${Math.round(percentage)}%`;
+            tooltipMessage = `${consumedKcal.toFixed(1)} ${t('units.kcal')} • 占 ${Math.round(percentage)}%`;
             if (remainingKcal > 0) {
-              tooltipMessage += ` • 剩余 ${remainingKcal.toFixed(1)} kcal`;
+              tooltipMessage += ` • 剩余 ${remainingKcal.toFixed(1)} ${t('units.kcal')}`;
             } else if (remainingKcal < 0) {
-              tooltipMessage += ` • 超出 ${Math.abs(remainingKcal).toFixed(1)} kcal`;
+              tooltipMessage += ` • 超出 ${Math.abs(remainingKcal).toFixed(1)} ${t('units.kcal')}`;
             }
           } else {
-            tooltipMessage = `${consumedKcal.toFixed(1)} kcal • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
+            tooltipMessage = `${consumedKcal.toFixed(1)} ${t('units.kcal')} • ${Math.round(percentage)}% ${t('table.summary.dailyTarget')}`;
             if (remainingKcal > 0) {
-              tooltipMessage += ` • ${remainingKcal.toFixed(1)} kcal ${t('general.remaining')}`;
+              tooltipMessage += ` • ${remainingKcal.toFixed(1)} ${t('units.kcal')} ${t('general.remaining')}`;
             } else if (remainingKcal < 0) {
-              tooltipMessage += ` • ${Math.abs(remainingKcal).toFixed(1)} kcal ${t('table.summary.over')}`;
+              tooltipMessage += ` • ${Math.abs(remainingKcal).toFixed(1)} ${t('units.kcal')} ${t('table.summary.over')}`;
             }
           }
         }
@@ -240,11 +240,11 @@ export class MacrosDashboard {
           const percentage = target > 0 ? (numericValue / target) * 100 : 0;
           const remaining = target - numericValue;
 
-          tooltipMessage = `${numericValue.toFixed(1)} g ${label.toLowerCase()} • 占 ${Math.round(percentage)}%`;
+          tooltipMessage = `${numericValue.toFixed(1)} ${t('units.grams')} ${label.toLowerCase()} • 占 ${Math.round(percentage)}%`;
           if (remaining > 0) {
-            tooltipMessage += ` • 剩余 ${remaining.toFixed(1)} g`;
+            tooltipMessage += ` • 剩余 ${remaining.toFixed(1)} ${t('units.grams')}`;
           } else if (remaining < 0) {
-            tooltipMessage += ` • 超出 ${Math.abs(remaining).toFixed(1)} g`;
+            tooltipMessage += ` • 超出 ${Math.abs(remaining).toFixed(1)} ${t('units.grams')}`;
           }
         } else {
           tooltipMessage = formatDashboardTooltip(numericValue, target, label);
@@ -298,14 +298,14 @@ export class MacrosDashboard {
           // Convert target from kcal to kJ for display
           const targetInKj = target * 4.184;
           targetValueForDisplay = Math.round(targetInKj).toString();
-          unit = ' kJ';
+          unit = t('units.kj');
         } else {
           targetValueForDisplay = target.toString();
-          unit = ' kcal';
+          unit = t('units.kcal');
         }
       } else {
         targetValueForDisplay = target.toString();
-        unit = 'g';
+        unit = t('units.grams');
       }
 
       safeAttachTooltip(
