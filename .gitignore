@@ -31,8 +31,3 @@ coverage/
 
 # ESLint cache
 .eslintcache
-
-# Agent documentation (single consolidated file, kept out of git)
-.claude/
-.omc/
-graphify-out
