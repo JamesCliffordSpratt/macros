@@ -2,7 +2,11 @@ import { App, Modal, Notice, Component, normalizePath } from 'obsidian';
 import MacrosPlugin from '../../main';
 import { convertEnergyUnit } from '../../utils/energyUtils';
 import { t } from '../../lang/I18nManager';
-import { MICRONUTRIENTS, MicronutrientCategory } from '../../utils/nutrition/micronutrients';
+import {
+  MICRONUTRIENTS,
+  MicronutrientCategory,
+  getPinnedMicronutrientKeys,
+} from '../../utils/nutrition/micronutrients';
 
 /**
  * Modal for manually entering food nutritional data with "Add More" functionality
@@ -364,6 +368,26 @@ export class ManualFoodEntryModal extends Modal {
 
     // Container for added micronutrient fields
     this.microFieldsContainer = body.createDiv({ cls: 'micronutrient-fields-container' });
+
+    // Pinned micronutrients start pre-added, with the section expanded so the
+    // user only has to type the numbers.
+    if (this.addPinnedMicronutrientFields() > 0) {
+      toggle();
+    }
+  }
+
+  /**
+   * Add input rows for the user's pinned micronutrients (without stealing
+   * focus). Does nothing while micronutrient tracking is disabled.
+   * @returns the number of pinned fields present after the call.
+   */
+  private addPinnedMicronutrientFields(): number {
+    if (!this.plugin.settings.micronutrientTrackingEnabled) return 0;
+    const pinned = getPinnedMicronutrientKeys(this.plugin.settings.pinnedMicronutrients);
+    for (const key of pinned) {
+      this.addMicronutrientField(key, false);
+    }
+    return pinned.length;
   }
 
   /**
@@ -415,7 +439,7 @@ export class ManualFoodEntryModal extends Modal {
   /**
    * Add an input row for the given micronutrient key.
    */
-  private addMicronutrientField(key: string): void {
+  private addMicronutrientField(key: string, focus = true): void {
     if (this.micronutrientInputs.has(key)) return;
     const def = MICRONUTRIENTS.find((d) => d.key === key);
     if (!def) return;
@@ -466,7 +490,9 @@ export class ManualFoodEntryModal extends Modal {
 
     this.micronutrientInputs.set(key, input);
     this.refreshMicronutrientDropdown();
-    input.focus();
+    if (focus) {
+      input.focus();
+    }
   }
 
   /**
@@ -789,12 +815,16 @@ created: ${new Date().toISOString()}
     this.fatInput.value = '';
     this.carbsInput.value = '';
 
-    // Clear any optional micronutrient fields that were added
+    // Clear any optional micronutrient fields that were added, then restore
+    // the pinned ones (empty) for the next item
     if (this.microFieldsContainer) {
       this.microFieldsContainer.empty();
     }
     this.micronutrientInputs.clear();
     this.refreshMicronutrientDropdown();
+    if (this.microFieldsContainer) {
+      this.addPinnedMicronutrientFields();
+    }
 
     const errorContainer = this.contentEl.querySelector('.validation-errors');
     if (errorContainer) {

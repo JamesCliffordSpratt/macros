@@ -197,6 +197,15 @@ export const esTranslations: LocaleData = {
       recommendedValue: 'Recomendado: {value} {unit}',
       noRecommendation: 'Sin recomendación estándar — establece tu propio objetivo.',
       limitNote: '(límite máximo sugerido)',
+      pinnedTitle: 'Micronutrientes fijados',
+      pinnedDesc:
+        'Fija los nutrientes que quieres vigilar con el botón de chincheta junto a cada objetivo. Los nutrientes fijados se añaden automáticamente al introducir un alimento manualmente y siempre se muestran en la tabla de micronutrientes; el resto queda contraído hasta que lo despliegues.',
+      pinnedCurrent: 'Fijados actualmente',
+      pinnedNone:
+        'No hay nada fijado. La tabla de micronutrientes muestra todos los nutrientes que contienen tus alimentos.',
+      unpinAll: 'Desfijar todo',
+      pin: 'Fijar',
+      unpin: 'Desfijar',
       groups: {
         infant_0_6: 'Bebés 0–6 meses',
         infant_7_12: 'Bebés 7–12 meses',
@@ -567,6 +576,9 @@ export const esTranslations: LocaleData = {
         'Ninguno de los alimentos de este bloque tiene datos de micronutrientes todavía. Añade valores de micronutrientes al crear alimentos o usa "show: all" para ver tus objetivos.',
       footnote:
         'Las cantidades se suman a partir de los datos de micronutrientes almacenados en cada alimento. Los objetivos provienen de tu configuración de Micronutrientes.',
+      pinned: 'Fijado',
+      showMore: 'Mostrar {count} más',
+      showLess: 'Mostrar menos',
     },
   },
   charts: {

@@ -64,7 +64,8 @@ The **Macros Plugin** brings powerful nutrition tracking to your Obsidian vault.
 - **Vitamins & minerals beyond macros** - track nutrients such as vitamin A, C, and D, calcium, iron, potassium, sodium, fiber, sugar, saturated fat, and cholesterol
 - **Automatic micronutrient data** - pulled from USDA FoodData Central and FatSecret when available
 - **Manual micronutrient entry** - add custom nutrient values per food in the manual entry modal
-- **Micronutrient tables** (`macrosmicro`) - render per-nutrient totals for any macros block
+- **Micronutrient tables** - per-nutrient totals shown beneath each macros table
+- **Pinned micronutrients** - pin the few nutrients you care about (e.g. sodium, iron, fiber) so they're pre-added in manual entry and always shown in the table, with everything else collapsed
 - **Personalized targets** - recommended values based on your profile, organized into Vitamins, Minerals, and Other
 - **Custom targets** - override any recommended value or reset everything back to recommendations
 - **Upper-limit awareness** - flags nutrients with a suggested upper limit
@@ -345,14 +346,16 @@ Set custom tolerances for each macro (e.g., Calories ±10%, Protein ±10%, Fat �
 
 Track vitamins and minerals alongside your macros. Micronutrient values are pulled automatically from USDA FoodData Central and FatSecret when available, and you can add or override them manually in the food entry modal.
 
-Render per-nutrient totals for any macros block with a `macrosmicro` code block:
-````markdown
-```macrosmicro
-id: today
-```
-````
+Once tracking is enabled in **Settings → Micronutrients**, a micronutrient table with per-nutrient totals appears beneath each `macros` table whose foods carry micronutrient data.
 
 Set your targets in **Settings → Micronutrients**: each nutrient shows a recommended value based on your profile (organized into Vitamins, Minerals, and Other), and you can enter custom targets or reset everything back to the recommendations.
+
+**Pinning the nutrients you care about:** if you only watch a few nutrients (say sodium, iron, and fiber), click the 📌 pin button next to them in the targets list. Pinned nutrients:
+- are added automatically when you enter a food manually, so you only type the numbers
+- are always shown in the micronutrient table, even when you haven't had any yet
+- keep the table tidy: all other nutrients collapse behind a **Show N more** toggle
+
+With nothing pinned, the table shows every nutrient your foods contain.
 
 ### Custom Serving Sizes
 All foods support custom serving sizes with automatic nutritional scaling:
@@ -432,6 +435,7 @@ Configure which databases to use for food search:
 - Recommended values based on your profile, grouped into Vitamins, Minerals, and Other
 - Enter custom targets or reset all back to recommendations
 - Nutrients with a suggested upper limit are flagged
+- Pin the nutrients you care about to pre-add them in manual entry and keep them visible in the micronutrient table
 
 ### **Food Tolerances**
 - Track food intolerances and sensitivities

@@ -193,6 +193,15 @@ export const enTranslations: LocaleData = {
       recommendedValue: 'Recommended: {value} {unit}',
       noRecommendation: 'No standard recommendation — set your own target.',
       limitNote: '(Suggested upper limit)',
+      pinnedTitle: 'Pinned micronutrients',
+      pinnedDesc:
+        'Pin the nutrients you want to keep an eye on using the pin button next to each target below. Pinned nutrients are added automatically when you enter a food manually and are always shown in the micronutrient table, while the rest stay collapsed until you expand them.',
+      pinnedCurrent: 'Currently pinned',
+      pinnedNone:
+        'Nothing pinned. The micronutrient table shows every nutrient your foods contain.',
+      unpinAll: 'Unpin all',
+      pin: 'Pin',
+      unpin: 'Unpin',
       groups: {
         infant_0_6: 'Infants 0–6 months',
         infant_7_12: 'Infants 7–12 months',
@@ -547,6 +556,9 @@ export const enTranslations: LocaleData = {
         'None of the foods in this block have micronutrient data yet. Add micronutrient values when creating foods, or use "show: all" to see your targets.',
       footnote:
         'Amounts are summed from the micronutrient data stored on each food. Targets come from your micronutrients settings.',
+      pinned: 'Pinned',
+      showMore: 'Show {count} more',
+      showLess: 'Show less',
     },
   },
   charts: {

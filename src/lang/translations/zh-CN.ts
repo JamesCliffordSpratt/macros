@@ -184,6 +184,14 @@ export const zhCNTranslations: LocaleData = {
       recommendedValue: '推荐：{value} {unit}',
       noRecommendation: '无标准推荐值 — 请设置你自己的目标。',
       limitNote: '（建议上限）',
+      pinnedTitle: '固定的微量营养素',
+      pinnedDesc:
+        '使用下方每个目标旁的图钉按钮固定你想关注的营养素。手动添加食物时会自动添加已固定的营养素，并且它们始终显示在微量营养素表格中；其他营养素默认收起，可随时展开。',
+      pinnedCurrent: '当前已固定',
+      pinnedNone: '尚未固定任何营养素。微量营养素表格会显示食物中包含的所有营养素。',
+      unpinAll: '全部取消固定',
+      pin: '固定',
+      unpin: '取消固定',
       groups: {
         infant_0_6: '婴儿 0–6 个月',
         infant_7_12: '婴儿 7–12 个月',
@@ -520,6 +528,9 @@ export const zhCNTranslations: LocaleData = {
       noData:
         '此块中的食物尚无微量营养素数据。创建食物时添加微量营养素值，或使用 "show: all" 查看你的目标值。',
       footnote: '数量根据每种食物中存储的微量营养素数据汇总。目标值来自你的微量营养素设置。',
+      pinned: '已固定',
+      showMore: '显示其余 {count} 项',
+      showLess: '收起',
     },
   },
   charts: {

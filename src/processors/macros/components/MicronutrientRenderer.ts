@@ -1,9 +1,11 @@
+import { setIcon } from 'obsidian';
 import MacrosPlugin from '../../../main';
 import { t } from '../../../lang/I18nManager';
 import {
   MICRONUTRIENTS,
   MicronutrientCategory,
   getEffectiveTarget,
+  getPinnedMicronutrientKeys,
   formatMicroAmount,
 } from '../../../utils/nutrition/micronutrients';
 import {
@@ -20,6 +22,10 @@ const CATEGORY_ORDER: { id: MicronutrientCategory; labelKey: string }[] = [
 /**
  * Build the micronutrient table element from an aggregate result.
  * Returns null when there is nothing meaningful to show.
+ *
+ * When the user has pinned micronutrients, pinned rows are always shown (even
+ * at zero, so progress toward the target is visible) and every other nutrient
+ * is collapsed behind a "show more" row.
  */
 function buildMicronutrientTable(
   plugin: MacrosPlugin,
@@ -28,9 +34,12 @@ function buildMicronutrientTable(
 ): HTMLElement | null {
   const profile = plugin.settings.micronutrientProfile;
   const overrides = plugin.settings.micronutrientTargets || {};
+  const pinned = new Set(getPinnedMicronutrientKeys(plugin.settings.pinnedMicronutrients));
+  const hasPins = pinned.size > 0;
 
   // Determine which nutrients to display
   const visibleDefs = MICRONUTRIENTS.filter((def) => {
+    if (pinned.has(def.key)) return true;
     const consumed = result.totals[def.key] || 0;
     if (consumed > 0) return true;
     if (showAll) {
@@ -41,6 +50,10 @@ function buildMicronutrientTable(
   });
 
   if (visibleDefs.length === 0) return null;
+
+  // Rows hidden until the user expands them (only when something is pinned)
+  const isExtra = (key: string) => hasPins && !pinned.has(key);
+  const extraCount = visibleDefs.filter((def) => isExtra(def.key)).length;
 
   const container = createDiv({ cls: 'macrosmicro-container' });
 
@@ -75,8 +88,12 @@ function buildMicronutrientTable(
     const defs = visibleDefs.filter((d) => d.category === category.id);
     if (defs.length === 0) continue;
 
-    // Category sub-header row
+    // Category sub-header row (collapsed with the extras when the category
+    // has no pinned nutrient)
     const catRow = tbody.createEl('tr', { cls: 'macrosmicro-category-row' });
+    if (defs.every((def) => isExtra(def.key))) {
+      catRow.addClass('macrosmicro-extra', 'macros-u-hidden');
+    }
     const catCell = catRow.createEl('td', { attr: { colspan: '4' } });
     catCell.createSpan({ cls: 'macrosmicro-category-label', text: t(category.labelKey) });
 
@@ -85,9 +102,19 @@ function buildMicronutrientTable(
       const target = getEffectiveTarget(def.key, profile, overrides);
 
       const row = tbody.createEl('tr', { cls: 'macrosmicro-row' });
+      if (isExtra(def.key)) {
+        row.addClass('macrosmicro-extra', 'macros-u-hidden');
+      }
 
       // Nutrient name
       const nameCell = row.createEl('td', { cls: 'macrosmicro-name' });
+      if (pinned.has(def.key)) {
+        const pinIcon = nameCell.createSpan({
+          cls: 'macrosmicro-pin-icon',
+          attr: { 'aria-label': t('micronutrients.processor.pinned') },
+        });
+        setIcon(pinIcon, 'pin');
+      }
       nameCell.createSpan({ text: def.label });
       if (def.isLimit) {
         nameCell.createSpan({
@@ -134,6 +161,31 @@ function buildMicronutrientTable(
         pctCell.createSpan({ cls: 'macrosmicro-percent-label', text: '—' });
       }
     }
+  }
+
+  // "Show N more" toggle for the non-pinned nutrients
+  if (extraCount > 0) {
+    const moreRow = tbody.createEl('tr', { cls: 'macrosmicro-more-row' });
+    const moreCell = moreRow.createEl('td', { attr: { colspan: '4' } });
+    const moreBtn = moreCell.createEl('button', {
+      cls: 'macrosmicro-more-btn',
+      text: t('micronutrients.processor.showMore', { count: extraCount }),
+      attr: { 'aria-expanded': 'false' },
+    });
+
+    let expanded = false;
+    moreBtn.addEventListener('click', () => {
+      expanded = !expanded;
+      tbody
+        .querySelectorAll('.macrosmicro-extra')
+        .forEach((el) => el.toggleClass('macros-u-hidden', !expanded));
+      moreBtn.setText(
+        expanded
+          ? t('micronutrients.processor.showLess')
+          : t('micronutrients.processor.showMore', { count: extraCount })
+      );
+      moreBtn.setAttr('aria-expanded', expanded ? 'true' : 'false');
+    });
   }
 
   // Footnote about basis

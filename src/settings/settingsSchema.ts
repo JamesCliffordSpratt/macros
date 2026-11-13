@@ -48,4 +48,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     lifeStage: 'none',
   },
   micronutrientTargets: {},
+  pinnedMicronutrients: [],
 };

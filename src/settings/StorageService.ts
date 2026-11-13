@@ -19,8 +19,10 @@ import { DEFAULT_SETTINGS } from './settingsSchema';
 import { ToleranceData } from '../ui/modals/ToleranceModal';
 import {
   MICRONUTRIENTS,
+  MICRONUTRIENT_MAP,
   MicronutrientCategory,
   MicronutrientProfile,
+  getPinnedMicronutrientKeys,
   getRecommendedValue,
   resolveLifeStageGroup,
 } from '../utils/nutrition/micronutrients';
@@ -82,6 +84,10 @@ export interface PluginSettings {
   // User overrides for individual micronutrient targets (key -> amount). When a
   // key is absent the recommended value derived from the profile is used.
   micronutrientTargets: Record<string, number>;
+  // Micronutrient keys the user cares about. Pinned nutrients are pre-added in
+  // manual food entry and always shown in the micronutrient table; when any are
+  // pinned, the remaining nutrients are collapsed behind a "show more" toggle.
+  pinnedMicronutrients: string[];
 }
 
 // Sortable component class
@@ -1538,6 +1544,46 @@ export class NutritionalSettingTab extends PluginSettingTab {
     });
 
     // =======================================
+    // PINNED MICRONUTRIENTS
+    // =======================================
+    // Pin state is changed per nutrient in the targets list below. Buttons are
+    // updated in place (no full re-render) so the long list keeps its scroll
+    // position while the user pins several nutrients in a row.
+    const pinButtonUpdaters = new Map<string, () => void>();
+
+    new Setting(containerEl).setName(t('settings.micronutrients.pinnedTitle')).setHeading();
+
+    containerEl.createEl('p', {
+      text: t('settings.micronutrients.pinnedDesc'),
+      cls: 'setting-item-description',
+    });
+
+    const pinnedSummary = new Setting(containerEl).setName(
+      t('settings.micronutrients.pinnedCurrent')
+    );
+
+    const updatePinnedSummary = () => {
+      const pinned = getPinnedMicronutrientKeys(this.plugin.settings.pinnedMicronutrients);
+      pinnedSummary.setDesc(
+        pinned.length > 0
+          ? pinned.map((key) => MICRONUTRIENT_MAP[key].label).join(', ')
+          : t('settings.micronutrients.pinnedNone')
+      );
+      pinnedSummary.setDisabled(pinned.length === 0);
+    };
+
+    pinnedSummary.addButton((btn) => {
+      btn.setButtonText(t('settings.micronutrients.unpinAll')).onClick(async () => {
+        this.plugin.settings.pinnedMicronutrients = [];
+        await this.plugin.saveSettings();
+        this.plugin.refreshMacrosTables?.();
+        pinButtonUpdaters.forEach((update) => update());
+        updatePinnedSummary();
+      });
+    });
+    updatePinnedSummary();
+
+    // =======================================
     // TARGETS
     // =======================================
     new Setting(containerEl).setName(t('settings.micronutrients.targetsTitle')).setHeading();
@@ -1635,6 +1681,34 @@ export class NutritionalSettingTab extends PluginSettingTab {
               this.plugin.refreshMacrosTables?.();
               this.display();
             });
+        });
+
+        // Pin / unpin this nutrient
+        setting.addExtraButton((btn) => {
+          btn.extraSettingsEl.addClass('micronutrient-pin-btn');
+          const applyPinState = () => {
+            const isPinned = this.plugin.settings.pinnedMicronutrients.includes(def.key);
+            btn
+              .setIcon('pin')
+              .setTooltip(
+                t(isPinned ? 'settings.micronutrients.unpin' : 'settings.micronutrients.pin')
+              );
+            btn.extraSettingsEl.toggleClass('is-active', isPinned);
+            btn.extraSettingsEl.setAttr('aria-pressed', isPinned ? 'true' : 'false');
+          };
+          applyPinState();
+          pinButtonUpdaters.set(def.key, applyPinState);
+
+          btn.onClick(async () => {
+            const current = getPinnedMicronutrientKeys(this.plugin.settings.pinnedMicronutrients);
+            this.plugin.settings.pinnedMicronutrients = current.includes(def.key)
+              ? current.filter((key) => key !== def.key)
+              : getPinnedMicronutrientKeys([...current, def.key]);
+            await this.plugin.saveSettings();
+            this.plugin.refreshMacrosTables?.();
+            applyPinState();
+            updatePinnedSummary();
+          });
         });
       }
     }

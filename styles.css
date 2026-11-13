@@ -9329,6 +9329,52 @@ body:not(.theme-obsidian) .api-credentials-success {
   color: var(--text-faint);
 }
 
+/* ---- Pinned micronutrients ---- */
+/* Settings: per-nutrient pin toggle (filled + accent when pinned) */
+.micronutrient-pin-btn.is-active {
+  color: var(--interactive-accent);
+}
+
+.micronutrient-pin-btn.is-active svg {
+  fill: currentColor;
+}
+
+/* Table: pin marker next to pinned nutrient names */
+.macrosmicro-pin-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+  color: var(--interactive-accent);
+}
+
+.macrosmicro-pin-icon svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  fill: currentColor;
+}
+
+/* Table: "Show N more" toggle for non-pinned nutrients */
+.macrosmicro-more-row td {
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.macrosmicro-table .macrosmicro-more-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  height: auto;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-accent);
+  cursor: pointer;
+}
+
+.macrosmicro-table .macrosmicro-more-btn:hover {
+  background: none;
+  text-decoration: underline;
+}
+
 .macros-u-hidden { display: none; }
 
 /* === Food name cell layout (appended override) === */

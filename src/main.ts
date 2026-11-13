@@ -144,6 +144,9 @@ export default class MacrosPlugin extends Plugin {
     if (!this.settings.micronutrientTargets) {
       this.settings.micronutrientTargets = {};
     }
+    if (!Array.isArray(this.settings.pinnedMicronutrients)) {
+      this.settings.pinnedMicronutrients = [];
+    }
   }
 
   async calculateMacrosFromLinesAsync(

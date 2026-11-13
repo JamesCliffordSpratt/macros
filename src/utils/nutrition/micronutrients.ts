@@ -815,6 +815,17 @@ export const MICRONUTRIENT_MAP: Record<string, MicronutrientDef> = MICRONUTRIENT
 export const MICRONUTRIENT_KEYS: string[] = MICRONUTRIENTS.map((m) => m.key);
 
 /**
+ * Normalise a stored list of pinned micronutrient keys: drop unknown keys and
+ * duplicates, and return them in catalogue order so every view lists pinned
+ * nutrients consistently.
+ */
+export function getPinnedMicronutrientKeys(pinned: readonly string[] | undefined): string[] {
+  if (!Array.isArray(pinned) || pinned.length === 0) return [];
+  const pinnedSet = new Set(pinned);
+  return MICRONUTRIENT_KEYS.filter((key) => pinnedSet.has(key));
+}
+
+/**
  * Resolve a user profile to the standardised DRI life-stage group.
  */
 export function resolveLifeStageGroup(profile: MicronutrientProfile): LifeStageGroup {
