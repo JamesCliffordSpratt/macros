@@ -1261,9 +1261,6 @@ export class LiveFoodSearchModal extends Modal {
     let protein = 0;
     let fat = 0;
     let carbs = 0;
-    let fiber = 0;
-    let sugars = 0;
-    let salt = 0;
 
     // For Open Food Facts, we have direct access to nutrition data
     // Fixed: Use proper typing instead of any
@@ -1273,9 +1270,6 @@ export class LiveFoodSearchModal extends Modal {
       protein = (offData.protein as number) || 0;
       fat = (offData.fat as number) || 0;
       carbs = (offData.carbs as number) || 0;
-      fiber = (offData.fiber as number) || 0;
-      sugars = (offData.sugars as number) || 0;
-      salt = (offData.salt as number) || 0;
     } else {
       // Parse nutrition data from description for other sources
       if (food.description) {
@@ -1358,10 +1352,6 @@ source: ${food.source}`;
           ? String((food.raw as Record<string, string>).code)
           : '';
       frontmatter += `\noff_code: ${offCode}`;
-
-      if (fiber) frontmatter += `\nfiber: ${fiber}`;
-      if (sugars) frontmatter += `\nsugars: ${sugars}`;
-      if (salt) frontmatter += `\nsalt: ${salt}`;
     }
 
     if (food.brandName) frontmatter += `\nbrand: ${food.brandName}`;
@@ -1388,10 +1378,6 @@ ${food.description}
 - **Protein:** ${protein}g
 - **Fat:** ${fat}g
 - **Carbohydrates:** ${carbs}g`;
-
-    if (fiber) frontmatter += `\n- **Fiber:** ${fiber}g`;
-    if (sugars) frontmatter += `\n- **Sugars:** ${sugars}g`;
-    if (salt) frontmatter += `\n- **Salt:** ${salt}g`;
 
     // Readable micronutrient breakdown for any nutrients that were resolved.
     const microKeysPresent = MICRONUTRIENT_KEYS.filter(

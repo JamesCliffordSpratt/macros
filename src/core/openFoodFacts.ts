@@ -49,6 +49,7 @@ const OFF_NUTRIMENT_TO_KEY: Record<string, string> = {
   // Other tracked nutrients
   fiber: 'fiber',
   sugars: 'sugar',
+  salt: 'salt',
   'added-sugars': 'added_sugar',
   'saturated-fat': 'saturated_fat',
   cholesterol: 'cholesterol',

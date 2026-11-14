@@ -73,6 +73,14 @@ export default [
     },
   },
 
+  // Jest globals for test files.
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts'],
+    languageOptions: {
+      globals: { describe: true, it: true, expect: true, jest: true },
+    },
+  },
+
   // Lint the English locale source for sentence-case UI strings. The
   // recommended config can't see these (they go through t()), so enable the
   // locale-module rule on en.ts only (other locales aren't English prose).

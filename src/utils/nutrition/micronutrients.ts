@@ -800,6 +800,16 @@ export const MICRONUTRIENTS: MicronutrientDef[] = [
       ...symmetric(300, 300, { teen: [300, 300] }),
     },
   },
+  {
+    key: 'salt',
+    label: 'Salt',
+    unit: 'g',
+    category: 'other',
+    isLimit: true,
+    dri: {
+      ...symmetric(5, 5, { teen: [5, 5] }),
+    },
+  },
 ];
 
 /** Fast lookup by key. */
