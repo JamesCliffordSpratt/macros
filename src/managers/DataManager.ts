@@ -254,8 +254,6 @@ export class DataManager {
           fat: string;
           carbs: string;
           fiber?: string;
-          sugars?: string;
-          salt?: string;
         };
         let additionalMetadata: {
           source: string;
@@ -290,8 +288,6 @@ export class DataManager {
                 fat: offData.fat?.toString() || '0',
                 carbs: offData.carbs?.toString() || '0',
                 fiber: offData.fiber?.toString(),
-                sugars: offData.sugars?.toString(),
-                salt: offData.salt?.toString(),
               };
             } else {
               // Fallback: parse from description
@@ -432,17 +428,6 @@ fat: ${nutritionalData.fat}
 carbs: ${nutritionalData.carbs}
 serving_size: ${servingSize}`;
 
-        // Add optional nutrition fields for Open Food Facts
-        if (nutritionalData.fiber) {
-          frontmatter += `\nfiber: ${nutritionalData.fiber}`;
-        }
-        if (nutritionalData.sugars) {
-          frontmatter += `\nsugars: ${nutritionalData.sugars}`;
-        }
-        if (nutritionalData.salt) {
-          frontmatter += `\nsalt: ${nutritionalData.salt}`;
-        }
-
         // Add micronutrient keys (vitamins, minerals, other tracked nutrients).
         // These use the same canonical keys read back by extractMicronutrients().
         for (const key of MICRONUTRIENT_KEYS) {
@@ -543,15 +528,6 @@ serving_size: ${servingSize}`;
 - **Carbohydrates:** ${nutritionalData.carbs}g`;
 
         // Add optional nutrition information
-        if (nutritionalData.fiber) {
-          frontmatter += `\n- **Fiber:** ${nutritionalData.fiber}g`;
-        }
-        if (nutritionalData.sugars) {
-          frontmatter += `\n- **Sugars:** ${nutritionalData.sugars}g`;
-        }
-        if (nutritionalData.salt) {
-          frontmatter += `\n- **Salt:** ${nutritionalData.salt}g`;
-        }
 
         // Add a readable micronutrient breakdown if any were resolved.
         const microKeysPresent = MICRONUTRIENT_KEYS.filter(

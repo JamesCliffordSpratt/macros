@@ -31,3 +31,8 @@ coverage/
 
 # ESLint cache
 .eslintcache
+
+#claude
+.claude
+.omc
+graphify-out
